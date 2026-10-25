@@ -3,7 +3,7 @@ import {
   defaultTransform,
   evaluate,
 } from "@anim8/core";
-import { mountSvg } from "@anim8/renderer-svg";
+import { mountSvg, renderSceneAt } from "@anim8/renderer-svg";
 import { defineAnim8Player, mountPlayer } from "@anim8/player";
 
 const root = document.querySelector("#fixture-root");
@@ -226,6 +226,101 @@ async function dynamicConnector() {
   return result;
 }
 
+function routedScene() {
+  return {
+    version: "1.0",
+    scene: { width: 480, height: 270, background: "#ffffff" },
+    objects: [
+      rect("route-a", 70, 135, "A", 1),
+      rect("route-block", 240, 135, "Obstacle", 1),
+      rect("route-b", 410, 135, "B", 1),
+      {
+        id: "route-edge",
+        type: "connector",
+        from: { objectId: "route-a", anchor: "right" },
+        to: { objectId: "route-b", anchor: "left" },
+        kind: "routed",
+        routing: { clearance: 12, bendPenalty: 8 },
+        transform: defaultTransform(),
+        style: { ...defaultStyle(), fill: "none", stroke: "#334155", strokeWidth: 3 },
+        visible: true,
+        z: 0,
+      },
+    ],
+    timeline: [
+      {
+        id: "move-obstacle",
+        type: "move",
+        target: "route-block",
+        start: 0,
+        duration: 1000,
+        easing: "linear",
+        to: { x: 240, y: 235 },
+      },
+    ],
+  };
+}
+
+async function routedConnector() {
+  reset();
+  const container = host("routed-connector-host");
+  const scene = routedScene();
+  const mount = mountSvg(container, evaluate(scene, 0));
+  const edge = container.querySelector('[data-anim8-id="route-edge"]');
+  const before = edge?.getAttribute("d");
+
+  mount.update(evaluate(scene, 1000));
+
+  const afterEdge = container.querySelector('[data-anim8-id="route-edge"]');
+  const result = {
+    sameNode: edge === afterEdge,
+    before,
+    after: afterEdge?.getAttribute("d"),
+  };
+  mount.destroy();
+  return result;
+}
+
+async function responsiveSizing() {
+  reset();
+  const container = host("responsive-host");
+  const mount = mountSvg(container, evaluate(motionScene(), 400));
+  const svg = container.querySelector("svg");
+  const before = svg?.getBoundingClientRect();
+  const viewBoxBefore = svg?.getAttribute("viewBox");
+
+  container.style.width = "320px";
+  container.style.height = "180px";
+  await waitAnimationFrames(2);
+
+  const after = svg?.getBoundingClientRect();
+  const viewBoxAfter = svg?.getAttribute("viewBox");
+  const result = {
+    beforeWidth: Math.round(before?.width ?? 0),
+    beforeHeight: Math.round(before?.height ?? 0),
+    afterWidth: Math.round(after?.width ?? 0),
+    afterHeight: Math.round(after?.height ?? 0),
+    viewBoxBefore,
+    viewBoxAfter,
+  };
+  mount.destroy();
+  return result;
+}
+
+async function staticFallback() {
+  reset();
+  const container = host("static-fallback-host");
+  container.innerHTML = renderSceneAt(motionScene(), 500);
+  const svg = container.querySelector("svg");
+  const object = container.querySelector('[data-anim8-id="a"]');
+  return {
+    svgCount: container.querySelectorAll("svg").length,
+    viewBox: svg?.getAttribute("viewBox"),
+    transform: object?.getAttribute("transform"),
+    scriptCount: container.querySelectorAll("script").length,
+  };
+}
+
 async function multipleInstances() {
   reset();
   const firstHost = host("player-one");
@@ -321,6 +416,9 @@ window.__anim8Browser = {
   svgIdentity,
   playerControls,
   dynamicConnector,
+  routedConnector,
+  responsiveSizing,
+  staticFallback,
   multipleInstances,
   mountUnmount,
   reducedMotionCustomElement,
