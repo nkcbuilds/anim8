@@ -139,6 +139,38 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
         message: "drawProgress must be a finite number between 0 and 1.",
       });
     }
+
+    if (object.type === "connector") {
+      if (object.routing && object.kind !== "routed") {
+        diagnostics.push({
+          code: "INVALID_CONNECTOR_ROUTING",
+          path: `objects[${index}].routing`,
+          message: "connector.routing is only valid when kind is routed.",
+        });
+      }
+      if (object.routing?.clearance !== undefined && (
+        !Number.isFinite(object.routing.clearance) ||
+        object.routing.clearance < 0 ||
+        object.routing.clearance > 512
+      )) {
+        diagnostics.push({
+          code: "INVALID_CONNECTOR_ROUTING",
+          path: `objects[${index}].routing.clearance`,
+          message: "routing.clearance must be a finite number between 0 and 512.",
+        });
+      }
+      if (object.routing?.bendPenalty !== undefined && (
+        !Number.isFinite(object.routing.bendPenalty) ||
+        object.routing.bendPenalty < 0 ||
+        object.routing.bendPenalty > 10_000
+      )) {
+        diagnostics.push({
+          code: "INVALID_CONNECTOR_ROUTING",
+          path: `objects[${index}].routing.bendPenalty`,
+          message: "routing.bendPenalty must be a finite number between 0 and 10000.",
+        });
+      }
+    }
   });
 
   scene.timeline.forEach((action, index) => {
