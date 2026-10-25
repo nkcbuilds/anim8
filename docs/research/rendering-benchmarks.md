@@ -6,11 +6,13 @@ These numbers describe the **current implementation**, not the final feature-com
 
 ## Why SVG first
 
-SVG maps directly to Anim8's required primitives, text, groups, connectors, markers and accessibility semantics. It also provides a useful static representation for SSR and documentation fallback.
+SVG maps directly to Anim8's required primitives, text, groups, connectors,
+markers and accessibility semantics. It also provides a useful static
+representation for SSR and documentation fallback.
 
 The renderer is not authoritative. It consumes an `EvaluatedScene`.
 
-## Measured baseline
+## Measured Node/headless baseline
 
 Machine:
 
@@ -19,63 +21,98 @@ Machine:
 - Intel Core i7-13700HX
 - 24 logical CPUs
 
-Benchmark harness: `benchmarks/run-baseline.mjs`. The harness performs warmup runs and records per-call samples using `performance.now()`.
+Benchmark harness: `benchmarks/run-baseline.mjs`. The harness performs warmup
+runs and records per-call samples using `performance.now()`.
 
-Post-feature baseline after follow-path/spring support, richer shapes, reactive bindings, object events, and incremental SVG mounting:
+Current baseline after deterministic path morphing, state interactions,
+canonical SVG numbers, and the current scene-graph/timeline feature set:
 
 | Case | p50 | p95 | max |
 | --- | ---: | ---: | ---: |
-| Evaluate 50 independently moving rectangles at t=1000ms | 0.546 ms | 0.905 ms | 1.424 ms |
-| Serialize SVG for 100 nodes + 99 attached connectors | 0.469 ms | 1.058 ms | 1.560 ms |
+| Evaluate 50 independently moving rectangles at t=1000ms | 0.161 ms | 0.240 ms | 0.345 ms |
+| Serialize SVG for 100 nodes + 99 attached connectors | 0.327 ms | 0.473 ms | 0.720 ms |
 
-The 100-node connected SVG was 31,778 bytes before compression.
+The 100-node connected SVG is 31,843 bytes before compression.
 
-These are Node/headless microbenchmarks; they do **not** replace browser frame-time, layout, paint, memory, or long-task measurements.
+These are Node/headless microbenchmarks; they do **not** replace browser
+frame-time, layout, paint, memory, or long-task measurements.
 
 ## Standard runtime bundle measurement
 
-Entry: `benchmarks/standard-runtime.ts`, importing the public core evaluator, SVG renderer, and browser player.
+Entry: `benchmarks/standard-runtime.ts`, importing the public core evaluator,
+SVG renderer, and browser player.
 
-Bundler command uses esbuild with production minification and tree-shaking.
+Measured with esbuild production bundling/minification/tree-shaking:
 
-Current consumer bundle:
+- 43,112 bytes minified
+- **10,253 bytes gzip** (level 9)
+- hard release ceiling: 35,840 bytes gzip (35 KiB)
 
-- 27,969 bytes minified
-- 6,981 bytes gzip (level 9)
-- 6,184 bytes Brotli
+The standard runtime remains comfortably below the target. Optional sketch,
+Dagre/ELK layout adapters, framework wrappers, presets, accessibility helpers,
+DSL, and AI tooling are not included in this bundle.
 
-The current standard runtime remains far below the 35 KB gzip ceiling. Optional sketch/layout/framework/preset/AI packages are not included in this number.
+## Real browser matrix
 
-## Browser artifact validation
+The Playwright harness executes real built package output, not source aliases or
+a fake DOM.
 
-Built CLI renders were served to the MoonDesk Chromium browser and parsed as native SVG.
+Current locally verified engines:
 
-This check caught a duplicate `fill` attribute on standalone text that unit tests had missed. The serializer was fixed and a regression test was added.
+- Chromium 156.0.8078.4
+- Firefox 157.0
+- WebKit 27.2
 
-The reactive browser example verified live input binding end-to-end:
+Portable behavior cases run in all three:
 
-- input index 0 -> pointer transform `matrix(1 0 0 1 150 95)`
-- input index 3 -> pointer transform `matrix(1 0 0 1 450 95)`
+1. stable keyed SVG element identity across updates;
+2. play/pause/seek/reverse using real `requestAnimationFrame`;
+3. attached connector updates while endpoints move;
+4. reduced-motion behavior;
+5. independent multiple players;
+6. mount/destroy/remount cleanup.
 
-The transition occurs through `PlayerController.setInput()` and deterministic scene re-evaluation.
+Chromium additionally captures a fixed deterministic fixture twice and requires
+the PNG bytes to be identical within the same browser build. Current fixture
+SHA-256:
 
-Trusted browser object interaction was also verified: clicking the pointer emitted `click:pointer` through delegated player events.
+`f325374a85805d1cf2e2b01698189db2e70860fe533c4041c12f846abbde34b3`
 
-The accessible web-component example was inspected in Chromium and exposed labelled Previous/Play/Restart/Next controls, a timeline slider, keyboard guidance, and the expected scene content.
+Cross-engine PNG bytes are intentionally not compared because rasterization and
+font antialiasing are browser/platform-specific.
+
+## Framework consumer validation
+
+The consumer boundary suite now executes production builds when framework
+dependencies are installed:
+
+- vanilla ESM;
+- Node SSR import/static SVG;
+- React SSR;
+- Next.js App Router static export using `@anim8/react`;
+- Astro static build using `@anim8/renderer-svg` for the initial frame and
+  `@anim8/player` for client activation.
+
+This validates actual downstream package resolution rather than relying only on
+workspace symlinks.
 
 ## Incremental renderer behavior
 
-The browser SVG mount now keeps one stable SVG root and keyed object records. Normal frame updates mutate transforms, geometry, style, text, draw progress and connector paths in place rather than replacing the entire SVG tree.
+The browser SVG mount keeps one stable SVG root and keyed object records. Normal
+frame updates mutate transforms, geometry, style, text, draw progress and
+connector paths in place rather than replacing the entire SVG tree.
 
 Tests verify:
 
-- stable root/object DOM identity,
-- connector endpoint updates,
-- visibility detach/reattach without losing identity,
-- safe additions/removals,
-- text/geometry updates.
+- stable root/object DOM identity;
+- connector endpoint updates;
+- visibility detach/reattach without losing identity;
+- safe additions/removals;
+- text/geometry updates;
+- deterministic canonical numeric serialization.
 
-A static-serialization fallback remains available for minimal/nonstandard DOM shims.
+A static-serialization fallback remains available for minimal/nonstandard DOM
+shims.
 
 ## Required benchmark scenes
 
@@ -92,15 +129,12 @@ A static-serialization fallback remains available for minimal/nonstandard DOM sh
 
 ## Metrics still to add
 
-- browser frame timing and dropped frames,
-- memory usage,
-- idle CPU,
-- initial render time,
-- time to first interactive frame,
-- allocation behavior,
-- repeated mount/unmount cleanup at browser scale,
-- multi-diagram playback,
-- sketch-mode browser cost,
+- sustained browser frame timing and dropped frames under larger moving scenes;
+- memory usage and allocation profiles;
+- idle CPU across many paused diagrams;
+- time to first interactive frame;
+- multi-diagram playback stress;
+- sketch-mode browser cost;
 - compile/validation scaling for hostile/near-limit documents.
 
 ## Determinism protocol
@@ -113,26 +147,26 @@ For every representative scene:
 4. Serialize and parse the scene.
 5. Evaluate T again.
 
-Semantic frames must match within documented numerical tolerance.
-
-Static SVG generation should become byte-stable for identical inputs after canonical numeric formatting is finalized.
+Semantic frames must match within documented numerical tolerance. Static SVG
+serialization is canonicalized so identical semantic inputs produce stable
+numeric output.
 
 ## Browser methodology
 
-Browser visual/performance runs should pin:
+Browser visual/performance runs pin or record:
 
-- browser versions,
-- OS/CI image,
-- viewport/DPR,
-- font files,
-- reduced-motion setting,
-- scene fixture,
-- warmup period,
+- browser versions;
+- OS/CI image;
+- viewport/DPR;
+- fonts;
+- reduced-motion setting;
+- scene fixture;
+- warmup period;
 - sample count.
 
-Pixel baselines must be browser/platform specific because antialiasing and font rendering vary.
+Pixel baselines remain browser/platform specific.
 
-## Initial architectural performance choices
+## Architectural performance choices
 
 - No render loop while paused.
 - No mandatory UI framework.

@@ -4,5 +4,7 @@ dist/
 artifacts/
 coverage/
 .vite/
+.astro/
+.next/
 *.log
 .DS_Store

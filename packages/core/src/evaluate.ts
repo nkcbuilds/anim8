@@ -1,6 +1,7 @@
 import { defaultCamera } from "./defaults.js";
 import { ease, lerp, lerpColor } from "./easing.js";
 import { quadraticPoint } from "./geometry.js";
+import { canonicalMorphPathToString, interpolateMorphPath, morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
 import { evaluateExpression } from "./expression.js";
 import type { Action, Binding, CameraAction, CameraState, DrawableObject, EvaluatedScene, EvaluationContext, PointValue, SceneDocument, ScalarValue } from "./types.js";
 
@@ -122,6 +123,16 @@ function applyAction(state: Map<string, DrawableObject>, action: ObjectAction, t
     case "draw":
       if (target.type === "path" || target.type === "polygon" || target.type === "polyline") {
         target.drawProgress = lerp(target.drawProgress ?? 1, action.to, progress);
+      }
+      break;
+    case "morph":
+      if (target.type === "path") {
+        const from = parseMorphPathData(target.d);
+        const to = parseMorphPathData(action.to);
+        if (from.ok && to.ok && morphPathCompatibility(from.path, to.path).ok) {
+          const interpolated = interpolateMorphPath(from.path, to.path, progress);
+          if (interpolated) target.d = canonicalMorphPathToString(interpolated);
+        }
       }
       break;
   }

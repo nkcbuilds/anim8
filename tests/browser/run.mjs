@@ -150,15 +150,15 @@ async function runCase(name, callback) {
   }
 }
 
-async function launchChromium(chromium) {
+async function launchBrowser(browserName, browserType) {
   try {
-    return await chromium.launch({ headless: true });
+    return await browserType.launch({ headless: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (message.includes("Executable doesn't exist") || message.includes("playwright install")) {
       console.log(
-        "SKIP browser harness: Playwright is installed but its Chromium binary is unavailable. " +
-        "Install it with: pnpm exec playwright install chromium",
+        `SKIP ${browserName}: Playwright is installed but its browser binary is unavailable. ` +
+        `Install it with: pnpm exec playwright install ${browserName}`,
       );
       return null;
     }
@@ -166,18 +166,24 @@ async function launchChromium(chromium) {
   }
 }
 
-async function main() {
-  const playwright = await loadPlaywright();
-  if (!playwright) return;
+function requestedBrowserNames() {
+  const supported = ["chromium", "firefox", "webkit"];
+  const raw = process.env.ANIM8_BROWSER_ENGINES?.trim();
+  if (!raw) return supported;
 
-  runBuilds();
-  assertBuiltOutputs();
+  const requested = [...new Set(raw.split(",").map(value => value.trim().toLowerCase()).filter(Boolean))];
+  assert.ok(requested.length > 0, "ANIM8_BROWSER_ENGINES must contain at least one browser name.");
+  for (const name of requested) {
+    assert.ok(supported.includes(name), `Unsupported browser '${name}'. Use chromium, firefox, and/or webkit.`);
+  }
+  return requested;
+}
 
-  const browser = await launchChromium(playwright.chromium);
-  if (!browser) return;
-  console.log(`INFO Playwright Chromium version=${browser.version()}`);
+async function runBrowserSuite(browserName, browserType, server) {
+  const browser = await launchBrowser(browserName, browserType);
+  if (!browser) return false;
 
-  const server = await startStaticServer();
+  console.log(`INFO Playwright ${browserName} version=${browser.version()}`);
   const context = await browser.newContext({
     viewport: { width: 640, height: 480 },
     deviceScaleFactor: 1,
@@ -188,15 +194,17 @@ async function main() {
   page.on("pageerror", error => pageErrors.push(error));
   page.on("console", message => {
     if (message.type() === "error") {
-      pageErrors.push(new Error(`Browser console error: ${message.text()}`));
+      pageErrors.push(new Error(`${browserName} console error: ${message.text()}`));
     }
   });
+
+  const caseName = name => `${browserName}: ${name}`;
 
   try {
     await page.goto(`${server.origin}/tests/browser/fixture.html`, { waitUntil: "load" });
     await page.waitForFunction(() => globalThis.__anim8BrowserReady === true);
 
-    await runCase("SVG mount/update preserves keyed DOM identity", async () => {
+    await runCase(caseName("SVG mount/update preserves keyed DOM identity"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.svgIdentity());
       assert.equal(result.sameNode, true);
       assert.equal(result.sentinel, "same-node");
@@ -204,7 +212,7 @@ async function main() {
       assert.notEqual(result.beforeTransform, result.afterTransform);
     });
 
-    await runCase("player play/pause/seek/reverse uses real requestAnimationFrame", async () => {
+    await runCase(caseName("player play/pause/seek/reverse uses real requestAnimationFrame"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.playerControls());
       assert.equal(result.seekTime, 500);
       assert.ok(result.seekTransform?.includes("170"), "seek(500) should render the midpoint x position");
@@ -214,7 +222,7 @@ async function main() {
       assert.ok(result.afterReverse < 900, "reverse() should move timeline time backward");
     });
 
-    await runCase("dynamic connectors update in place as endpoints move", async () => {
+    await runCase(caseName("dynamic connectors update in place as endpoints move"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.dynamicConnector());
       assert.equal(result.sameNode, true);
       assert.ok(result.before);
@@ -223,7 +231,7 @@ async function main() {
       assert.ok(result.movedTransform?.includes("250"));
     });
 
-    await runCase("prefers-reduced-motion prevents custom-element autoplay/play advancement", async () => {
+    await runCase(caseName("prefers-reduced-motion prevents custom-element autoplay/play advancement"), async () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       const result = await page.evaluate(() => globalThis.__anim8Browser.reducedMotionCustomElement());
       assert.equal(result.mediaMatches, true);
@@ -232,7 +240,7 @@ async function main() {
       await page.emulateMedia({ reducedMotion: "no-preference" });
     });
 
-    await runCase("multiple player instances remain isolated", async () => {
+    await runCase(caseName("multiple player instances remain isolated"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.multipleInstances());
       assert.equal(result.firstTime, 250);
       assert.equal(result.secondTime, 750);
@@ -241,7 +249,7 @@ async function main() {
       assert.equal(result.distinctObjectNode, true);
     });
 
-    await runCase("mount/destroy/remount lifecycle cleans DOM", async () => {
+    await runCase(caseName("mount/destroy/remount lifecycle cleans DOM"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.mountUnmount());
       assert.equal(result.mountedChildren, 1);
       assert.equal(result.childrenAfterDestroy, 0);
@@ -250,36 +258,79 @@ async function main() {
       assert.ok(result.remountTransform?.includes("186"));
     });
 
-    await runCase("deterministic Chromium screenshot fixture is byte-stable", async () => {
-      const fixtureInfo = await page.evaluate(() => globalThis.__anim8Browser.setupScreenshotFixture());
-      assert.deepEqual(fixtureInfo, { width: 480, height: 270, objectCount: 4 });
+    if (browserName === "chromium") {
+      await runCase(caseName("deterministic screenshot fixture is byte-stable"), async () => {
+        const fixtureInfo = await page.evaluate(() => globalThis.__anim8Browser.setupScreenshotFixture());
+        assert.deepEqual(fixtureInfo, { width: 480, height: 270, objectCount: 4 });
 
-      const locator = page.locator("#snapshot-root");
-      const first = await locator.screenshot({ animations: "disabled" });
+        const locator = page.locator("#snapshot-root");
+        const first = await locator.screenshot({ animations: "disabled" });
 
-      await page.evaluate(() => globalThis.__anim8Browser.setupScreenshotFixture());
-      const second = await page.locator("#snapshot-root").screenshot({ animations: "disabled" });
+        await page.evaluate(() => globalThis.__anim8Browser.setupScreenshotFixture());
+        const second = await page.locator("#snapshot-root").screenshot({ animations: "disabled" });
 
-      assert.equal(Buffer.compare(first, second), 0, "Identical deterministic fixture screenshots must match byte-for-byte.");
-      const hash = sha256(first);
-      console.log(`INFO deterministic Chromium screenshot sha256=${hash}`);
+        assert.equal(Buffer.compare(first, second), 0, "Identical deterministic fixture screenshots must match byte-for-byte.");
+        const hash = sha256(first);
+        console.log(`INFO deterministic Chromium screenshot sha256=${hash}`);
 
-      if (process.env.ANIM8_BROWSER_WRITE_SCREENSHOT === "1") {
-        const artifactDir = resolve(browserRoot, "artifacts");
-        await mkdir(artifactDir, { recursive: true });
-        const output = resolve(artifactDir, "deterministic.chromium.png");
-        await writeFile(output, first);
-        console.log(`INFO wrote screenshot artifact: ${output}`);
-      }
-    });
+        if (process.env.ANIM8_BROWSER_WRITE_SCREENSHOT === "1") {
+          const artifactDir = resolve(browserRoot, "artifacts");
+          await mkdir(artifactDir, { recursive: true });
+          const output = resolve(artifactDir, "deterministic.chromium.png");
+          await writeFile(output, first);
+          console.log(`INFO wrote screenshot artifact: ${output}`);
+        }
+      });
+    }
 
     assert.equal(pageErrors.length, 0, pageErrors.map(error => error.message).join("\n"));
-    console.log("PASS browser harness (Chromium, 7 cases)");
+    const caseCount = browserName === "chromium" ? 7 : 6;
+    console.log(`PASS browser harness (${browserName}, ${caseCount} cases)`);
+    return true;
   } finally {
     await context.close();
     await browser.close();
+  }
+}
+
+async function main() {
+  const playwright = await loadPlaywright();
+  if (!playwright) return;
+
+  runBuilds();
+  assertBuiltOutputs();
+
+  const requested = requestedBrowserNames();
+  const requireAll = process.env.ANIM8_BROWSER_REQUIRE_ALL === "1";
+  const server = await startStaticServer();
+  const executed = [];
+  const skipped = [];
+
+  try {
+    for (const browserName of requested) {
+      const browserType = playwright[browserName];
+      assert.ok(browserType, `Playwright does not expose browser type '${browserName}'.`);
+      const ran = await runBrowserSuite(browserName, browserType, server);
+      if (ran) executed.push(browserName);
+      else skipped.push(browserName);
+    }
+  } finally {
     await server.close();
   }
+
+  if (requireAll && skipped.length > 0) {
+    throw new Error(`Required browser binaries are missing: ${skipped.join(", ")}.`);
+  }
+
+  if (executed.length === 0) {
+    console.log("SKIP browser harness: none of the requested browser binaries are installed.");
+    return;
+  }
+
+  console.log(
+    `PASS browser matrix: executed ${executed.join(", ")}` +
+    (skipped.length ? `; skipped missing ${skipped.join(", ")}` : ""),
+  );
 }
 
 await main();

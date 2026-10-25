@@ -8,6 +8,7 @@ Canonical docs:
 - docs/reference/timeline.md
 - docs/security.md
 - docs/guides/ai-agents.md
+- docs/guides/accessibility.md
 - packages/compiler/scene.schema.json
 
 Rules for generated scenes:
@@ -33,6 +34,8 @@ Current core actions:
 - stroke
 - visibility
 - draw
+- morph
+- camera
 
 Current easing names:
 - linear

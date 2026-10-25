@@ -1,4 +1,4 @@
-import { applyMatrix, defaultCamera, defaultStyle, defaultTransform, evaluate, objectBounds, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type EasingName, type Expression, type Marker, type PointValue, type ScalarValue, type SceneDocument, type ThemeName } from "@anim8/core";
+import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type EasingName, type Expression, type Marker, type PointValue, type ScalarValue, type SceneDocument, type ThemeName } from "@anim8/core";
 
 export interface SceneOptions {
   width?: number;
@@ -19,6 +19,11 @@ export interface MotionOptions {
 }
 
 export interface FollowPathOptions {
+  duration?: number;
+  easing?: EasingName;
+}
+
+export interface MorphOptions {
   duration?: number;
   easing?: EasingName;
 }
@@ -112,6 +117,10 @@ export class NodeHandle {
   draw(to = 1, options: MotionOptions = {}): Pending {
     this.owner.assertDrawableStroke(this.id, to);
     return { type: "draw", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+  }
+  morphTo(to: string, options: MorphOptions = {}): Pending {
+    const canonical = this.owner.assertMorphable(this.id, to);
+    return { type: "morph", target: this.id, to: canonical, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
   }
   fadeTo(to: number, options: MotionOptions = {}): Pending {
     return { type: "opacity", target: this.id, to, duration: options.duration ?? 400, easing: options.easing ?? "easeInOut" };
@@ -241,6 +250,22 @@ export class SceneBuilder {
     if (!Number.isFinite(to) || to < 0 || to > 1) {
       throw new Error("Draw progress must be a finite number between 0 and 1.");
     }
+  }
+
+  assertMorphable(id: string, to: string): string {
+    const object = this.evaluatedObject(id);
+    if (object.type !== "path") {
+      throw new Error(`Object '${id}' of type '${object.type}' is not an SVG path and cannot be morphed.`);
+    }
+
+    const fromPath = parseMorphPathData(object.d);
+    if (!fromPath.ok) throw new Error(`Morph source path is invalid: ${fromPath.message}`);
+    const toPath = parseMorphPathData(to);
+    if (!toPath.ok) throw new Error(`Morph target path is invalid: ${toPath.message}`);
+
+    const compatibility = morphPathCompatibility(fromPath.path, toPath.path);
+    if (!compatibility.ok) throw new Error(compatibility.message);
+    return canonicalMorphPathToString(toPath.path);
   }
 
   /**

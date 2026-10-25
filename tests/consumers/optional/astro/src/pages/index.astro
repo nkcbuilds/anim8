@@ -1,17 +1,31 @@
 ---
-import { Anim8Player } from "@anim8/react";
+import { renderSceneAt } from "@anim8/renderer-svg";
+import { scene } from "../scene.js";
 
-const scene = {
-  version: "1.0",
-  scene: { width: 320, height: 180, theme: "clean" },
-  objects: [],
-  timeline: [],
-};
+const staticSvg = renderSceneAt(scene, 0);
 ---
 
 <html lang="en">
+  <head>
+    <title>Anim8 Astro consumer fixture</title>
+  </head>
   <body>
     <h1>Anim8 Astro consumer fixture</h1>
-    <Anim8Player client:load scene={scene} aria-label="Anim8 fixture" />
+    <div
+      id="anim8-astro-fixture"
+      aria-label="Anim8 Astro fixture animation"
+      set:html={staticSvg}
+    ></div>
+
+    <script>
+      import { mountPlayer } from "@anim8/player";
+      import { scene } from "../scene.js";
+
+      const target = document.querySelector("#anim8-astro-fixture");
+      if (target) {
+        const controller = mountPlayer(target, scene);
+        globalThis.__anim8AstroController = controller;
+      }
+    </script>
   </body>
 </html>

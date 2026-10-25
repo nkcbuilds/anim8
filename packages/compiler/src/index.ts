@@ -1,13 +1,17 @@
 import {
+  canonicalMorphPathToString,
   defaultCamera,
   defaultStyle,
   defaultTransform,
+  morphPathCompatibility,
+  parseMorphPathData,
   validateScene,
   type Action,
   type AnchorName,
   type Binding,
   type BindingProperty,
   type CameraState,
+  type CanonicalMorphPath,
   type Expression,
   type Interaction,
   type InteractionTrigger,
@@ -75,6 +79,21 @@ const finite = (value: unknown): value is number =>
 
 const boundedNumber = (value: unknown): value is number =>
   finite(value) && Math.abs(value) <= COMPILER_LIMITS.absoluteNumber;
+
+function canonicalPathWithinBounds(path: CanonicalMorphPath): boolean {
+  return path.subpaths.every(subpath =>
+    boundedNumber(subpath.start.x) &&
+    boundedNumber(subpath.start.y) &&
+    subpath.segments.every(segment =>
+      boundedNumber(segment.c1x) &&
+      boundedNumber(segment.c1y) &&
+      boundedNumber(segment.c2x) &&
+      boundedNumber(segment.c2y) &&
+      boundedNumber(segment.x) &&
+      boundedNumber(segment.y)
+    )
+  );
+}
 
 function diagnostic(
   diagnostics: Diagnostic[],
@@ -1001,6 +1020,7 @@ function actionProperties(action: Action): readonly ActionProperty[] {
     case "stroke": return ["stroke"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
+    case "morph":
     case "visibility":
     case "camera":
       return [];
@@ -1219,6 +1239,46 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
       if (finite(value.to) && value.to >= 0 && value.to <= 1) return { ...objectBase, type: "draw", to: value.to };
       diagnostic(diagnostics, "INVALID_DRAW_PROGRESS", `${path}.to`, "draw.to must be a finite number between 0 and 1.");
       return null;
+    case "morph": {
+      if (typeof value.to !== "string" || value.to.length === 0) {
+        diagnostic(diagnostics, "INVALID_MORPH_PATH", `${path}.to`, "morph.to must be a non-empty SVG path string.");
+        return null;
+      }
+      if (value.to.length > COMPILER_LIMITS.pathLength) {
+        diagnostic(
+          diagnostics,
+          "LIMIT_PATH_LENGTH",
+          `${path}.to`,
+          `Morph path data exceeds the ${COMPILER_LIMITS.pathLength}-character limit.`,
+        );
+        return null;
+      }
+      const parsed = parseMorphPathData(value.to);
+      if (!parsed.ok) {
+        diagnostic(diagnostics, parsed.code, `${path}.to`, parsed.message);
+        return null;
+      }
+      if (!canonicalPathWithinBounds(parsed.path)) {
+        diagnostic(
+          diagnostics,
+          "MORPH_PATH_COORDINATE_LIMIT",
+          `${path}.to`,
+          `Morph path coordinates must have absolute value <= ${COMPILER_LIMITS.absoluteNumber}.`,
+        );
+        return null;
+      }
+      const canonical = canonicalMorphPathToString(parsed.path);
+      if (canonical.length > COMPILER_LIMITS.pathLength) {
+        diagnostic(
+          diagnostics,
+          "LIMIT_PATH_LENGTH",
+          `${path}.to`,
+          `Canonical morph path exceeds the ${COMPILER_LIMITS.pathLength}-character limit.`,
+        );
+        return null;
+      }
+      return { ...objectBase, type: "morph", to: canonical };
+    }
     case "visibility":
       if (typeof value.visible === "boolean") return { ...objectBase, type: "visibility", visible: value.visible };
       diagnostic(diagnostics, "INVALID_VISIBILITY_TARGET", `${path}.visible`, "visibility.visible must be a boolean.");
@@ -1229,7 +1289,7 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
         "UNKNOWN_ACTION",
         `${path}.type`,
         `Unsupported action type '${value.type}'.`,
-        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, or visibility.",
+        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, morph, or visibility.",
       );
       return null;
   }
@@ -1461,6 +1521,59 @@ function validateTimelineReferences(
         `Object '${target.id}' of type '${target.type}' does not expose drawProgress.`,
         "Use draw on path, polygon, or polyline objects.",
       );
+    }
+
+    if (action.type === "morph") {
+      if (target.type !== "path") {
+        diagnostic(
+          diagnostics,
+          "UNSUPPORTED_MORPH_TARGET",
+          `timeline[${index}].target`,
+          `Object '${target.id}' of type '${target.type}' is not an SVG path.`,
+          "Morph actions may target path objects only.",
+        );
+        return;
+      }
+
+      const priorMorph = timeline
+        .filter((candidate): candidate is Extract<Action, { type: "morph" }> =>
+          candidate.type === "morph" &&
+          candidate.target === action.target &&
+          candidate !== action &&
+          candidate.start + candidate.duration <= action.start
+        )
+        .sort((a, b) => a.start - b.start || a.id.localeCompare(b.id))
+        .at(-1);
+      const from = parseMorphPathData(priorMorph?.to ?? target.d);
+      if (!from.ok) {
+        diagnostic(
+          diagnostics,
+          from.code,
+          `timeline[${index}].target`,
+          `Morph source path is invalid: ${from.message}`,
+        );
+        return;
+      }
+      if (!canonicalPathWithinBounds(from.path)) {
+        diagnostic(
+          diagnostics,
+          "MORPH_PATH_COORDINATE_LIMIT",
+          `timeline[${index}].target`,
+          `Morph source path coordinates must have absolute value <= ${COMPILER_LIMITS.absoluteNumber}.`,
+        );
+        return;
+      }
+
+      const to = parseMorphPathData(action.to);
+      if (!to.ok) {
+        diagnostic(diagnostics, to.code, `timeline[${index}].to`, to.message);
+        return;
+      }
+
+      const compatibility = morphPathCompatibility(from.path, to.path);
+      if (!compatibility.ok) {
+        diagnostic(diagnostics, compatibility.code, `timeline[${index}].to`, compatibility.message);
+      }
     }
   });
 }

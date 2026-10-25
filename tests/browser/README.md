@@ -1,59 +1,84 @@
-# Anim8 Chromium browser harness
+# Anim8 browser matrix harness
 
-This directory contains a browser-level regression harness for the real built
+This directory contains browser-level regression tests against the real built
 `@anim8/core`, `@anim8/renderer-svg`, and `@anim8/player` packages.
 
-It intentionally does **not** add Playwright to the root/package manifests.
-The runner dynamically loads `playwright`; when it is absent, it prints an
-explicit `SKIP browser harness` message and executes zero browser cases.
+The runner dynamically loads Playwright. If Playwright itself is unavailable it
+prints an explicit skip. Browser binaries are checked independently, so local
+development can run whichever engines are installed while CI can require the
+full matrix.
 
 ## Run
 
 From the repository root:
 
 ```sh
-node tests/browser/run.mjs
+pnpm browser
 ```
 
-With Playwright installed, the runner:
+By default the harness attempts:
+
+- Chromium
+- Firefox
+- WebKit
+
+Filter locally with:
+
+```sh
+ANIM8_BROWSER_ENGINES=chromium,firefox pnpm browser
+```
+
+Set `ANIM8_BROWSER_REQUIRE_ALL=1` when every requested engine must be
+installed; CI uses this mode.
+
+With an engine available, the runner:
 
 1. builds `@anim8/core`, `@anim8/renderer-svg`, and `@anim8/player`;
 2. starts a loopback-only static server for this repository;
-3. launches **Playwright Chromium only**;
-4. loads `fixture.html` with an import map pointing at the real package
-   `dist/index.js` outputs;
-5. executes seven browser cases and fails on page/console errors.
+3. launches the requested Playwright browser;
+4. loads `fixture.html` against real package `dist/index.js` outputs;
+5. executes the portable behavior suite and fails on page/console errors.
 
-Set `ANIM8_BROWSER_SKIP_BUILD=1` only when those three package outputs are
-already current.
+Set `ANIM8_BROWSER_SKIP_BUILD=1` only when those package outputs are already
+current.
 
-## Coverage
+## Portable behavior coverage
+
+Each available engine verifies:
 
 - keyed SVG mount/update DOM identity;
 - player play, pause, seek, and reverse using real `requestAnimationFrame`;
 - connector path updates as endpoints move;
 - `prefers-reduced-motion: reduce` through the real custom element;
 - multiple player instances with independent state/DOM;
-- mount/destroy/remount cleanup;
-- a fixed 480x270 screenshot fixture captured twice after a full remount and
-  required to be byte-identical in the same Chromium build.
+- mount/destroy/remount cleanup.
 
-The screenshot case prints its SHA-256. It deliberately does not hard-code a
-cross-version Chromium pixel hash yet: this harness is Chromium-first, and a
-browser-engine/version bump should not be mislabeled as an Anim8 regression.
-To write the captured PNG for inspection:
+## Visual determinism
+
+Chromium additionally captures a fixed 480x270 fixture twice after remount and
+requires the PNG bytes to match within the same browser build.
+
+Pixel output is deliberately **not** compared byte-for-byte across Chromium,
+Firefox, and WebKit because font rasterization and antialiasing are
+engine/platform-specific. Structural/behavioral assertions are the portable
+cross-browser contract.
+
+The Chromium screenshot case prints its SHA-256. To write the captured PNG:
 
 ```sh
-ANIM8_BROWSER_WRITE_SCREENSHOT=1 node tests/browser/run.mjs
+ANIM8_BROWSER_ENGINES=chromium ANIM8_BROWSER_WRITE_SCREENSHOT=1 pnpm browser
 ```
 
-That writes `tests/browser/artifacts/deterministic.chromium.png`.
+## Installing browsers
 
-## Installing Playwright locally
+```sh
+pnpm exec playwright install chromium firefox webkit
+```
 
-This harness expects the standard `playwright` package and its Chromium
-binary to be available to Node resolution. If the package is installed but the
-browser binary is missing, the runner emits a separate explicit skip with the
-Chromium install command.
+Linux CI should install required system dependencies as well:
 
-No fallback browser or fake DOM is used by this suite.
+```sh
+pnpm exec playwright install --with-deps chromium firefox webkit
+```
+
+No fake DOM or fallback browser is used by this suite.
