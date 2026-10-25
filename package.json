@@ -12,8 +12,9 @@
     "consumers": "node tests/consumers/run.mjs",
     "benchmark": "node benchmarks/run-baseline.mjs",
     "browser": "node tests/browser/run.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers",
-    "release:check": "pnpm check && pnpm browser"
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm release:metadata",
+    "release:check": "pnpm check && pnpm browser",
+    "release:metadata": "node tests/release/check-version.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
