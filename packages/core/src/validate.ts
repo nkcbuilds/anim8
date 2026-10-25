@@ -22,6 +22,8 @@ const props = (action: Action): string[] => {
     case "draw": return ["drawProgress"];
     case "morph": return ["d"];
     case "visibility": return ["visible"];
+    case "reparent": return ["parentId"];
+    case "zOrder": return ["z"];
     case "camera": return [
       ...(action.to.x !== undefined ? ["camera.x"] : []),
       ...(action.to.y !== undefined ? ["camera.y"] : []),
@@ -521,6 +523,49 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
         );
       });
     });
+  });
+
+  scene.timeline.forEach((action, index) => {
+    if (action.type === "reparent") {
+      if (action.duration !== 0) {
+        diagnostics.push({
+          code: "INVALID_STRUCTURAL_DURATION",
+          path: `timeline[${index}].duration`,
+          message: "reparent actions must have duration 0.",
+        });
+      }
+      if (action.parentId !== null) {
+        const parent = scene.objects.find(object => object.id === action.parentId);
+        if (!parent) {
+          diagnostics.push({
+            code: "UNKNOWN_REPARENT_TARGET",
+            path: `timeline[${index}].parentId`,
+            message: `Parent object '${action.parentId}' does not exist.`,
+          });
+        } else if (parent.type !== "group") {
+          diagnostics.push({
+            code: "INVALID_REPARENT_TARGET",
+            path: `timeline[${index}].parentId`,
+            message: `Parent '${action.parentId}' must be a group.`,
+          });
+        }
+      }
+    } else if (action.type === "zOrder") {
+      if (action.duration !== 0) {
+        diagnostics.push({
+          code: "INVALID_STRUCTURAL_DURATION",
+          path: `timeline[${index}].duration`,
+          message: "zOrder actions must have duration 0.",
+        });
+      }
+      if (!Number.isInteger(action.to) || Math.abs(action.to) > 1_000_000) {
+        diagnostics.push({
+          code: "INVALID_Z_ORDER",
+          path: `timeline[${index}].to`,
+          message: "zOrder.to must be a bounded integer.",
+        });
+      }
+    }
   });
 
   const actions = scene.timeline;
