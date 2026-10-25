@@ -231,6 +231,33 @@ async function runBrowserSuite(browserName, browserType, server) {
       assert.ok(result.movedTransform?.includes("250"));
     });
 
+    await runCase(caseName("routed connectors recompute around moving obstacles"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.routedConnector());
+      assert.equal(result.sameNode, true);
+      assert.ok(result.before);
+      assert.ok(result.after);
+      assert.notEqual(result.before, result.after);
+      assert.ok(result.before.includes("route") === false);
+    });
+
+    await runCase(caseName("responsive SVG sizing preserves semantic viewBox"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.responsiveSizing());
+      assert.deepEqual(
+        [result.beforeWidth, result.beforeHeight, result.afterWidth, result.afterHeight],
+        [480, 270, 320, 180],
+      );
+      assert.equal(result.viewBoxBefore, "0 0 480 270");
+      assert.equal(result.viewBoxAfter, result.viewBoxBefore);
+    });
+
+    await runCase(caseName("static renderer provides a useful no-player fallback"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.staticFallback());
+      assert.equal(result.svgCount, 1);
+      assert.equal(result.viewBox, "0 0 480 270");
+      assert.ok(result.transform?.includes("170"));
+      assert.equal(result.scriptCount, 0);
+    });
+
     await runCase(caseName("prefers-reduced-motion prevents custom-element autoplay/play advancement"), async () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       const result = await page.evaluate(() => globalThis.__anim8Browser.reducedMotionCustomElement());
@@ -284,7 +311,7 @@ async function runBrowserSuite(browserName, browserType, server) {
     }
 
     assert.equal(pageErrors.length, 0, pageErrors.map(error => error.message).join("\n"));
-    const caseCount = browserName === "chromium" ? 7 : 6;
+    const caseCount = browserName === "chromium" ? 10 : 9;
     console.log(`PASS browser harness (${browserName}, ${caseCount} cases)`);
     return true;
   } finally {
