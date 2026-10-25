@@ -23,7 +23,7 @@ import {
   type StateMachineTransition,
   type Diagnostic,
   type DrawableObject,
-  type EasingName,
+  type Easing,
   type PointValue,
   type SceneDocument,
   type Style,
@@ -1427,17 +1427,50 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
     return null;
   }
 
-  let easing: EasingName = "linear";
+  let easing: Easing = "linear";
   if (value.easing !== undefined) {
     if (value.easing === "linear" || value.easing === "easeIn" || value.easing === "easeOut" || value.easing === "easeInOut" || value.easing === "spring") {
       easing = value.easing;
+    } else if (isRecord(value.easing) && value.easing.type === "cubicBezier") {
+      const { x1, y1, x2, y2 } = value.easing;
+      if (
+        !finite(x1) || x1 < 0 || x1 > 1 ||
+        !finite(x2) || x2 < 0 || x2 > 1 ||
+        !finite(y1) || Math.abs(y1) > 10 ||
+        !finite(y2) || Math.abs(y2) > 10
+      ) {
+        diagnostic(
+          diagnostics,
+          "INVALID_EASING",
+          `${path}.easing`,
+          "cubicBezier requires finite x1/x2 in [0, 1] and finite y1/y2 with absolute value <= 10.",
+        );
+        return null;
+      }
+      easing = { type: "cubicBezier", x1, y1, x2, y2 };
     } else {
-      diagnostic(diagnostics, "INVALID_EASING", `${path}.easing`, "Unsupported easing value.");
+      diagnostic(
+        diagnostics,
+        "INVALID_EASING",
+        `${path}.easing`,
+        "Easing must be linear, easeIn, easeOut, easeInOut, spring, or a cubicBezier object.",
+      );
       return null;
     }
   }
 
-  const base = { id, start: value.start, duration: value.duration, easing };
+  if (value.interrupt !== undefined && typeof value.interrupt !== "boolean") {
+    diagnostic(diagnostics, "INVALID_INTERRUPT", `${path}.interrupt`, "interrupt must be a boolean.");
+    return null;
+  }
+
+  const base = {
+    id,
+    start: value.start,
+    duration: value.duration,
+    easing,
+    ...(value.interrupt === true ? { interrupt: true } : {}),
+  };
 
   if (value.type === "camera") {
     if (value.target !== undefined) {
