@@ -1,3 +1,4 @@
+import { describeScene, type DescribeSceneOptions } from "@anim8/a11y";
 import {
   computed,
   defineComponent,
@@ -121,6 +122,10 @@ export const Anim8Player = defineComponent({
       type: Object as PropType<PlayerOptions>,
       default: () => ({}),
     },
+    accessibility: {
+      type: [Object, Boolean] as PropType<false | Omit<DescribeSceneOptions, "time" | "context">>,
+      default: undefined,
+    },
   },
   setup(props, { attrs }) {
     const resolvedOptions = computed<UseAnim8PlayerOptions>(() => ({
@@ -129,14 +134,20 @@ export const Anim8Player = defineComponent({
     }));
     const { containerRef } = useAnim8Player(toRef(props, "scene"), resolvedOptions);
 
-    return () => h("div", {
-      ...attrs,
-      ref: containerRef,
-      "data-anim8-player": "",
-      innerHTML: renderSceneAt(
-        props.scene,
-        normalizedInitialTime(props.initialTime),
-      ),
-    });
+    return () => {
+      const time = normalizedInitialTime(props.initialTime);
+      const summary = props.accessibility === false
+        ? undefined
+        : describeScene(props.scene, { time, ...(props.accessibility ?? {}) });
+      const generatedLabel = summary?.text;
+      return h("div", {
+        ...attrs,
+        ...(generatedLabel && attrs["aria-label"] === undefined ? { "aria-label": generatedLabel } : {}),
+        ...(generatedLabel && attrs.role === undefined ? { role: "group" } : {}),
+        ref: containerRef,
+        "data-anim8-player": "",
+        innerHTML: renderSceneAt(props.scene, time),
+      });
+    };
   },
 });
