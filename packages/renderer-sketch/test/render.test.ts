@@ -540,4 +540,23 @@ describe("@anim8/renderer-sketch", () => {
     expect(renderSketchSvg(evaluate(scene, time))).toBe(first);
     expect(first).not.toMatch(/\d+\.\d{7,}/);
   });
+  it("renders routed connector base and overdraw from the same deterministic route", () => {
+    const scene: SceneDocument = {
+      version: "1.0",
+      scene: { width: 360, height: 180, seed: 12 },
+      objects: [
+        { id:"a", type:"rect", width:40, height:40, transform:{...defaultTransform(),x:20,y:90}, style:defaultStyle(), visible:true,z:1 },
+        { id:"block", type:"rect", width:80, height:80, transform:{...defaultTransform(),x:160,y:90}, style:defaultStyle(), visible:true,z:1 },
+        { id:"b", type:"rect", width:40, height:40, transform:{...defaultTransform(),x:300,y:90}, style:defaultStyle(), visible:true,z:1 },
+        { id:"edge", type:"connector", from:{objectId:"a",anchor:"right"}, to:{objectId:"b",anchor:"left"}, kind:"routed", routing:{clearance:10}, transform:defaultTransform(), style:defaultStyle(), visible:true,z:0 },
+      ],
+      timeline: [],
+    };
+    const first = renderSketchSceneAt(scene, 0);
+    const second = renderSketchSceneAt(scene, 0);
+    expect(second).toBe(first);
+    expect(connectorBase(first, "edge")).toContain("M 40 90");
+    expect(first).toContain('data-sketch-part="connector-overdraw"');
+  });
+
 });
