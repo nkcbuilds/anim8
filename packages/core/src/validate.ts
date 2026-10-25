@@ -533,22 +533,28 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
       if (a.type === "camera" || b.type === "camera") {
         if (a.type !== "camera" || b.type !== "camera") continue;
         const conflicts = props(a).filter(p => props(b).includes(p));
-        if (conflicts.length) diagnostics.push({
+        const laterInterrupts =
+          conflicts.length > 0 &&
+          ((b.start > a.start && b.interrupt === true) || (a.start > b.start && a.interrupt === true));
+        if (conflicts.length && !laterInterrupts) diagnostics.push({
           code: "OVERLAPPING_PROPERTY_ACTIONS",
           path: `timeline[${j}]`,
           message: `Actions '${a.id}' and '${b.id}' overlap on ${conflicts.join(", ")}.`,
-          suggestion: "Sequence the camera actions or animate distinct camera properties.",
+          suggestion: "Sequence the camera actions, animate distinct camera properties, or mark the later action interrupt: true.",
         });
         continue;
       }
 
       if (a.target !== b.target) continue;
       const conflicts = props(a).filter(p => props(b).includes(p));
-      if (conflicts.length) diagnostics.push({
+      const laterInterrupts =
+        conflicts.length > 0 &&
+        ((b.start > a.start && b.interrupt === true) || (a.start > b.start && a.interrupt === true));
+      if (conflicts.length && !laterInterrupts) diagnostics.push({
         code: "OVERLAPPING_PROPERTY_ACTIONS",
         path: `timeline[${j}]`,
         message: `Actions '${a.id}' and '${b.id}' overlap on ${conflicts.join(", ")} for object '${a.target}'.`,
-        suggestion: "Sequence the actions or animate distinct properties.",
+        suggestion: "Sequence the actions, animate distinct properties, or mark the later action interrupt: true.",
       });
     }
   }
