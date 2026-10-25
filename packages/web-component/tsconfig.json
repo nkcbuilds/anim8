@@ -15,7 +15,10 @@
         "../core/src/index.ts"
       ],
       "@anim8/player": [
-        "../player/dist/index.d.ts"
+        "../player/src/index.ts"
+      ],
+      "@anim8/renderer-svg": [
+        "../renderer-svg/src/index.ts"
       ]
     }
   }
