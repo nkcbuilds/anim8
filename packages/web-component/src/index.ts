@@ -1,3 +1,4 @@
+import { describeFrame, describeScene } from "@anim8/a11y";
 import type { ScalarValue, SceneDocument } from "@anim8/core";
 import { mountPlayer, type PlayerController } from "@anim8/player";
 
@@ -63,6 +64,17 @@ const CONTROL_TEMPLATE = `
     flex-basis: 100%;
     margin: 0;
   }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 </style>
 <div class="shell" part="shell">
   <div
@@ -72,7 +84,9 @@ const CONTROL_TEMPLATE = `
     role="region"
     tabindex="0"
     aria-label="Animation. Press Space to play or pause, Left and Right arrows to seek, Home to restart, and End to jump to the end."
+    aria-describedby="summary"
   ></div>
+  <p id="summary" class="sr-only" part="summary"></p>
   <div class="controls" part="controls" role="group" aria-label="Animation playback controls">
     <button id="previous" part="previous-button" type="button" aria-label="Previous step">Previous</button>
     <button id="play" part="play-button" type="button" aria-label="Play animation" aria-pressed="false">Play</button>
@@ -141,6 +155,7 @@ export class Anim8WebComponent extends HTMLElementBase {
   #timeline: HTMLInputElement | undefined;
   #timeOutput: HTMLOutputElement | undefined;
   #motionNote: HTMLElement | undefined;
+  #summary: HTMLElement | undefined;
   #motionQuery: MediaQueryList | undefined;
   #reducedMotion = false;
   #domBound = false;
@@ -261,6 +276,7 @@ export class Anim8WebComponent extends HTMLElementBase {
     const timeline = root.getElementById("timeline");
     const time = root.getElementById("time");
     const motionNote = root.getElementById("motion-note");
+    const summary = root.getElementById("summary");
 
     if (
       !(stage instanceof HTMLElement) ||
@@ -270,7 +286,8 @@ export class Anim8WebComponent extends HTMLElementBase {
       !(restart instanceof HTMLButtonElement) ||
       !(timeline instanceof HTMLInputElement) ||
       !(time instanceof HTMLOutputElement) ||
-      !(motionNote instanceof HTMLElement)
+      !(motionNote instanceof HTMLElement) ||
+      !(summary instanceof HTMLElement)
     ) {
       return false;
     }
@@ -283,6 +300,7 @@ export class Anim8WebComponent extends HTMLElementBase {
     this.#timeline = timeline;
     this.#timeOutput = time;
     this.#motionNote = motionNote;
+    this.#summary = summary;
 
     play.addEventListener("click", () => this.#togglePlayback());
     previous.addEventListener("click", () => this.previousStep());
@@ -338,6 +356,7 @@ export class Anim8WebComponent extends HTMLElementBase {
       reducedMotion: this.#reducedMotion,
       onFrame: frame => {
         this.#syncControls(frame.time, frame.duration);
+        this.#syncAccessibility(frame);
         this.#dispatchFrame(frame.time, frame.duration);
       },
     });
@@ -347,6 +366,18 @@ export class Anim8WebComponent extends HTMLElementBase {
     }
 
     this.#syncControls();
+    this.#syncAccessibility();
+  }
+
+  #syncAccessibility(frame?: Parameters<typeof describeFrame>[0]): void {
+    if (!this.#scene || !this.#summary) return;
+    const summary = frame
+      ? describeFrame(frame, {
+          source: this.#scene,
+          state: { ...(this.#controller?.getState() ?? {}) },
+        })
+      : describeScene(this.#scene);
+    if (this.#summary.textContent !== summary.text) this.#summary.textContent = summary.text;
   }
 
   #syncControls(frameTime?: number, frameDuration?: number): void {
