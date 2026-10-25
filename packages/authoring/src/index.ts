@@ -1,4 +1,4 @@
-import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type EasingName, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
+import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
 
 export interface SceneOptions {
   width?: number;
@@ -11,26 +11,31 @@ export interface SceneOptions {
 
 export interface MotionOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
   path?: "linear" | "arc-up" | "arc-down";
   arcHeight?: number;
+  /** Explicitly replace an already-active action on the same property. */
+  interrupt?: boolean;
   /** Margin used when the destination is a semantic scene position. */
   margin?: number;
 }
 
 export interface FollowPathOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
 }
 
 export interface MorphOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
 }
 
 export interface CameraMotionOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
 }
 
 export interface PulseOptions {
@@ -38,7 +43,7 @@ export interface PulseOptions {
   duration?: number;
   /** Multiplicative peak scale relative to the current scale. Defaults to 1.08. */
   scale?: number;
-  easing?: EasingName;
+  easing?: Easing;
 }
 
 export interface ShakeOptions {
@@ -47,7 +52,7 @@ export interface ShakeOptions {
   /** Scene-coordinate offset from the current position. Defaults to 8. */
   distance?: number;
   axis?: "x" | "y";
-  easing?: EasingName;
+  easing?: Easing;
 }
 
 export type SemanticPosition =
@@ -81,7 +86,26 @@ export interface StrokeShapeOptions extends ShapeOptions {
 }
 
 type WithoutSchedule<T> = T extends Action ? Omit<T, "id" | "start"> : never;
-type Pending = WithoutSchedule<Action>;
+export type PendingAction = WithoutSchedule<Action>;
+type Pending = PendingAction;
+
+export interface Keyframe {
+  /** Normalized target time in (0, 1]. The current evaluated pose is implicit at 0. */
+  offset: number;
+  position?: PointValue;
+  rotation?: number;
+  scale?: number | { x: number; y: number };
+  opacity?: number;
+  fill?: string;
+  stroke?: string;
+  /** Easing for the segment ending at this keyframe. */
+  easing?: Easing;
+}
+
+export interface KeyframeOptions {
+  duration: number;
+  easing?: Easing;
+}
 
 export class NodeHandle {
   constructor(public readonly id: string, private readonly owner: SceneBuilder) {}
@@ -91,7 +115,7 @@ export class NodeHandle {
       : to instanceof NodeHandle
         ? this.owner.positionOf(to.id)
         : to;
-    return { type: "move", target: this.id, to: point, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.path && options.path !== "linear" ? { path: options.path } : {}), ...(options.arcHeight !== undefined ? { arcHeight: options.arcHeight } : {}) };
+    return { type: "move", target: this.id, to: point, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.path && options.path !== "linear" ? { path: options.path } : {}), ...(options.arcHeight !== undefined ? { arcHeight: options.arcHeight } : {}), ...(options.interrupt ? { interrupt: true } : {}) };
   }
   followPath(points: readonly PointValue[], options: FollowPathOptions = {}): Pending {
     this.owner.assertFollowPath(points);
@@ -101,32 +125,33 @@ export class NodeHandle {
       points: points.map(point => ({ ...point })),
       duration: options.duration ?? 800,
       easing: options.easing ?? "easeInOut",
+      ...(options.interrupt ? { interrupt: true } : {}),
     };
   }
   rotate(to: number, options: MotionOptions = {}): Pending {
-    return { type: "rotate", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "rotate", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   scale(to: number | { x: number; y: number }, options: MotionOptions = {}): Pending {
     const value = typeof to === "number" ? { x: to, y: to } : to;
-    return { type: "scale", target: this.id, to: value, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "scale", target: this.id, to: value, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   resize(to: { width: number; height: number }, options: MotionOptions = {}): Pending {
     this.owner.assertResizable(this.id, to);
-    return { type: "resize", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "resize", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   draw(to = 1, options: MotionOptions = {}): Pending {
     this.owner.assertDrawableStroke(this.id, to);
-    return { type: "draw", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "draw", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   morphTo(to: string, options: MorphOptions = {}): Pending {
     const canonical = this.owner.assertMorphable(this.id, to);
-    return { type: "morph", target: this.id, to: canonical, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "morph", target: this.id, to: canonical, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   fadeTo(to: number, options: MotionOptions = {}): Pending {
-    return { type: "opacity", target: this.id, to, duration: options.duration ?? 400, easing: options.easing ?? "easeInOut" };
+    return { type: "opacity", target: this.id, to, duration: options.duration ?? 400, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   highlight(color = "#fef08a", options: MotionOptions = {}): Pending {
-    return { type: "fill", target: this.id, to: color, duration: options.duration ?? 300, easing: options.easing ?? "easeInOut" };
+    return { type: "fill", target: this.id, to: color, duration: options.duration ?? 300, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   show(): Pending {
     return { type: "visibility", target: this.id, visible: true, duration: 0 };
