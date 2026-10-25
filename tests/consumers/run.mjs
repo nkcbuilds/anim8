@@ -17,6 +17,7 @@ const optionalRuntime = join(runtimeRoot, "optional");
 
 const workspacePackages = [
   "core",
+  "a11y",
   "authoring",
   "renderer-svg",
   "player",
