@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 700,
+    "height": 300,
+    "theme": "clean",
+    "background": "#f8fafc"
+  },
+  "objects": [
+    {
+      "id": "array",
+      "type": "rect",
+      "width": 500,
+      "height": 74,
+      "text": "0      1      2      3      4",
+      "transform": {
+        "x": 350,
+        "y": 165,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 18,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "pointer",
+      "type": "text",
+      "text": "▼",
+      "transform": {
+        "x": 150,
+        "y": 95,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "color": "#2563eb",
+        "fontSize": 28
+      },
+      "visible": true,
+      "z": 2
+    }
+  ],
+  "timeline": [],
+  "state": {
+    "index": 0
+  },
+  "bindings": [
+    {
+      "id": "pointer-x",
+      "target": {
+        "objectId": "pointer",
+        "property": "x"
+      },
+      "expression": {
+        "kind": "op",
+        "op": "add",
+        "args": [
+          {
+            "kind": "literal",
+            "value": 150
+          },
+          {
+            "kind": "op",
+            "op": "mul",
+            "args": [
+              {
+                "kind": "get",
+                "path": "inputs.index"
+              },
+              {
+                "kind": "literal",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

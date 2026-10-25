@@ -1,0 +1,188 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 800,
+    "height": 450,
+    "theme": "clean",
+    "background": "#f8fafc",
+    "seed": 17
+  },
+  "objects": [
+    {
+      "id": "ellipse",
+      "type": "ellipse",
+      "rx": 65,
+      "ry": 40,
+      "text": "Ellipse",
+      "transform": {
+        "x": 160,
+        "y": 150,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#dbeafe",
+        "stroke": "#1f2937",
+        "strokeWidth": 3,
+        "color": "#111827",
+        "fontSize": 16
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "triangle",
+      "type": "polygon",
+      "points": [
+        {
+          "x": 0,
+          "y": -55
+        },
+        {
+          "x": 55,
+          "y": 45
+        },
+        {
+          "x": -55,
+          "y": 45
+        }
+      ],
+      "drawProgress": 0,
+      "transform": {
+        "x": 400,
+        "y": 150,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#dcfce7",
+        "stroke": "#1f2937",
+        "strokeWidth": 3,
+        "color": "#111827",
+        "fontSize": 16
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "route",
+      "type": "polyline",
+      "points": [
+        {
+          "x": -90,
+          "y": 20
+        },
+        {
+          "x": -35,
+          "y": -35
+        },
+        {
+          "x": 25,
+          "y": 30
+        },
+        {
+          "x": 90,
+          "y": -20
+        }
+      ],
+      "drawProgress": 0,
+      "transform": {
+        "x": 635,
+        "y": 150,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#7c3aed",
+        "strokeWidth": 3,
+        "color": "#111827",
+        "fontSize": 16
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "curve",
+      "type": "path",
+      "d": "M 120 340 C 260 230, 520 430, 680 320",
+      "drawProgress": 0,
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#ea580c",
+        "strokeWidth": 3,
+        "color": "#111827",
+        "fontSize": 16
+      },
+      "visible": true,
+      "z": 1
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw-triangle",
+      "type": "draw",
+      "target": "triangle",
+      "start": 0,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw-route",
+      "type": "draw",
+      "target": "route",
+      "start": 150,
+      "duration": 900,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw-curve",
+      "type": "draw",
+      "target": "curve",
+      "start": 400,
+      "duration": 1000,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "resize-ellipse",
+      "type": "resize",
+      "target": "ellipse",
+      "start": 800,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": {
+        "width": 190,
+        "height": 80
+      }
+    }
+  ],
+  "markers": [
+    {
+      "id": "g1",
+      "label": "Reveal geometry",
+      "time": 0
+    },
+    {
+      "id": "g2",
+      "label": "Resize ellipse",
+      "time": 800
+    }
+  ]
+}

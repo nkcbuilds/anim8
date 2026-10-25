@@ -1,0 +1,243 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 800,
+    "height": 450,
+    "theme": "clean",
+    "background": "#f8fafc",
+    "seed": 42
+  },
+  "objects": [
+    {
+      "id": "c0",
+      "type": "rect",
+      "width": 90,
+      "height": 58,
+      "text": "2",
+      "transform": {
+        "x": 170,
+        "y": 210,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "c1",
+      "type": "rect",
+      "width": 90,
+      "height": 58,
+      "text": "7",
+      "transform": {
+        "x": 290,
+        "y": 210,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "c2",
+      "type": "rect",
+      "width": 90,
+      "height": 58,
+      "text": "11",
+      "transform": {
+        "x": 410,
+        "y": 210,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "c3",
+      "type": "rect",
+      "width": 90,
+      "height": 58,
+      "text": "15",
+      "transform": {
+        "x": 530,
+        "y": 210,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "pointer",
+      "type": "text",
+      "text": "i",
+      "transform": {
+        "x": 170,
+        "y": 135,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 24,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 3
+    },
+    {
+      "id": "edge",
+      "type": "connector",
+      "from": {
+        "objectId": "c0",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "c1",
+        "anchor": "left"
+      },
+      "kind": "curve",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#2563eb",
+        "strokeWidth": 3,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "highlight-0",
+      "type": "fill",
+      "target": "c0",
+      "start": 0,
+      "duration": 300,
+      "easing": "easeInOut",
+      "to": "#fde68a"
+    },
+    {
+      "id": "highlight-1",
+      "type": "fill",
+      "target": "c1",
+      "start": 0,
+      "duration": 300,
+      "easing": "easeInOut",
+      "to": "#bbf7d0"
+    },
+    {
+      "id": "pointer-to-1",
+      "type": "move",
+      "target": "pointer",
+      "start": 350,
+      "duration": 350,
+      "easing": "easeInOut",
+      "to": {
+        "x": 290,
+        "y": 135
+      }
+    },
+    {
+      "id": "swap-0",
+      "type": "move",
+      "target": "c0",
+      "start": 750,
+      "duration": 700,
+      "easing": "easeInOut",
+      "path": "arc-up",
+      "arcHeight": 70,
+      "to": {
+        "x": 290,
+        "y": 210
+      }
+    },
+    {
+      "id": "swap-1",
+      "type": "move",
+      "target": "c1",
+      "start": 750,
+      "duration": 700,
+      "easing": "easeInOut",
+      "path": "arc-down",
+      "arcHeight": 70,
+      "to": {
+        "x": 170,
+        "y": 210
+      }
+    }
+  ],
+  "markers": [
+    {
+      "id": "m1",
+      "label": "Compare",
+      "time": 0
+    },
+    {
+      "id": "m2",
+      "label": "Move pointer",
+      "time": 350
+    },
+    {
+      "id": "m3",
+      "label": "Swap",
+      "time": 750
+    }
+  ]
+}

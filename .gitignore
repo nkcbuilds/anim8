@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.bench/
+artifacts/
+coverage/
+.vite/
+*.log
+.DS_Store

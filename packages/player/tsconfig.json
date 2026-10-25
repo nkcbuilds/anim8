@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src",
+    "test"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@anim8/core": [
+        "../core/src/index.ts"
+      ],
+      "@anim8/renderer-svg": [
+        "../renderer-svg/src/index.ts"
+      ]
+    }
+  }
+}

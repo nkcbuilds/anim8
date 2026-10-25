@@ -1,0 +1,904 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anim8.dev/schema/scene-1.0.json",
+  "title": "Anim8 Scene",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "scene",
+    "objects",
+    "timeline"
+  ],
+  "properties": {
+    "version": {
+      "const": "1.0"
+    },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 8192
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 8192
+        },
+        "theme": {
+          "enum": [
+            "clean",
+            "sketch"
+          ]
+        },
+        "background": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "camera": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y",
+            "zoom"
+          ],
+          "properties": {
+            "x": {
+              "$ref": "#/$defs/boundedNumber"
+            },
+            "y": {
+              "$ref": "#/$defs/boundedNumber"
+            },
+            "zoom": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 100
+            }
+          }
+        }
+      },
+      "description": "Compiler additionally enforces width*height <= 33,554,432 pixels."
+    },
+    "objects": {
+      "type": "array",
+      "maxItems": 5000,
+      "items": {
+        "$ref": "#/$defs/object"
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "state": {
+      "type": "object",
+      "maxProperties": 1000,
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/scalar"
+      }
+    },
+    "bindings": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/binding"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.:-]*$"
+    },
+    "boundedNumber": {
+      "type": "number",
+      "minimum": -1000000,
+      "maximum": 1000000
+    },
+    "positiveDimension": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1000000
+    },
+    "nonNegativeDimension": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000000
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "y": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "rotation": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "scaleX": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "scaleY": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fill": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "stroke": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "color": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "fontFamily": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "strokeWidth": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "fontSize": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "radius": {
+          "$ref": "#/$defs/boundedNumber"
+        }
+      }
+    },
+    "baseObject": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "enum": [
+            "rect",
+            "circle",
+            "ellipse",
+            "polygon",
+            "polyline",
+            "text",
+            "line",
+            "path",
+            "group",
+            "connector",
+            "image"
+          ]
+        },
+        "transform": {
+          "$ref": "#/$defs/transform"
+        },
+        "style": {
+          "$ref": "#/$defs/style"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "z": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "parentId": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "anchorRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objectId"
+      ],
+      "properties": {
+        "objectId": {
+          "$ref": "#/$defs/id"
+        },
+        "anchor": {
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right"
+          ]
+        }
+      }
+    },
+    "object": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseObject"
+        },
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "type": {
+                  "const": "rect"
+                },
+                "width": {
+                  "$ref": "#/$defs/positiveDimension"
+                },
+                "height": {
+                  "$ref": "#/$defs/positiveDimension"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 32768
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "circle"
+                },
+                "radius": {
+                  "$ref": "#/$defs/positiveDimension"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 32768
+                }
+              }
+            },
+            {
+              "required": [
+                "rx",
+                "ry"
+              ],
+              "properties": {
+                "type": {
+                  "const": "ellipse"
+                },
+                "rx": {
+                  "$ref": "#/$defs/nonNegativeDimension"
+                },
+                "ry": {
+                  "$ref": "#/$defs/nonNegativeDimension"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 32768
+                }
+              }
+            },
+            {
+              "required": [
+                "points"
+              ],
+              "properties": {
+                "type": {
+                  "const": "polygon"
+                },
+                "points": {
+                  "type": "array",
+                  "minItems": 3,
+                  "maxItems": 10000,
+                  "items": {
+                    "$ref": "#/$defs/point"
+                  }
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "required": [
+                "points"
+              ],
+              "properties": {
+                "type": {
+                  "const": "polyline"
+                },
+                "points": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 10000,
+                  "items": {
+                    "$ref": "#/$defs/point"
+                  }
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "type": {
+                  "const": "text"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 32768
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "line"
+                },
+                "x2": {
+                  "$ref": "#/$defs/boundedNumber"
+                },
+                "y2": {
+                  "$ref": "#/$defs/boundedNumber"
+                }
+              }
+            },
+            {
+              "required": [
+                "d"
+              ],
+              "properties": {
+                "type": {
+                  "const": "path"
+                },
+                "d": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "properties": {
+                "type": {
+                  "const": "group"
+                },
+                "children": {
+                  "type": "array",
+                  "maxItems": 5000,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/$defs/id"
+                  }
+                }
+              }
+            },
+            {
+              "required": [
+                "from",
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "connector"
+                },
+                "from": {
+                  "$ref": "#/$defs/anchorRef"
+                },
+                "to": {
+                  "$ref": "#/$defs/anchorRef"
+                },
+                "kind": {
+                  "enum": [
+                    "straight",
+                    "curve",
+                    "orthogonal"
+                  ]
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 32768
+                }
+              }
+            },
+            {
+              "required": [
+                "href"
+              ],
+              "properties": {
+                "type": {
+                  "const": "image"
+                },
+                "width": {
+                  "$ref": "#/$defs/positiveDimension"
+                },
+                "height": {
+                  "$ref": "#/$defs/positiveDimension"
+                },
+                "href": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048,
+                  "description": "Compiler policy allows relative URLs and safe public-host HTTPS URLs only; non-HTTPS schemes, protocol-relative URLs, credentials, obvious private/local hosts, fragments-only references, controls, whitespace, and backslashes are rejected."
+                },
+                "alt": {
+                  "type": "string",
+                  "maxLength": 32768
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "actionBase": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "start",
+        "duration"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "enum": [
+            "camera",
+            "move",
+            "followPath",
+            "rotate",
+            "scale",
+            "opacity",
+            "fill",
+            "stroke",
+            "resize",
+            "draw",
+            "visibility"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/id"
+        },
+        "start": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600000
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600000
+        },
+        "easing": {
+          "enum": [
+            "linear",
+            "easeIn",
+            "easeOut",
+            "easeInOut",
+            "spring"
+          ]
+        }
+      }
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/boundedNumber"
+        },
+        "y": {
+          "$ref": "#/$defs/boundedNumber"
+        }
+      }
+    },
+    "action": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/actionBase"
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "const": "camera"
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "oneOf": [
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "camera"
+                },
+                "target": false,
+                "to": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "minProperties": 1,
+                  "properties": {
+                    "x": {
+                      "$ref": "#/$defs/boundedNumber"
+                    },
+                    "y": {
+                      "$ref": "#/$defs/boundedNumber"
+                    },
+                    "zoom": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 100
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "move"
+                },
+                "to": {
+                  "$ref": "#/$defs/point"
+                },
+                "path": {
+                  "enum": [
+                    "linear",
+                    "arc-up",
+                    "arc-down"
+                  ]
+                },
+                "arcHeight": {
+                  "$ref": "#/$defs/boundedNumber"
+                }
+              }
+            },
+            {
+              "required": [
+                "points"
+              ],
+              "properties": {
+                "type": {
+                  "const": "followPath"
+                },
+                "points": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 10000,
+                  "items": {
+                    "$ref": "#/$defs/point"
+                  },
+                  "description": "Explicit polyline points. Compiler additionally requires at least one non-zero-length segment."
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "rotate"
+                },
+                "to": {
+                  "$ref": "#/$defs/boundedNumber"
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "scale"
+                },
+                "to": {
+                  "$ref": "#/$defs/point"
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "opacity"
+                },
+                "to": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "fill"
+                },
+                "to": {
+                  "type": "string",
+                  "maxLength": 512
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "stroke"
+                },
+                "to": {
+                  "type": "string",
+                  "maxLength": 512
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "resize"
+                },
+                "to": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "width",
+                    "height"
+                  ],
+                  "properties": {
+                    "width": {
+                      "$ref": "#/$defs/nonNegativeDimension"
+                    },
+                    "height": {
+                      "$ref": "#/$defs/nonNegativeDimension"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "draw"
+                },
+                "to": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            },
+            {
+              "required": [
+                "visible"
+              ],
+              "properties": {
+                "type": {
+                  "const": "visibility"
+                },
+                "visible": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "scalar": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 32768
+        },
+        {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expression": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "value"
+          ],
+          "properties": {
+            "kind": {
+              "const": "literal"
+            },
+            "value": {
+              "$ref": "#/$defs/scalar"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "path"
+          ],
+          "properties": {
+            "kind": {
+              "const": "get"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(time|progress|inputs\\.[A-Za-z_][A-Za-z0-9_]*|state\\.[A-Za-z_][A-Za-z0-9_]*)$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "op",
+            "args"
+          ],
+          "properties": {
+            "kind": {
+              "const": "op"
+            },
+            "op": {
+              "enum": [
+                "add",
+                "sub",
+                "mul",
+                "div",
+                "min",
+                "max",
+                "clamp",
+                "lerp",
+                "eq",
+                "lt",
+                "gt",
+                "and",
+                "or",
+                "not"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "$ref": "#/$defs/expression"
+              }
+            }
+          }
+        }
+      ],
+      "description": "Compiler additionally enforces expression depth <= 32 and total nodes <= 256 per binding."
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "target",
+        "expression"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "objectId",
+            "property"
+          ],
+          "properties": {
+            "objectId": {
+              "$ref": "#/$defs/id"
+            },
+            "property": {
+              "enum": [
+                "x",
+                "y",
+                "rotation",
+                "scaleX",
+                "scaleY",
+                "opacity",
+                "fill",
+                "stroke",
+                "text"
+              ]
+            }
+          }
+        },
+        "expression": {
+          "$ref": "#/$defs/expression"
+        }
+      }
+    }
+  }
+}

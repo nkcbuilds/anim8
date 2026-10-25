@@ -1,0 +1,17 @@
+---
+import { Anim8Player } from "@anim8/react";
+
+const scene = {
+  version: "1.0",
+  scene: { width: 320, height: 180, theme: "clean" },
+  objects: [],
+  timeline: [],
+};
+---
+
+<html lang="en">
+  <body>
+    <h1>Anim8 Astro consumer fixture</h1>
+    <Anim8Player client:load scene={scene} aria-label="Anim8 fixture" />
+  </body>
+</html>

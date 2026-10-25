@@ -1,0 +1,325 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 900,
+    "height": 500,
+    "theme": "clean",
+    "background": "#ffffff",
+    "seed": 9
+  },
+  "objects": [
+    {
+      "id": "client",
+      "type": "rect",
+      "width": 140,
+      "height": 70,
+      "text": "Client",
+      "transform": {
+        "x": 130,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "api",
+      "type": "rect",
+      "width": 150,
+      "height": 70,
+      "text": "API Server",
+      "transform": {
+        "x": 390,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "db",
+      "type": "rect",
+      "width": 150,
+      "height": 90,
+      "text": "Database",
+      "transform": {
+        "x": 690,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#eff6ff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "request",
+      "type": "rect",
+      "width": 90,
+      "height": 42,
+      "text": "GET /users",
+      "transform": {
+        "x": 130,
+        "y": 160,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#fef3c7",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 3
+    },
+    {
+      "id": "query",
+      "type": "rect",
+      "width": 100,
+      "height": 42,
+      "text": "SELECT",
+      "transform": {
+        "x": 390,
+        "y": 160,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#dcfce7",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 3
+    },
+    {
+      "id": "response",
+      "type": "rect",
+      "width": 90,
+      "height": 42,
+      "text": "rows[]",
+      "transform": {
+        "x": 690,
+        "y": 340,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#e0e7ff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 3
+    },
+    {
+      "id": "c-api",
+      "type": "connector",
+      "from": {
+        "objectId": "client",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "api",
+        "anchor": "left"
+      },
+      "kind": "straight",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 0
+    },
+    {
+      "id": "api-db",
+      "type": "connector",
+      "from": {
+        "objectId": "api",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "db",
+        "anchor": "left"
+      },
+      "kind": "straight",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "send-request",
+      "type": "move",
+      "target": "request",
+      "start": 0,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": {
+        "x": 390,
+        "y": 160
+      }
+    },
+    {
+      "id": "send-query",
+      "type": "move",
+      "target": "query",
+      "start": 800,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": {
+        "x": 690,
+        "y": 160
+      }
+    },
+    {
+      "id": "return-rows",
+      "type": "move",
+      "target": "response",
+      "start": 1600,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": {
+        "x": 390,
+        "y": 340
+      }
+    },
+    {
+      "id": "return-response",
+      "type": "move",
+      "target": "response",
+      "start": 2400,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": {
+        "x": 130,
+        "y": 340
+      }
+    },
+    {
+      "id": "rearrange-api",
+      "type": "move",
+      "target": "api",
+      "start": 3300,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": {
+        "x": 390,
+        "y": 160
+      }
+    },
+    {
+      "id": "rearrange-db",
+      "type": "move",
+      "target": "db",
+      "start": 3300,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": {
+        "x": 690,
+        "y": 340
+      }
+    }
+  ],
+  "markers": [
+    {
+      "id": "d1",
+      "label": "Request",
+      "time": 0
+    },
+    {
+      "id": "d2",
+      "label": "Query",
+      "time": 800
+    },
+    {
+      "id": "d3",
+      "label": "Rows",
+      "time": 1600
+    },
+    {
+      "id": "d4",
+      "label": "Response",
+      "time": 2400
+    },
+    {
+      "id": "d5",
+      "label": "Rearrange",
+      "time": 3300
+    }
+  ]
+}

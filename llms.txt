@@ -1,0 +1,42 @@
+# Anim8
+
+Anim8 is a deterministic, model-first 2D animation library for diagrams and technical explanations.
+
+Canonical docs:
+- README.md
+- docs/reference/scene-format.md
+- docs/reference/timeline.md
+- docs/security.md
+- docs/guides/ai-agents.md
+- packages/compiler/scene.schema.json
+
+Rules for generated scenes:
+- Use scene version 1.0.
+- Give every object a stable unique id.
+- Never invent object/action types.
+- Prefer JSON for untrusted/generated content.
+- Do not use arbitrary JavaScript in scene documents.
+- Validate before rendering.
+- Fix compiler diagnostics exactly; do not suppress them.
+- Avoid overlapping actions that write the same property.
+- Use explicit points for followPath; do not encode arbitrary executable path callbacks.
+- Use state/bindings only through the documented safe expression AST.
+
+Current core actions:
+- move
+- followPath
+- rotate
+- scale
+- resize
+- opacity
+- fill
+- stroke
+- visibility
+- draw
+
+Current easing names:
+- linear
+- easeIn
+- easeOut
+- easeInOut
+- spring

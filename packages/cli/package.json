@@ -1,0 +1,23 @@
+{
+  "name": "@anim8/cli",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "anim8": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@anim8/compiler": "workspace:*",
+    "@anim8/core": "workspace:*",
+    "@anim8/renderer-svg": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsup src/cli.ts --format esm --clean",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  }
+}

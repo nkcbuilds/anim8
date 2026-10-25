@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+
+      - name: Validate reference scenes
+        run: |
+          node packages/cli/dist/cli.js validate examples/two-sum/scene.json
+          node packages/cli/dist/cli.js validate examples/database/scene.json
+          node packages/cli/dist/cli.js validate examples/geometry/scene.json
+          node packages/cli/dist/cli.js validate examples/reactive/scene.json
+          node packages/cli/dist/cli.js validate examples/geometry-rich/scene.json
+          node packages/cli/dist/cli.js validate examples/binary-search/scene.json
+          node packages/cli/dist/cli.js validate examples/bubble-sort/scene.json
+          node packages/cli/dist/cli.js validate examples/linked-list/scene.json
+          node packages/cli/dist/cli.js validate examples/binary-tree/scene.json
+
+      - name: Measure baseline bundle
+        run: |
+          mkdir -p .bench
+          pnpm exec esbuild benchmarks/standard-runtime.ts --bundle --minify --format=esm --platform=browser --outfile=.bench/standard-runtime.js
+          node -e "const fs=require('fs'),z=require('zlib');const b=fs.readFileSync('.bench/standard-runtime.js');const g=z.gzipSync(b,{level:9});console.log('gzip bytes',g.length);if(g.length>35840)process.exit(1)"

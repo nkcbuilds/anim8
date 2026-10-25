@@ -1,0 +1,308 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 810,
+    "height": 420,
+    "theme": "clean",
+    "background": "#f8fafc",
+    "seed": 202
+  },
+  "objects": [
+    {
+      "id": "v5",
+      "type": "rect",
+      "width": 92,
+      "height": 64,
+      "text": "5",
+      "transform": {
+        "x": 210,
+        "y": 235,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 18,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "v1",
+      "type": "rect",
+      "width": 92,
+      "height": 64,
+      "text": "1",
+      "transform": {
+        "x": 340,
+        "y": 235,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 18,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "v4",
+      "type": "rect",
+      "width": 92,
+      "height": 64,
+      "text": "4",
+      "transform": {
+        "x": 470,
+        "y": 235,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 18,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "v2",
+      "type": "rect",
+      "width": 92,
+      "height": 64,
+      "text": "2",
+      "transform": {
+        "x": 600,
+        "y": 235,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 18,
+        "radius": 10
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "title",
+      "type": "text",
+      "text": "Bubble sort: [5, 1, 4, 2]",
+      "transform": {
+        "x": 405,
+        "y": 60,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#0f172a",
+        "fontSize": 24,
+        "radius": 0
+      },
+      "visible": true,
+      "z": 5
+    },
+    {
+      "id": "note",
+      "type": "text",
+      "text": "Each swap moves the same value objects along opposite arcs",
+      "transform": {
+        "x": 405,
+        "y": 360,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#475569",
+        "fontSize": 16,
+        "radius": 0
+      },
+      "visible": true,
+      "z": 4
+    }
+  ],
+  "timeline": [
+    {
+      "id": "swap-5-1-a",
+      "type": "move",
+      "target": "v5",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-up",
+      "arcHeight": 70,
+      "to": {
+        "x": 340,
+        "y": 235
+      }
+    },
+    {
+      "id": "swap-5-1-b",
+      "type": "move",
+      "target": "v1",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-down",
+      "arcHeight": 70,
+      "to": {
+        "x": 210,
+        "y": 235
+      }
+    },
+    {
+      "id": "swap-5-4-a",
+      "type": "move",
+      "target": "v5",
+      "start": 800,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-up",
+      "arcHeight": 70,
+      "to": {
+        "x": 470,
+        "y": 235
+      }
+    },
+    {
+      "id": "swap-5-4-b",
+      "type": "move",
+      "target": "v4",
+      "start": 800,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-down",
+      "arcHeight": 70,
+      "to": {
+        "x": 340,
+        "y": 235
+      }
+    },
+    {
+      "id": "swap-5-2-a",
+      "type": "move",
+      "target": "v5",
+      "start": 1600,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-up",
+      "arcHeight": 70,
+      "to": {
+        "x": 600,
+        "y": 235
+      }
+    },
+    {
+      "id": "swap-5-2-b",
+      "type": "move",
+      "target": "v2",
+      "start": 1600,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-down",
+      "arcHeight": 70,
+      "to": {
+        "x": 470,
+        "y": 235
+      }
+    },
+    {
+      "id": "swap-4-2-a",
+      "type": "move",
+      "target": "v4",
+      "start": 2400,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-up",
+      "arcHeight": 70,
+      "to": {
+        "x": 470,
+        "y": 235
+      }
+    },
+    {
+      "id": "swap-4-2-b",
+      "type": "move",
+      "target": "v2",
+      "start": 2400,
+      "duration": 600,
+      "easing": "easeInOut",
+      "path": "arc-down",
+      "arcHeight": 70,
+      "to": {
+        "x": 340,
+        "y": 235
+      }
+    },
+    {
+      "id": "sorted-1",
+      "type": "fill",
+      "target": "v1",
+      "start": 3200,
+      "duration": 300,
+      "easing": "easeInOut",
+      "to": "#bbf7d0"
+    },
+    {
+      "id": "sorted-2",
+      "type": "fill",
+      "target": "v2",
+      "start": 3200,
+      "duration": 300,
+      "easing": "easeInOut",
+      "to": "#bbf7d0"
+    },
+    {
+      "id": "sorted-4",
+      "type": "fill",
+      "target": "v4",
+      "start": 3200,
+      "duration": 300,
+      "easing": "easeInOut",
+      "to": "#bbf7d0"
+    },
+    {
+      "id": "sorted-5",
+      "type": "fill",
+      "target": "v5",
+      "start": 3200,
+      "duration": 300,
+      "easing": "easeInOut",
+      "to": "#bbf7d0"
+    }
+  ]
+}
