@@ -15,7 +15,8 @@ for (const entry of entries.filter(entry => entry.isDirectory()).sort((a, b) => 
   assert.match(json.name ?? "", /^@anim8\/[a-z0-9-]+$/, `${entry.name}: invalid public package name`);
   assert.match(json.version ?? "", /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, `${json.name}: invalid semver`);
   assert.equal(json.license, "MIT", `${json.name}: license must be MIT`);
-  assert.ok(json.exports?.["."], `${json.name}: missing root export`);
+  const expectedCliBin = json.name === "@anim8/cli" && json.bin?.anim8 === "./dist/cli.js";
+  assert.ok(json.exports?.["."] || expectedCliBin, `${json.name}: missing root export or expected CLI bin`);
   manifests.push({ name: json.name, version: json.version });
 }
 
