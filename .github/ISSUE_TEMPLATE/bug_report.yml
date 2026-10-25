@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible Anim8 problem
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+  - type: input
+    id: package
+    attributes:
+      label: Package / version
+      placeholder: "@anim8/core 0.1.0 or commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include a scene/code sample and the exact timestamp or interaction when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Node/browser/OS/framework and any relevant build tool.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: This is not a security vulnerability (security reports should follow SECURITY.md).
+          required: true

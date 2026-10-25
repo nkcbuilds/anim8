@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src",
+    "test"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@anim8/core": [
+        "../core/src/index.ts"
+      ]
+    }
+  }
+}

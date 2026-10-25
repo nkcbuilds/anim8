@@ -31,6 +31,33 @@ describe("authoring", () => {
     expect(doc.objects.find(object => object.id === "curve")).toEqual(expect.objectContaining({ type: "path", drawProgress: 0 }));
   });
 
+  it("authors deterministic path morphs with canonical cubic targets", () => {
+    const s = scene({ width: 640, height: 360 });
+    const path = s.path("M 0 0 L 60 0", { id: "shape" });
+    s.sequence(path.morphTo("m 10 10 q 20 30 40 0", { duration: 800, easing: "linear" }));
+
+    expect(s.toJSON().timeline).toEqual([
+      expect.objectContaining({
+        type: "morph",
+        target: "shape",
+        start: 0,
+        duration: 800,
+        easing: "linear",
+        to: "M 10 10 C 23.3333333333333 30 36.6666666666667 30 50 10",
+      }),
+    ]);
+  });
+
+  it("rejects malformed, incompatible, and non-path authoring morphs", () => {
+    const s = scene();
+    const path = s.path("M 0 0 L 10 0", { id: "shape" });
+    const box = s.box("", { id: "box" });
+
+    expect(() => path.morphTo("M 0 0 A 10 10 0 0 0 20 20")).toThrow("not supported");
+    expect(() => path.morphTo("M 0 0 L 5 0 L 10 0")).toThrow("different cubic segment counts");
+    expect(() => box.morphTo("M 0 0 L 10 0")).toThrow("cannot be morphed");
+  });
+
   it("serializes resize and stroke-draw actions without hidden runtime state", () => {
     const s = scene({ width: 640, height: 360 });
     const oval = s.ellipse("", { id: "oval", width: 80, height: 40 });

@@ -88,6 +88,16 @@ Interaction actions are limited to:
 
 Matching interactions and their actions run in document order. Only keys declared in `state` may be changed, and the transition helper is pure for a given scene, current state, and event.
 
+## Path morphing
+
+A `morph` timeline action may target a `path` object. Morph paths are
+canonicalized to absolute cubic segments and must have compatible topology.
+
+The deterministic v1 morph subset accepts `M/m`, `L/l`, `H/h`, `V/v`,
+`C/c`, `Q/q`, and `Z/z`. Different subpath counts, open/closed state, or
+segment counts are rejected with structured diagnostics. Smooth shorthand and
+arc commands are not silently resampled.
+
 ## Camera
 
 `scene.camera` defines the base camera as `{ x, y, zoom }`. A `camera` timeline action can animate any subset of those absolute values. Camera state is evaluated from absolute time just like object actions, so seek and reverse do not depend on previous rendered frames.

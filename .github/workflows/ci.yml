@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 10.28.0
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -28,11 +28,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
 
-      - name: Install Chromium for browser tests
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install browser matrix
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
 
-      - name: Run browser tests
+      - name: Run browser matrix
         run: pnpm browser
+        env:
+          ANIM8_BROWSER_REQUIRE_ALL: "1"
 
       - name: Validate reference scenes
         run: |

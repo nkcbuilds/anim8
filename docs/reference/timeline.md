@@ -16,6 +16,7 @@ Current primitive actions include:
 - `stroke`
 - `visibility`
 - `draw`
+- `morph`
 - `camera`
 
 Object actions have an `id`, `target`, `start`, and `duration`. Scene-level `camera` actions intentionally have no object target.
@@ -89,6 +90,26 @@ Unsupported resize targets are rejected.
 ## Authoring-only helpers
 
 Helpers such as `pulse` and `shake` compile to ordinary primitive scale/move actions. They do not introduce renderer-specific effect state.
+
+## Path morphing
+
+`morph` targets a `path` object's geometry:
+
+```json
+{
+  "id": "morph-shape",
+  "type": "morph",
+  "target": "shape",
+  "start": 0,
+  "duration": 800,
+  "easing": "easeInOut",
+  "to": "M 0 0 C 20 -40 80 -40 100 0 C 80 40 20 40 0 0 Z"
+}
+```
+
+Anim8 deliberately does **not** guess how unrelated SVG paths correspond. The deterministic morph subset accepts `M/m`, `L/l`, `H/h`, `V/v`, `C/c`, `Q/q`, and `Z/z`, canonicalizes them to absolute cubic segments, and requires compatible subpath counts, open/closed state, and segment counts. Arcs and smooth shorthand commands are rejected for morphing rather than silently resampled.
+
+A compatible morph is evaluated directly from absolute timeline time, so seek and reverse produce the same geometry as forward playback.
 
 ## Camera
 

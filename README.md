@@ -62,6 +62,8 @@ Every object keeps a stable identity. The boxes, their text, and attached connec
 | `@anim8/cli` | Validate and render scene files |
 | `@anim8/layout` | Deterministic row/column/grid/stack/radial/tree layouts |
 | `@anim8/layout-dagre` | Optional Dagre-backed directed graph layout adapter |
+| `@anim8/layout-elk` | Optional ELK-backed directed graph layout and route adapter |
+| `@anim8/a11y` | Deterministic headless accessibility summaries |
 | `@anim8/presets` | Technical shapes composed from generic primitives |
 | `@anim8/dsl` | Optional concise text authoring syntax |
 | `@anim8/ai` | Provider-neutral model-generation benchmark harness |
@@ -143,8 +145,8 @@ anim8 render examples/two-sum/scene.json 700 frame.svg
 ```bash
 pnpm install
 pnpm check
-pnpm exec playwright install chromium
-pnpm browser
+pnpm exec playwright install chromium firefox webkit
+ANIM8_BROWSER_REQUIRE_ALL=1 pnpm browser
 pnpm benchmark
 ```
 

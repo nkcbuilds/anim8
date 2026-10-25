@@ -503,6 +503,7 @@
             "stroke",
             "resize",
             "draw",
+            "morph",
             "visibility"
           ]
         },
@@ -747,6 +748,22 @@
                   "type": "number",
                   "minimum": 0,
                   "maximum": 1
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "morph"
+                },
+                "to": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 262144,
+                  "description": "Deterministic morph subset: M/m, L/l, H/h, V/v, C/c, Q/q, Z/z. Compiler canonicalizes to absolute cubic segments and requires compatible topology."
                 }
               }
             },

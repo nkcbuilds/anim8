@@ -211,6 +211,12 @@ export interface DrawAction extends ActionBase {
   to: number;
 }
 
+export interface MorphAction extends ActionBase {
+  type: "morph";
+  /** Target SVG path data. Compiler/authoring canonicalize the supported subset. */
+  to: string;
+}
+
 export interface VisibilityAction extends ActionBase {
   type: "visibility";
   visible: boolean;
@@ -237,6 +243,7 @@ export type Action =
   | StrokeAction
   | ResizeAction
   | DrawAction
+  | MorphAction
   | VisibilityAction;
 
 export interface Marker {

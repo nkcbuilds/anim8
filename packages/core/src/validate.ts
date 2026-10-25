@@ -1,4 +1,5 @@
 import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
+import { morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
 import type { Action, SceneDocument } from "./types.js";
 
 export interface Diagnostic {
@@ -19,6 +20,7 @@ const props = (action: Action): string[] => {
     case "stroke": return ["stroke"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
+    case "morph": return ["d"];
     case "visibility": return ["visible"];
     case "camera": return [
       ...(action.to.x !== undefined ? ["camera.x"] : []),
@@ -197,6 +199,53 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
           message: `Object '${target.id}' of type '${target.type}' does not expose drawProgress.`,
           suggestion: "Use draw on path, polygon, or polyline objects.",
         });
+      }
+    }
+
+    if (action.type === "morph") {
+      if (target && target.type !== "path") {
+        diagnostics.push({
+          code: "UNSUPPORTED_MORPH_TARGET",
+          path: `timeline[${index}].target`,
+          message: `Object '${target.id}' of type '${target.type}' is not an SVG path.`,
+          suggestion: "Morph actions may target path objects only.",
+        });
+      } else if (target?.type === "path") {
+        const priorMorph = scene.timeline
+          .filter((candidate): candidate is Extract<Action, { type: "morph" }> =>
+            candidate.type === "morph" &&
+            candidate.target === action.target &&
+            candidate !== action &&
+            candidate.start + candidate.duration <= action.start
+          )
+          .sort((a, b) => a.start - b.start || a.id.localeCompare(b.id))
+          .at(-1);
+        const from = parseMorphPathData(priorMorph?.to ?? target.d);
+        const to = parseMorphPathData(action.to);
+        if (!from.ok) {
+          diagnostics.push({
+            code: from.code,
+            path: `timeline[${index}].target`,
+            message: `Morph source path is invalid: ${from.message}`,
+          });
+        }
+        if (!to.ok) {
+          diagnostics.push({
+            code: to.code,
+            path: `timeline[${index}].to`,
+            message: `Morph target path is invalid: ${to.message}`,
+          });
+        }
+        if (from.ok && to.ok) {
+          const compatibility = morphPathCompatibility(from.path, to.path);
+          if (!compatibility.ok) {
+            diagnostics.push({
+              code: compatibility.code,
+              path: `timeline[${index}].to`,
+              message: compatibility.message,
+            });
+          }
+        }
       }
     }
   });
