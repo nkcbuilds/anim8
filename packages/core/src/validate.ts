@@ -1,6 +1,6 @@
 import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
 import { morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
-import type { Action, SceneDocument, StateAction } from "./types.js";
+import type { Action, ScalarValue, SceneDocument, StateAction } from "./types.js";
 
 export interface Diagnostic {
   code: string;
@@ -31,7 +31,7 @@ const props = (action: Action): string[] => {
 };
 
 function validateStateActionAtPath(
-  declaredState: SceneDocument["state"] extends infer T ? Record<string, import("./types.js").ScalarValue> : never,
+  declaredState: Record<string, ScalarValue>,
   action: StateAction,
   actionPath: string,
   diagnostics: Diagnostic[],
