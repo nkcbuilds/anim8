@@ -153,6 +153,30 @@ function runFrameworkBuild(label, cliPath, cwd) {
   );
 }
 
+function runDesktopWebviewBuild(rootRequire) {
+  const cwd = join(fixtureRuntime, "desktop-webview");
+  const cli = packageBinPath(rootRequire, "esbuild", "esbuild");
+  const output = join(cwd, "dist", "app.js");
+  const result = spawnSync(process.execPath, [
+    cli,
+    join(cwd, "app.mjs"),
+    "--bundle",
+    "--platform=browser",
+    "--format=esm",
+    `--outfile=${output}`,
+  ], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, NODE_ENV: "production" },
+  });
+
+  if (result.stdout) process.stdout.write(result.stdout);
+  if (result.stderr) process.stderr.write(result.stderr);
+  assert.equal(result.status, 0, "Desktop WebView consumer bundle failed.");
+  assert.ok(existsSync(output), "Desktop WebView bundle output is missing.");
+  console.log("PASS desktop-webview-browser-bundle");
+}
+
 async function assertBuiltHtml(path, expected) {
   assert.ok(existsSync(path), `Expected framework build output at ${path}.`);
   const html = await readFile(path, "utf8");
@@ -231,8 +255,11 @@ async function main() {
     runFixture(join("ssr-node", "index.mjs"));
     runFixture(join("react-ssr", "index.mjs"));
 
+    const rootRequire = createRequire(join(repoRoot, "package.json"));
+    runDesktopWebviewBuild(rootRequire);
+
     const frameworkCount = await runOptionalFrameworks();
-    console.log(`PASS consumer package-boundary suite (${3 + frameworkCount} executed fixtures)`);
+    console.log(`PASS consumer package-boundary suite (${4 + frameworkCount} executed fixtures)`);
   } finally {
     if (process.env.KEEP_CONSUMER_RUNTIME !== "1") {
       await rm(runtimeRoot, { recursive: true, force: true });
