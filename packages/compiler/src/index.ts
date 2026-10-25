@@ -1661,7 +1661,7 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
         diagnostic(diagnostics, "INVALID_REPARENT_TARGET", `${path}.parentId`, "reparent.parentId must be an object id or null.");
         return null;
       }
-      if (value.parentId === actionBase.target) {
+      if (value.parentId === target) {
         diagnostic(diagnostics, "REPARENT_SELF", `${path}.parentId`, "An object cannot be parented to itself.");
         return null;
       }
