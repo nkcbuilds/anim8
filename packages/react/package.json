@@ -14,6 +14,7 @@
     "dist"
   ],
   "dependencies": {
+    "@anim8/a11y": "workspace:*",
     "@anim8/player": "workspace:*",
     "@anim8/renderer-svg": "workspace:*"
   },
