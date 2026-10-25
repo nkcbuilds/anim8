@@ -446,14 +446,50 @@
                   "enum": [
                     "straight",
                     "curve",
-                    "orthogonal"
+                    "orthogonal",
+                    "routed"
                   ]
                 },
                 "label": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "routing": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "clearance": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 512
+                    },
+                    "bendPenalty": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  }
                 }
-              }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "required": [
+                      "routing"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "kind": {
+                        "const": "routed"
+                      }
+                    },
+                    "required": [
+                      "kind"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "required": [
