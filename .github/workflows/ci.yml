@@ -4,6 +4,13 @@ on:
   push:
     branches: ["main"]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# A burst of commits should not run obsolete PR checks concurrently.
+# Keep main checks independent so every merged commit is verified.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
