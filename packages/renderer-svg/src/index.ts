@@ -386,7 +386,8 @@ function findHydratableSvg(container: Element, frame: EvaluatedScene): {
   background?: SVGRectElement;
   records: Map<string, ObjectDomRecord>;
 } | undefined {
-  if (container.children.length !== 1) return undefined;
+  // Non-browser DOM hosts may support replaceChildren but not children.
+  if (!container.children || container.children.length !== 1) return undefined;
   const candidate = container.firstElementChild;
   if (!candidate || candidate.namespaceURI !== SVG_NS || candidate.tagName.toLowerCase() !== "svg") return undefined;
 
