@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { evaluate } from "@anim8/core";
 import { scene, stateAction } from "../src/index.js";
 
 describe("authoring", () => {
@@ -219,6 +220,85 @@ describe("authoring", () => {
       id: "flow",
       initial: "idle",
     }));
+  });
+
+  it("supports absolute, relative, staggered, and repeated scheduling", () => {
+    const s = scene();
+    const a = s.box("A", { id: "a" });
+    const b = s.box("B", { id: "b" });
+
+    s.at(100, a.rotate(10, { duration: 100 }));
+    s.after(50, b.rotate(20, { duration: 100 }));
+    s.stagger(
+      50,
+      a.fadeTo(0.5, { duration: 100 }),
+      b.fadeTo(0.5, { duration: 100 }),
+    );
+    s.repeat(2, a.rotate(30, { duration: 50 }));
+
+    expect(s.toJSON().timeline.map(action => action.start)).toEqual([
+      100,
+      250,
+      350,
+      400,
+      500,
+      550,
+    ]);
+  });
+
+  it("compiles keyframes to deterministic primitive actions", () => {
+    const s = scene();
+    const node = s.box("K", { id: "node", x: 0, y: 0 });
+    s.keyframes(node, [
+      { offset: 0.5, position: { x: 100, y: 0 } },
+      { offset: 1, position: { x: 200, y: 0 } },
+    ], { duration: 1000, easing: "linear" });
+
+    const doc = s.toJSON();
+    expect(doc.timeline).toHaveLength(2);
+    expect(doc.timeline.map(action => action.start)).toEqual([0, 500]);
+    expect(evaluate(doc, 250).objects[0]?.transform.x).toBeCloseTo(50, 8);
+    expect(evaluate(doc, 750).objects[0]?.transform.x).toBeCloseTo(150, 8);
+  });
+
+  it("retargets and cancels actions while preserving sampled poses", () => {
+    const retargeted = scene();
+    const node = retargeted.box("R", { id: "node", x: 0, y: 0 });
+    const [moveId] = retargeted.at(0, node.moveTo({ x: 100, y: 0 }, { duration: 1000, easing: "linear" }));
+    expect(moveId).toBeDefined();
+    retargeted.retarget(
+      moveId!,
+      node.moveTo({ x: 200, y: 0 }, { duration: 500, easing: "linear" }),
+      500,
+    );
+    expect(evaluate(retargeted.toJSON(), 750).objects[0]?.transform.x).toBeCloseTo(125, 8);
+
+    const cancelled = scene();
+    const cancelledNode = cancelled.box("C", { id: "node", x: 0, y: 0 });
+    const [cancelId] = cancelled.at(0, cancelledNode.moveTo({ x: 100, y: 0 }, { duration: 1000, easing: "linear" }));
+    expect(cancelId).toBeDefined();
+    cancelled.cancel(cancelId!, 500);
+    expect(evaluate(cancelled.toJSON(), 500).objects[0]?.transform.x).toBeCloseTo(50, 8);
+    expect(evaluate(cancelled.toJSON(), 900).objects[0]?.transform.x).toBeCloseTo(50, 8);
+  });
+
+  it("authors serializable cubic bezier easing", () => {
+    const s = scene();
+    const node = s.box("E", { id: "node" });
+    s.sequence(node.moveTo(
+      { x: 100, y: 0 },
+      {
+        duration: 500,
+        easing: { type: "cubicBezier", x1: 0.42, y1: 0, x2: 0.58, y2: 1 },
+      },
+    ));
+    expect(s.toJSON().timeline[0]?.easing).toEqual({
+      type: "cubicBezier",
+      x1: 0.42,
+      y1: 0,
+      x2: 0.58,
+      y2: 1,
+    });
   });
 
 });
