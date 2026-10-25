@@ -270,6 +270,36 @@ export interface Interaction {
   actions: StateAction[];
 }
 
+export interface StateMachineGuard {
+  /** Declared scene.state key compared with strict scalar equality. */
+  key: string;
+  equals: ScalarValue;
+}
+
+export interface StateMachineTransition {
+  id: string;
+  event: InteractionTrigger;
+  /** Destination state id within the containing state machine. */
+  target: string;
+  guard?: StateMachineGuard;
+  /** Optional bounded scene-state mutations applied when the transition fires. */
+  actions?: StateAction[];
+}
+
+export interface StateMachineState {
+  id: string;
+  transitions: StateMachineTransition[];
+}
+
+export interface StateMachine {
+  id: string;
+  initial: string;
+  states: StateMachineState[];
+}
+
+/** Explicit runtime state for serializable state machines. */
+export type StateMachineSnapshot = Record<string, string>;
+
 export type Expression =
   | { kind: "literal"; value: ScalarValue }
   | { kind: "get"; path: string }
@@ -298,6 +328,7 @@ export interface SceneDocument {
   state?: Record<string, ScalarValue>;
   bindings?: Binding[];
   interactions?: Interaction[];
+  stateMachines?: StateMachine[];
   markers?: Marker[];
 }
 
