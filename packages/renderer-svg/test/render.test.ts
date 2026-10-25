@@ -208,9 +208,7 @@ describe("SVG renderer", () => {
     const second = renderSceneAt(doc, 0);
     expect(second).toBe(first);
     const path = first.match(/data-anim8-id="edge" d="([^"]+)"/)?.[1] ?? "";
-    expect(path).toContain("M 40 90");
-    expect(path).toContain("L 280 90");
-    expect(path).toMatch(/(?:20|160)/);
+    expect(path).toBe("M 40 90 L 40 140 L 280 140 L 280 90");
   });
 
 });
