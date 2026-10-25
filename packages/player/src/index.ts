@@ -49,6 +49,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
   let playing = false;
   let raf = 0;
   let previousTimestamp: number | null = null;
+  const ownerDocument = container.ownerDocument ?? (typeof document !== "undefined" ? document : undefined);
   const inputs: Record<string, ScalarValue> = {};
   let localState: Record<string, ScalarValue> = { ...(scene.state ?? {}) };
   let localMachines = initializeStateMachines(scene);
@@ -178,17 +179,36 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     }
 
     render();
-    if (playing) raf = requestAnimationFrame(tick);
+    if (playing && !ownerDocument?.hidden && typeof requestAnimationFrame !== "undefined") {
+      raf = requestAnimationFrame(tick);
+    }
   };
 
   const play = () => {
     if (options.reducedMotion || duration === 0 || playing) return;
     playing = true;
     previousTimestamp = null;
-    raf = requestAnimationFrame(tick);
+    if (!ownerDocument?.hidden && typeof requestAnimationFrame !== "undefined") {
+      raf = requestAnimationFrame(tick);
+    }
   };
 
   const pause = () => { playing = false; stopRaf(); };
+
+  const visibilityHandler = () => {
+    if (!playing) return;
+    if (ownerDocument?.hidden) {
+      // Preserve the exact current timeline time and discard wall-clock time
+      // spent hidden. Resuming starts with a fresh RAF timestamp.
+      stopRaf();
+      return;
+    }
+    previousTimestamp = null;
+    if (!raf && typeof requestAnimationFrame !== "undefined") {
+      raf = requestAnimationFrame(tick);
+    }
+  };
+  ownerDocument?.addEventListener?.("visibilitychange", visibilityHandler);
   const seek = (next: number) => { time = Math.max(0, Math.min(duration, next)); render(); };
   const markerTimes = (scene.markers ?? []).map(m => m.time).sort((a,b) => a-b);
 
@@ -228,6 +248,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
       container.removeEventListener("pointerover", pointerOverHandler);
       container.removeEventListener("pointerout", pointerOutHandler);
       container.removeEventListener("keydown", keyHandler);
+      ownerDocument?.removeEventListener?.("visibilitychange", visibilityHandler);
       mount.destroy();
     },
   };
