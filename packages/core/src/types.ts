@@ -111,11 +111,20 @@ export interface GroupObject extends BaseObject {
   children: string[];
 }
 
+export interface ConnectorRouting {
+  /** World-space clearance around obstacles. */
+  clearance?: number;
+  /** Extra cost applied when a Manhattan route changes direction. */
+  bendPenalty?: number;
+}
+
 export interface ConnectorObject extends BaseObject {
   type: "connector";
   from: AnchorRef;
   to: AnchorRef;
-  kind: "straight" | "curve" | "orthogonal";
+  kind: "straight" | "curve" | "orthogonal" | "routed";
+  /** Optional deterministic routing parameters used by routed connectors. */
+  routing?: ConnectorRouting;
   label?: string;
 }
 
