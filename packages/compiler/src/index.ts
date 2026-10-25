@@ -17,6 +17,10 @@ import {
   type InteractionTrigger,
   type ScalarValue,
   type StateAction,
+  type StateMachine,
+  type StateMachineGuard,
+  type StateMachineState,
+  type StateMachineTransition,
   type Diagnostic,
   type DrawableObject,
   type EasingName,
@@ -45,6 +49,10 @@ export const COMPILER_LIMITS = Object.freeze({
   bindings: 10_000,
   interactions: 5_000,
   interactionActions: 100,
+  stateMachines: 256,
+  machineStates: 256,
+  machineTransitions: 512,
+  machineTransitionActions: 100,
   stateEntries: 1_000,
   expressionNodes: 256,
   expressionDepth: 32,
@@ -928,6 +936,270 @@ function validateInteractionIds(interactions: Interaction[], diagnostics: Diagno
   });
 }
 
+function parseStateMachineEvent(
+  value: unknown,
+  path: string,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): InteractionTrigger | null {
+  if (!isRecord(value) || typeof value.type !== "string") {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_EVENT", path, "State-machine event must be an object with a type.");
+    return null;
+  }
+
+  if (value.type === "custom") {
+    const name = parseId(value.name, `${path}.name`, diagnostics, "INVALID_STATE_MACHINE_EVENT");
+    if (name === "click" || name === "focus" || name === "hover") {
+      diagnostic(
+        diagnostics,
+        "RESERVED_STATE_MACHINE_EVENT",
+        `${path}.name`,
+        "Custom event names must not use the reserved click, focus, or hover names.",
+      );
+      return null;
+    }
+    return name ? { type: "custom", name } : null;
+  }
+
+  if (value.type === "click" || value.type === "focus" || value.type === "hover") {
+    const target = parseReferenceId(value.target, `${path}.target`, diagnostics);
+    if (target && !objects.has(target)) {
+      diagnostic(diagnostics, "UNKNOWN_STATE_MACHINE_TARGET", `${path}.target`, `Object '${target}' does not exist.`);
+      return null;
+    }
+    return target ? { type: value.type, target } : null;
+  }
+
+  diagnostic(
+    diagnostics,
+    "INVALID_STATE_MACHINE_EVENT",
+    `${path}.type`,
+    "State-machine event type must be click, focus, hover, or custom.",
+  );
+  return null;
+}
+
+function parseStateMachineGuard(
+  value: unknown,
+  path: string,
+  declaredState: Record<string, ScalarValue>,
+  diagnostics: Diagnostic[],
+): StateMachineGuard | null {
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_GUARD", path, "State-machine guard must be an object.");
+    return null;
+  }
+
+  const key = value.key;
+  if (typeof key !== "string" || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(key) || key.length > COMPILER_LIMITS.idLength) {
+    diagnostic(diagnostics, "INVALID_STATE_KEY", `${path}.key`, "Guard key must be a valid declared state identifier.");
+    return null;
+  }
+  if (!Object.prototype.hasOwnProperty.call(declaredState, key)) {
+    diagnostic(diagnostics, "UNKNOWN_STATE_KEY", `${path}.key`, `State key '${key}' is not declared in scene.state.`);
+    return null;
+  }
+
+  const equals = parseScalar(value.equals, `${path}.equals`, diagnostics);
+  if (equals === null && value.equals !== null) return null;
+  return { key, equals };
+}
+
+function parseStateMachineTransition(
+  value: unknown,
+  path: string,
+  declaredState: Record<string, ScalarValue>,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): StateMachineTransition | null {
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_TRANSITION", path, "State-machine transition must be an object.");
+    return null;
+  }
+
+  const id = parseId(value.id, `${path}.id`, diagnostics, "INVALID_STATE_MACHINE_TRANSITION_ID");
+  const event = parseStateMachineEvent(value.event, `${path}.event`, objects, diagnostics);
+  const target = parseId(value.target, `${path}.target`, diagnostics, "INVALID_STATE_MACHINE_STATE_ID");
+
+  let guard: StateMachineGuard | undefined;
+  if (value.guard !== undefined) {
+    const parsed = parseStateMachineGuard(value.guard, `${path}.guard`, declaredState, diagnostics);
+    if (!parsed) return null;
+    guard = parsed;
+  }
+
+  let actions: StateAction[] | undefined;
+  if (value.actions !== undefined) {
+    if (!Array.isArray(value.actions)) {
+      diagnostic(diagnostics, "INVALID_STATE_MACHINE_ACTIONS", `${path}.actions`, "Transition actions must be an array.");
+      return null;
+    }
+    if (value.actions.length > COMPILER_LIMITS.machineTransitionActions) {
+      diagnostic(
+        diagnostics,
+        "LIMIT_STATE_MACHINE_ACTIONS",
+        `${path}.actions`,
+        `Transition exceeds the ${COMPILER_LIMITS.machineTransitionActions}-action limit.`,
+      );
+      return null;
+    }
+    const parsed = value.actions
+      .map((action, index) => parseStateAction(action, `${path}.actions[${index}]`, declaredState, diagnostics))
+      .filter((action): action is StateAction => action !== null);
+    if (parsed.length !== value.actions.length) return null;
+    actions = parsed;
+  }
+
+  if (!id || !event || !target) return null;
+  return {
+    id,
+    event,
+    target,
+    ...(guard ? { guard } : {}),
+    ...(actions ? { actions } : {}),
+  };
+}
+
+function parseStateMachineState(
+  value: unknown,
+  path: string,
+  declaredState: Record<string, ScalarValue>,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): StateMachineState | null {
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_STATE", path, "State-machine state must be an object.");
+    return null;
+  }
+
+  const id = parseId(value.id, `${path}.id`, diagnostics, "INVALID_STATE_MACHINE_STATE_ID");
+  if (!Array.isArray(value.transitions)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_TRANSITIONS", `${path}.transitions`, "State transitions must be an array.");
+    return null;
+  }
+  if (value.transitions.length > COMPILER_LIMITS.machineTransitions) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_STATE_MACHINE_TRANSITIONS",
+      `${path}.transitions`,
+      `State exceeds the ${COMPILER_LIMITS.machineTransitions}-transition limit.`,
+    );
+    return null;
+  }
+
+  const transitions = value.transitions
+    .map((transition, index) =>
+      parseStateMachineTransition(transition, `${path}.transitions[${index}]`, declaredState, objects, diagnostics)
+    )
+    .filter((transition): transition is StateMachineTransition => transition !== null);
+
+  if (!id || transitions.length !== value.transitions.length) return null;
+  return { id, transitions };
+}
+
+function parseStateMachine(
+  value: unknown,
+  index: number,
+  declaredState: Record<string, ScalarValue>,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): StateMachine | null {
+  const path = `stateMachines[${index}]`;
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE", path, "State machine must be an object.");
+    return null;
+  }
+
+  const id = parseId(value.id, `${path}.id`, diagnostics, "INVALID_STATE_MACHINE_ID");
+  const initial = parseId(value.initial, `${path}.initial`, diagnostics, "INVALID_STATE_MACHINE_STATE_ID");
+  if (!Array.isArray(value.states) || value.states.length === 0) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_STATES", `${path}.states`, "State machine must contain at least one state.");
+    return null;
+  }
+  if (value.states.length > COMPILER_LIMITS.machineStates) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_STATE_MACHINE_STATES",
+      `${path}.states`,
+      `State machine exceeds the ${COMPILER_LIMITS.machineStates}-state limit.`,
+    );
+    return null;
+  }
+
+  const states = value.states
+    .map((state, stateIndex) =>
+      parseStateMachineState(state, `${path}.states[${stateIndex}]`, declaredState, objects, diagnostics)
+    )
+    .filter((state): state is StateMachineState => state !== null);
+
+  if (!id || !initial || states.length !== value.states.length) return null;
+
+  const stateIds = new Set<string>();
+  const transitionIds = new Set<string>();
+  states.forEach((state, stateIndex) => {
+    if (stateIds.has(state.id)) {
+      diagnostic(
+        diagnostics,
+        "DUPLICATE_STATE_MACHINE_STATE_ID",
+        `${path}.states[${stateIndex}].id`,
+        `State '${state.id}' is duplicated in machine '${id}'.`,
+      );
+    }
+    stateIds.add(state.id);
+
+    state.transitions.forEach((transition, transitionIndex) => {
+      if (transitionIds.has(transition.id)) {
+        diagnostic(
+          diagnostics,
+          "DUPLICATE_STATE_MACHINE_TRANSITION_ID",
+          `${path}.states[${stateIndex}].transitions[${transitionIndex}].id`,
+          `Transition '${transition.id}' is duplicated in machine '${id}'.`,
+        );
+      }
+      transitionIds.add(transition.id);
+    });
+  });
+
+  if (!stateIds.has(initial)) {
+    diagnostic(
+      diagnostics,
+      "UNKNOWN_STATE_MACHINE_INITIAL",
+      `${path}.initial`,
+      `Initial state '${initial}' does not exist in machine '${id}'.`,
+    );
+  }
+
+  states.forEach((state, stateIndex) => {
+    state.transitions.forEach((transition, transitionIndex) => {
+      if (!stateIds.has(transition.target)) {
+        diagnostic(
+          diagnostics,
+          "UNKNOWN_STATE_MACHINE_STATE",
+          `${path}.states[${stateIndex}].transitions[${transitionIndex}].target`,
+          `Target state '${transition.target}' does not exist in machine '${id}'.`,
+        );
+      }
+    });
+  });
+
+  return { id, initial, states };
+}
+
+function validateStateMachineIds(stateMachines: StateMachine[], diagnostics: Diagnostic[]): void {
+  const ids = new Set<string>();
+  stateMachines.forEach((machine, index) => {
+    if (ids.has(machine.id)) {
+      diagnostic(
+        diagnostics,
+        "DUPLICATE_STATE_MACHINE_ID",
+        `stateMachines[${index}].id`,
+        `State machine '${machine.id}' is duplicated.`,
+      );
+    }
+    ids.add(machine.id);
+  });
+}
+
 function parseExpression(
   value: unknown,
   path: string,
@@ -1743,6 +2015,17 @@ export function compile(input: unknown): CompileResult {
     );
   }
 
+  if (input.stateMachines !== undefined && !Array.isArray(input.stateMachines)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINES", "stateMachines", "stateMachines must be an array.");
+  } else if (Array.isArray(input.stateMachines) && input.stateMachines.length > COMPILER_LIMITS.stateMachines) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_STATE_MACHINES",
+      "stateMachines",
+      `stateMachines exceeds the ${COMPILER_LIMITS.stateMachines}-entry limit.`,
+    );
+  }
+
   const preflightDiagnostics = sortedDiagnostics(diagnostics);
   if (
     !scene ||
@@ -1751,7 +2034,8 @@ export function compile(input: unknown): CompileResult {
     input.objects.length > COMPILER_LIMITS.objects ||
     input.timeline.length > COMPILER_LIMITS.timelineActions ||
     (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings) ||
-    (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions)
+    (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions) ||
+    (Array.isArray(input.stateMachines) && input.stateMachines.length > COMPILER_LIMITS.stateMachines)
   ) {
     return { ok: false, diagnostics: preflightDiagnostics };
   }
@@ -1775,10 +2059,16 @@ export function compile(input: unknown): CompileResult {
         .map((value, index) => parseInteraction(value, index, state ?? {}, objectIndex, diagnostics))
         .filter((value): value is Interaction => value !== null)
     : [];
+  const stateMachines = Array.isArray(input.stateMachines)
+    ? input.stateMachines
+        .map((value, index) => parseStateMachine(value, index, state ?? {}, objectIndex, diagnostics))
+        .filter((value): value is StateMachine => value !== null)
+    : [];
 
   validateTimelineReferences(timeline, objectIndex, diagnostics);
   validateBindings(bindings, timeline, objectIndex, diagnostics);
   validateInteractionIds(interactions, diagnostics);
+  validateStateMachineIds(stateMachines, diagnostics);
 
   const doc: SceneDocument = {
     version: "1.0",
@@ -1788,6 +2078,7 @@ export function compile(input: unknown): CompileResult {
     ...(state ? { state } : {}),
     ...(bindings.length ? { bindings } : {}),
     ...(interactions.length ? { interactions } : {}),
+    ...(stateMachines.length ? { stateMachines } : {}),
   };
 
   // Compiler owns the stable duplicate/reference/time diagnostics above.
