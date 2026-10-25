@@ -1,6 +1,6 @@
 import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
 import { morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
-import type { Action, SceneDocument } from "./types.js";
+import type { Action, SceneDocument, StateAction } from "./types.js";
 
 export interface Diagnostic {
   code: string;
@@ -29,6 +29,60 @@ const props = (action: Action): string[] => {
     ];
   }
 };
+
+function validateStateActionAtPath(
+  declaredState: SceneDocument["state"] extends infer T ? Record<string, import("./types.js").ScalarValue> : never,
+  action: StateAction,
+  actionPath: string,
+  diagnostics: Diagnostic[],
+): void {
+  if (!Object.prototype.hasOwnProperty.call(declaredState, action.key)) {
+    diagnostics.push({
+      code: "UNKNOWN_STATE_KEY",
+      path: `${actionPath}.key`,
+      message: `State key '${action.key}' is not declared in scene.state.`,
+    });
+    return;
+  }
+
+  const initial = declaredState[action.key];
+  if (action.type === "set") {
+    if (typeof action.value === "number" && (!Number.isFinite(action.value) || Math.abs(action.value) > STATE_NUMBER_LIMIT)) {
+      diagnostics.push({
+        code: "INVALID_STATE_ACTION_VALUE",
+        path: `${actionPath}.value`,
+        message: `Set number must be finite with absolute value <= ${STATE_NUMBER_LIMIT}.`,
+      });
+    }
+    if (typeof action.value === "string" && action.value.length > STATE_STRING_LIMIT) {
+      diagnostics.push({
+        code: "INVALID_STATE_ACTION_VALUE",
+        path: `${actionPath}.value`,
+        message: `Set string must be at most ${STATE_STRING_LIMIT} characters.`,
+      });
+    }
+  } else if (action.type === "toggle") {
+    if (typeof initial !== "boolean") {
+      diagnostics.push({
+        code: "INVALID_STATE_ACTION_TYPE",
+        path: `${actionPath}.key`,
+        message: `toggle requires boolean state; '${action.key}' is not boolean.`,
+      });
+    }
+  } else if (
+    typeof initial !== "number" ||
+    !Number.isFinite(action.by) ||
+    Math.abs(action.by) > STATE_NUMBER_LIMIT
+  ) {
+    diagnostics.push({
+      code: "INVALID_STATE_ACTION_TYPE",
+      path: !Number.isFinite(action.by) || Math.abs(action.by) > STATE_NUMBER_LIMIT
+        ? `${actionPath}.by`
+        : `${actionPath}.key`,
+      message: `increment requires numeric state and a finite delta with absolute value <= ${STATE_NUMBER_LIMIT}.`,
+    });
+  }
+}
 
 export function validateScene(scene: SceneDocument): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
@@ -342,6 +396,97 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
           message: `increment requires numeric state and a finite delta with absolute value <= ${STATE_NUMBER_LIMIT}.`,
         });
       }
+    });
+  });
+
+  const stateMachineIds = new Set<string>();
+  scene.stateMachines?.forEach((machine, machineIndex) => {
+    const machinePath = `stateMachines[${machineIndex}]`;
+    if (stateMachineIds.has(machine.id)) {
+      diagnostics.push({
+        code: "DUPLICATE_STATE_MACHINE_ID",
+        path: `${machinePath}.id`,
+        message: `State machine '${machine.id}' is duplicated.`,
+      });
+    }
+    stateMachineIds.add(machine.id);
+
+    const stateIds = new Set<string>();
+    machine.states.forEach((state, stateIndex) => {
+      if (stateIds.has(state.id)) {
+        diagnostics.push({
+          code: "DUPLICATE_STATE_MACHINE_STATE_ID",
+          path: `${machinePath}.states[${stateIndex}].id`,
+          message: `State '${state.id}' is duplicated in machine '${machine.id}'.`,
+        });
+      }
+      stateIds.add(state.id);
+    });
+
+    if (!stateIds.has(machine.initial)) {
+      diagnostics.push({
+        code: "UNKNOWN_STATE_MACHINE_INITIAL",
+        path: `${machinePath}.initial`,
+        message: `Initial state '${machine.initial}' does not exist in machine '${machine.id}'.`,
+      });
+    }
+
+    const transitionIds = new Set<string>();
+    machine.states.forEach((state, stateIndex) => {
+      state.transitions.forEach((transition, transitionIndex) => {
+        const transitionPath = `${machinePath}.states[${stateIndex}].transitions[${transitionIndex}]`;
+        if (transitionIds.has(transition.id)) {
+          diagnostics.push({
+            code: "DUPLICATE_STATE_MACHINE_TRANSITION_ID",
+            path: `${transitionPath}.id`,
+            message: `Transition '${transition.id}' is duplicated in machine '${machine.id}'.`,
+          });
+        }
+        transitionIds.add(transition.id);
+
+        if (!stateIds.has(transition.target)) {
+          diagnostics.push({
+            code: "UNKNOWN_STATE_MACHINE_STATE",
+            path: `${transitionPath}.target`,
+            message: `Target state '${transition.target}' does not exist in machine '${machine.id}'.`,
+          });
+        }
+
+        if (transition.event.type === "custom") {
+          if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(transition.event.name)) {
+            diagnostics.push({
+              code: "INVALID_STATE_MACHINE_EVENT",
+              path: `${transitionPath}.event.name`,
+              message: "Custom event names must be stable identifiers.",
+            });
+          }
+          if (transition.event.name === "click" || transition.event.name === "focus" || transition.event.name === "hover") {
+            diagnostics.push({
+              code: "RESERVED_STATE_MACHINE_EVENT",
+              path: `${transitionPath}.event.name`,
+              message: "Custom event names must not use the reserved click, focus, or hover names.",
+            });
+          }
+        } else if (!ids.has(transition.event.target)) {
+          diagnostics.push({
+            code: "UNKNOWN_STATE_MACHINE_TARGET",
+            path: `${transitionPath}.event.target`,
+            message: `Object '${transition.event.target}' does not exist.`,
+          });
+        }
+
+        if (transition.guard && !Object.prototype.hasOwnProperty.call(declaredState, transition.guard.key)) {
+          diagnostics.push({
+            code: "UNKNOWN_STATE_KEY",
+            path: `${transitionPath}.guard.key`,
+            message: `State key '${transition.guard.key}' is not declared in scene.state.`,
+          });
+        }
+
+        transition.actions?.forEach((action, actionIndex) =>
+          validateStateActionAtPath(declaredState, action, `${transitionPath}.actions[${actionIndex}]`, diagnostics)
+        );
+      });
     });
   });
 
