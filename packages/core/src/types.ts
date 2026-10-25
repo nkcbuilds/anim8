@@ -247,6 +247,21 @@ export interface VisibilityAction extends ActionBase {
   visible: boolean;
 }
 
+/** Instant structural change to object group/container membership. */
+export interface ReparentAction extends ActionBase {
+  type: "reparent";
+  /** null moves the object to the scene root. */
+  parentId: string | null;
+  /** Preserve the evaluated world pose while changing coordinate spaces. */
+  preserveWorld?: boolean;
+}
+
+/** Instant structural change to object layer ordering. */
+export interface ZOrderAction extends ActionBase {
+  type: "zOrder";
+  to: number;
+}
+
 export interface CameraAction {
   id: string;
   type: "camera";
@@ -270,7 +285,9 @@ export type Action =
   | ResizeAction
   | DrawAction
   | MorphAction
-  | VisibilityAction;
+  | VisibilityAction
+  | ReparentAction
+  | ZOrderAction;
 
 export interface Marker {
   id: string;
