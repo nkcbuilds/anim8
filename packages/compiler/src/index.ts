@@ -1681,7 +1681,7 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
         diagnostic(diagnostics, "INVALID_STRUCTURAL_DURATION", `${path}.duration`, "zOrder actions must have duration 0.");
         return null;
       }
-      if (Number.isInteger(value.to) && Math.abs(value.to) <= COMPILER_LIMITS.absoluteNumber) {
+      if (typeof value.to === "number" && Number.isInteger(value.to) && Math.abs(value.to) <= COMPILER_LIMITS.absoluteNumber) {
         return { ...objectBase, type: "zOrder", to: value.to };
       }
       diagnostic(diagnostics, "INVALID_Z_ORDER", `${path}.to`, "zOrder.to must be a bounded integer.");
