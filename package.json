@@ -12,7 +12,12 @@
     "consumers": "node tests/consumers/run.mjs",
     "benchmark": "node benchmarks/run-baseline.mjs",
     "browser": "node tests/browser/run.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm release:metadata",
+    "catalog:generate": "node examples/catalog/generate.mjs",
+    "catalog:check": "node examples/catalog/generate.mjs --check",
+    "catalog": "node tests/catalog/run.mjs",
+    "catalog:browser": "node tests/catalog/browser.mjs",
+    "catalog:serve": "node examples/catalog/serve.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm release:metadata",
     "release:check": "pnpm check && pnpm browser",
     "release:metadata": "node tests/release/check-version.mjs"
   },

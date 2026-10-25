@@ -46,6 +46,9 @@ jobs:
         env:
           ANIM8_BROWSER_REQUIRE_ALL: "1"
 
+      - name: Validate all 150 gallery scenes in Chromium
+        run: pnpm catalog:browser
+
       - name: Validate reference scenes
         run: |
           node packages/cli/dist/cli.js validate examples/two-sum/scene.json
