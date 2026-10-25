@@ -153,6 +153,7 @@ function installControlNodes(root: FakeShadowRoot): void {
   root.elements.set("timeline", new FakeInputElement());
   root.elements.set("time", new FakeOutputElement());
   root.elements.set("motion-note", new FakeHTMLElement());
+  root.elements.set("summary", new FakeHTMLElement());
 }
 
 afterEach(() => {
@@ -200,6 +201,8 @@ describe("@anim8/web-component", () => {
     expect(html).toContain('type="range"');
     expect(html).toContain('aria-label="Animation timeline"');
     expect(html).toContain('tabindex="0"');
+    expect(html).toContain('aria-describedby="summary"');
+    expect(html).toContain('id="summary"');
 
     expect(module.playbackShortcutForKey(" ")).toBe("toggle");
     expect(module.playbackShortcutForKey("ArrowLeft")).toBe("seek-backward");
@@ -222,10 +225,12 @@ describe("@anim8/web-component", () => {
     const play = root.getElementById("play") as FakeButtonElement;
     const timeline = root.getElementById("timeline") as FakeInputElement;
     const motionNote = root.getElementById("motion-note") as FakeHTMLElement;
+    const summary = root.getElementById("summary") as FakeHTMLElement;
 
     expect(play.disabled).toBe(true);
     expect(timeline.disabled).toBe(false);
     expect(timeline.max).toBe("10000");
     expect(motionNote.hidden).toBe(false);
+    expect(summary.textContent).toContain("Visible objects");
   });
 });
