@@ -21,7 +21,8 @@ export function serviceBadge(builder, label, {
     id: `${id}_status`,
     x: x + 68,
     y: y - 22,
-    radius: 7,
+    width: 14,
+    height: 14,
     fill: statusColor,
     stroke: statusColor,
   });
