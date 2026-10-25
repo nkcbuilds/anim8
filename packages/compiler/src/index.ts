@@ -1341,7 +1341,7 @@ function parseBinding(value: unknown, index: number, diagnostics: Diagnostic[]):
   return { id, target: { objectId, property: property as BindingProperty }, expression };
 }
 
-type ActionProperty = BindingProperty | "width" | "height" | "drawProgress";
+type ActionProperty = BindingProperty | "width" | "height" | "drawProgress" | "parentId" | "z";
 
 function actionProperties(action: Action): readonly ActionProperty[] {
   switch (action.type) {
@@ -1354,6 +1354,8 @@ function actionProperties(action: Action): readonly ActionProperty[] {
     case "stroke": return ["stroke"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
+    case "reparent": return ["parentId"];
+    case "zOrder": return ["z"];
     case "morph":
     case "visibility":
     case "camera":
@@ -1650,13 +1652,47 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
       if (typeof value.visible === "boolean") return { ...objectBase, type: "visibility", visible: value.visible };
       diagnostic(diagnostics, "INVALID_VISIBILITY_TARGET", `${path}.visible`, "visibility.visible must be a boolean.");
       return null;
+    case "reparent": {
+      if (value.duration !== 0) {
+        diagnostic(diagnostics, "INVALID_STRUCTURAL_DURATION", `${path}.duration`, "reparent actions must have duration 0.");
+        return null;
+      }
+      if (value.parentId !== null && typeof value.parentId !== "string") {
+        diagnostic(diagnostics, "INVALID_REPARENT_TARGET", `${path}.parentId`, "reparent.parentId must be an object id or null.");
+        return null;
+      }
+      if (value.parentId === actionBase.target) {
+        diagnostic(diagnostics, "REPARENT_SELF", `${path}.parentId`, "An object cannot be parented to itself.");
+        return null;
+      }
+      if (value.preserveWorld !== undefined && typeof value.preserveWorld !== "boolean") {
+        diagnostic(diagnostics, "INVALID_REPARENT_POLICY", `${path}.preserveWorld`, "preserveWorld must be a boolean.");
+        return null;
+      }
+      return {
+        ...objectBase,
+        type: "reparent",
+        parentId: value.parentId,
+        ...(value.preserveWorld === false ? { preserveWorld: false } : {}),
+      };
+    }
+    case "zOrder":
+      if (value.duration !== 0) {
+        diagnostic(diagnostics, "INVALID_STRUCTURAL_DURATION", `${path}.duration`, "zOrder actions must have duration 0.");
+        return null;
+      }
+      if (Number.isInteger(value.to) && Math.abs(value.to) <= COMPILER_LIMITS.absoluteNumber) {
+        return { ...objectBase, type: "zOrder", to: value.to };
+      }
+      diagnostic(diagnostics, "INVALID_Z_ORDER", `${path}.to`, "zOrder.to must be a bounded integer.");
+      return null;
     default:
       diagnostic(
         diagnostics,
         "UNKNOWN_ACTION",
         `${path}.type`,
         `Unsupported action type '${value.type}'.`,
-        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, morph, or visibility.",
+        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, morph, visibility, reparent, or zOrder.",
       );
       return null;
   }
@@ -1858,6 +1894,41 @@ function validateTimelineReferences(
         objectIds.length ? `Use one of: ${objectIds.slice(0, 8).join(", ")}` : "Create the object before targeting it.",
       );
       return;
+    }
+
+    if (action.type === "reparent" && action.parentId !== null) {
+      const parent = objects.get(action.parentId);
+      if (!parent) {
+        diagnostic(
+          diagnostics,
+          "UNKNOWN_REPARENT_TARGET",
+          `timeline[${index}].parentId`,
+          `Parent object '${action.parentId}' does not exist.`,
+        );
+      } else if (parent.type !== "group") {
+        diagnostic(
+          diagnostics,
+          "INVALID_REPARENT_TARGET",
+          `timeline[${index}].parentId`,
+          `Parent '${action.parentId}' must be a group.`,
+        );
+      } else {
+        let current: DrawableObject | undefined = parent;
+        const seen = new Set<string>();
+        while (current?.parentId && !seen.has(current.id)) {
+          if (current.parentId === action.target) {
+            diagnostic(
+              diagnostics,
+              "REPARENT_CYCLE",
+              `timeline[${index}].parentId`,
+              `Reparenting '${action.target}' under '${action.parentId}' would create a parent cycle in the base graph.`,
+            );
+            break;
+          }
+          seen.add(current.id);
+          current = objects.get(current.parentId);
+        }
+      }
     }
 
     if (action.type === "resize") {
