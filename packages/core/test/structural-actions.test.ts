@@ -83,8 +83,10 @@ describe("structural timeline actions", () => {
     expect(groupedCard.parentId).toBe("container");
     expect(worldMatrix(groupedCard, groupedIndex).e).toBeCloseTo(20, 8);
     expect(worldMatrix(groupedCard, groupedIndex).f).toBeCloseTo(30, 8);
-    expect(grouped.objects.find(object => object.id === "container")?.type === "group" &&
-      grouped.objects.find(object => object.id === "container")?.children).toContain("card");
+    const groupedContainer = grouped.objects.find(object => object.id === "container");
+    expect(groupedContainer?.type).toBe("group");
+    if (groupedContainer?.type !== "group") throw new Error("Expected container group.");
+    expect(groupedContainer.children).toContain("card");
   });
 
   it("applies z-order and ungroup actions at exact timestamps", () => {
