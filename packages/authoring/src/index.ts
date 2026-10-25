@@ -335,6 +335,7 @@ export class SceneBuilder {
       to: { ...to },
       duration: options.duration ?? 600,
       easing: options.easing ?? "easeInOut",
+      ...(options.interrupt ? { interrupt: true } : {}),
     };
   }
 
@@ -506,21 +507,284 @@ export class SceneBuilder {
     return evaluated ? { x: evaluated.transform.x, y: evaluated.transform.y } : { x: object.transform.x, y: object.transform.y };
   }
 
-  sequence(...actions: Pending[]): void {
-    for (const action of actions) {
-      this.timeline.push({ ...action, id: this.next(action.type), start: this.cursor } as Action);
-      this.cursor += action.duration;
-    }
+  private scheduleAt(start: number, action: Pending): string {
+    if (!Number.isFinite(start) || start < 0) throw new Error("Action start must be a finite number >= 0.");
+    if (!Number.isFinite(action.duration) || action.duration < 0) throw new Error("Action duration must be a finite number >= 0.");
+    const id = this.next(action.type);
+    this.timeline.push({ ...structuredClone(action), id, start } as Action);
+    return id;
   }
 
-  parallel(...actions: Pending[]): void {
+  sequence(...actions: Pending[]): string[] {
+    const ids: string[] = [];
+    for (const action of actions) {
+      ids.push(this.scheduleAt(this.cursor, action));
+      this.cursor += action.duration;
+    }
+    return ids;
+  }
+
+  parallel(...actions: Pending[]): string[] {
     const start = this.cursor;
     let end = start;
+    const ids: string[] = [];
     for (const action of actions) {
-      this.timeline.push({ ...action, id: this.next(action.type), start } as Action);
+      ids.push(this.scheduleAt(start, action));
       end = Math.max(end, start + action.duration);
     }
     this.cursor = end;
+    return ids;
+  }
+
+  /** Schedule actions at an absolute timeline time. */
+  at(time: number, ...actions: Pending[]): string[] {
+    if (!Number.isFinite(time) || time < 0) throw new Error("Absolute timeline time must be a finite number >= 0.");
+    let end = this.cursor;
+    const ids: string[] = [];
+    for (const action of actions) {
+      ids.push(this.scheduleAt(time, action));
+      end = Math.max(end, time + action.duration);
+    }
+    this.cursor = end;
+    return ids;
+  }
+
+  /** Schedule actions relative to the current authoring cursor. */
+  after(delay: number, ...actions: Pending[]): string[] {
+    if (!Number.isFinite(delay) || delay < 0) throw new Error("Relative delay must be a finite number >= 0.");
+    const start = this.cursor + delay;
+    return this.at(start, ...actions);
+  }
+
+  /** Start each action after a fixed offset while allowing overlap. */
+  stagger(gap: number, ...actions: Pending[]): string[] {
+    if (!Number.isFinite(gap) || gap < 0) throw new Error("Stagger gap must be a finite number >= 0.");
+    const start = this.cursor;
+    let end = start;
+    const ids: string[] = [];
+    actions.forEach((action, index) => {
+      const actionStart = start + gap * index;
+      ids.push(this.scheduleAt(actionStart, action));
+      end = Math.max(end, actionStart + action.duration);
+    });
+    this.cursor = end;
+    return ids;
+  }
+
+  /** Repeat a sequence of pending actions a fixed number of times. */
+  repeat(count: number, ...actions: Pending[]): string[] {
+    if (!Number.isInteger(count) || count < 0 || count > 10_000) {
+      throw new Error("Repeat count must be an integer between 0 and 10000.");
+    }
+    const ids: string[] = [];
+    for (let iteration = 0; iteration < count; iteration += 1) {
+      ids.push(...this.sequence(...actions));
+    }
+    return ids;
+  }
+
+  /**
+   * Compile timed keyframes into ordinary primitive actions.
+   *
+   * The current evaluated pose is the implicit value at offset 0. A keyframe at
+   * offset 0 is allowed to intentionally establish an immediate value.
+   */
+  keyframes(target: NodeHandle, frames: readonly Keyframe[], options: KeyframeOptions): string[] {
+    if (!Number.isFinite(options.duration) || options.duration <= 0) {
+      throw new Error("Keyframe duration must be a finite number > 0.");
+    }
+    if (frames.length === 0) throw new Error("Keyframes require at least one target frame.");
+
+    let previousOffset = 0;
+    const start = this.cursor;
+    const ids: string[] = [];
+    for (const [index, frame] of frames.entries()) {
+      if (!Number.isFinite(frame.offset) || frame.offset < 0 || frame.offset > 1) {
+        throw new Error(`Keyframe offset at index ${index} must be between 0 and 1.`);
+      }
+      if (frame.offset < previousOffset || (index > 0 && frame.offset === previousOffset)) {
+        throw new Error("Keyframe offsets must be strictly increasing.");
+      }
+
+      const segmentStart = start + previousOffset * options.duration;
+      const segmentDuration = (frame.offset - previousOffset) * options.duration;
+      const easing = frame.easing ?? options.easing ?? "easeInOut";
+      const pending: Pending[] = [];
+
+      if (frame.position) {
+        pending.push({
+          type: "move",
+          target: target.id,
+          to: { ...frame.position },
+          duration: segmentDuration,
+          easing,
+        });
+      }
+      if (frame.rotation !== undefined) {
+        pending.push({ type: "rotate", target: target.id, to: frame.rotation, duration: segmentDuration, easing });
+      }
+      if (frame.scale !== undefined) {
+        const scale = typeof frame.scale === "number"
+          ? { x: frame.scale, y: frame.scale }
+          : { ...frame.scale };
+        pending.push({ type: "scale", target: target.id, to: scale, duration: segmentDuration, easing });
+      }
+      if (frame.opacity !== undefined) {
+        pending.push({ type: "opacity", target: target.id, to: frame.opacity, duration: segmentDuration, easing });
+      }
+      if (frame.fill !== undefined) {
+        pending.push({ type: "fill", target: target.id, to: frame.fill, duration: segmentDuration, easing });
+      }
+      if (frame.stroke !== undefined) {
+        pending.push({ type: "stroke", target: target.id, to: frame.stroke, duration: segmentDuration, easing });
+      }
+
+      for (const action of pending) ids.push(this.scheduleAt(segmentStart, action));
+      previousOffset = frame.offset;
+    }
+
+    if (frames.at(-1)!.offset !== 1) {
+      throw new Error("The final keyframe offset must be 1.");
+    }
+    this.cursor = Math.max(this.cursor, start + options.duration);
+    return ids;
+  }
+
+  private pendingProperties(action: Pending | Action): readonly string[] {
+    switch (action.type) {
+      case "move":
+      case "followPath": return ["x", "y"];
+      case "rotate": return ["rotation"];
+      case "scale": return ["scaleX", "scaleY"];
+      case "opacity": return ["opacity"];
+      case "fill": return ["fill"];
+      case "stroke": return ["stroke"];
+      case "resize": return ["width", "height"];
+      case "draw": return ["drawProgress"];
+      case "morph": return ["d"];
+      case "visibility": return ["visible"];
+      case "camera": return [
+        ...(action.to.x !== undefined ? ["camera.x"] : []),
+        ...(action.to.y !== undefined ? ["camera.y"] : []),
+        ...(action.to.zoom !== undefined ? ["camera.zoom"] : []),
+      ];
+    }
+  }
+
+  /**
+   * Retarget an active action without jumping by explicitly interrupting it at
+   * the requested absolute time.
+   */
+  retarget(actionId: string, replacement: Pending, at = this.cursor): string {
+    const original = this.timeline.find(action => action.id === actionId);
+    if (!original) throw new Error(`Unknown action '${actionId}'.`);
+    if (!Number.isFinite(at) || at <= original.start || at >= original.start + original.duration) {
+      throw new Error("Retarget time must fall strictly inside the original action.");
+    }
+
+    const sameTarget =
+      original.type === "camera" || replacement.type === "camera"
+        ? original.type === "camera" && replacement.type === "camera"
+        : original.target === replacement.target;
+    const conflicts = this.pendingProperties(original).some(property =>
+      this.pendingProperties(replacement).includes(property)
+    );
+    if (!sameTarget || !conflicts) {
+      throw new Error("Retarget replacement must write the same target and at least one of the original action's properties.");
+    }
+
+    const id = this.scheduleAt(at, { ...replacement, interrupt: true } as Pending);
+    this.cursor = Math.max(this.cursor, at + replacement.duration);
+    return id;
+  }
+
+  /**
+   * Freeze an active action at its sampled pose. Cancelling before it starts
+   * removes it outright; cancelling after it ends is a no-op.
+   */
+  cancel(actionId: string, at = this.cursor): string | undefined {
+    const index = this.timeline.findIndex(action => action.id === actionId);
+    if (index < 0) throw new Error(`Unknown action '${actionId}'.`);
+    const original = this.timeline[index]!;
+    if (!Number.isFinite(at) || at < 0) throw new Error("Cancellation time must be a finite number >= 0.");
+
+    if (at <= original.start) {
+      this.timeline.splice(index, 1);
+      return undefined;
+    }
+    if (at >= original.start + original.duration || original.duration === 0) return undefined;
+
+    const document: SceneDocument = {
+      version: "1.0",
+      scene: {
+        width: this.options.width ?? 800,
+        height: this.options.height ?? 450,
+        camera: this.baseCamera(),
+      },
+      objects: this.objects,
+      timeline: this.timeline,
+    };
+    const frame = evaluate(document, at);
+    let hold: Pending | undefined;
+
+    if (original.type === "camera") {
+      const to: CameraTarget = {};
+      if (original.to.x !== undefined) to.x = frame.camera.x;
+      if (original.to.y !== undefined) to.y = frame.camera.y;
+      if (original.to.zoom !== undefined) to.zoom = frame.camera.zoom;
+      hold = { type: "camera", to, duration: 0, easing: "linear", interrupt: true };
+    } else {
+      const object = frame.objects.find(item => item.id === original.target);
+      if (!object) throw new Error(`Unknown target '${original.target}'.`);
+      switch (original.type) {
+        case "move":
+        case "followPath":
+          hold = { type: "move", target: original.target, to: { x: object.transform.x, y: object.transform.y }, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "rotate":
+          hold = { type: "rotate", target: original.target, to: object.transform.rotation, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "scale":
+          hold = { type: "scale", target: original.target, to: { x: object.transform.scaleX, y: object.transform.scaleY }, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "opacity":
+          hold = { type: "opacity", target: original.target, to: object.transform.opacity, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "fill":
+          hold = { type: "fill", target: original.target, to: object.style.fill, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "stroke":
+          hold = { type: "stroke", target: original.target, to: object.style.stroke, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "resize": {
+          if (object.type === "rect" || object.type === "image") {
+            hold = { type: "resize", target: original.target, to: { width: object.width, height: object.height }, duration: 0, easing: "linear", interrupt: true };
+          } else if (object.type === "circle") {
+            hold = { type: "resize", target: original.target, to: { width: object.r * 2, height: object.r * 2 }, duration: 0, easing: "linear", interrupt: true };
+          } else if (object.type === "ellipse") {
+            hold = { type: "resize", target: original.target, to: { width: object.rx * 2, height: object.ry * 2 }, duration: 0, easing: "linear", interrupt: true };
+          }
+          break;
+        }
+        case "draw":
+          if (object.type === "path" || object.type === "polygon" || object.type === "polyline") {
+            hold = { type: "draw", target: original.target, to: object.drawProgress ?? 1, duration: 0, easing: "linear", interrupt: true };
+          }
+          break;
+        case "morph":
+          if (object.type === "path") {
+            hold = { type: "morph", target: original.target, to: object.d, duration: 0, easing: "linear", interrupt: true };
+          }
+          break;
+        case "visibility":
+          return undefined;
+      }
+    }
+
+    if (!hold) throw new Error(`Action '${actionId}' cannot be cancelled safely.`);
+    const id = this.scheduleAt(at, hold);
+    this.cursor = Math.max(this.cursor, at);
+    return id;
   }
 
   step(label: string, build: () => void): void {
@@ -528,7 +792,12 @@ export class SceneBuilder {
     build();
   }
 
-  wait(duration: number): void { this.cursor += duration; }
+  wait(duration: number): void {
+    if (!Number.isFinite(duration) || duration < 0) throw new Error("Wait duration must be a finite number >= 0.");
+    this.cursor += duration;
+  }
+
+  delay(duration: number): void { this.wait(duration); }
 
   state(name: string, value: ScalarValue): void {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error(`Invalid state name '${name}'.`);
