@@ -1,0 +1,27 @@
+name: Feature request
+description: Propose an Anim8 capability or API change
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the authoring/rendering problem rather than only a proposed API.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Include example JSON/TypeScript if useful.
+  - type: textarea
+    id: model
+    attributes:
+      label: Model-first impact
+      description: How easy would this be for a model to generate and repair?
+  - type: textarea
+    id: determinism
+    attributes:
+      label: Determinism / portability impact
+      description: Note implications for seek, reverse, SSR, renderers, bundle size, or security.
