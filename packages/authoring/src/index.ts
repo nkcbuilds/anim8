@@ -1,4 +1,4 @@
-import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type EasingName, type Expression, type Marker, type PointValue, type ScalarValue, type SceneDocument, type ThemeName } from "@anim8/core";
+import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type EasingName, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
 
 export interface SceneOptions {
   width?: number;
@@ -143,6 +143,15 @@ export class NodeHandle {
   bind(property: BindingProperty, expression: Expression): void {
     this.owner.bind(this, property, expression);
   }
+  onClick(...actions: StateAction[]): void {
+    this.owner.interaction({ type: "click", target: this.id }, actions);
+  }
+  onFocus(...actions: StateAction[]): void {
+    this.owner.interaction({ type: "focus", target: this.id }, actions);
+  }
+  onHover(...actions: StateAction[]): void {
+    this.owner.interaction({ type: "hover", target: this.id }, actions);
+  }
 }
 
 export class SceneBuilder {
@@ -151,6 +160,8 @@ export class SceneBuilder {
   private markers: Marker[] = [];
   private stateValues: Record<string, ScalarValue> = {};
   private bindings: Binding[] = [];
+  private interactions: Interaction[] = [];
+  private stateMachines: StateMachine[] = [];
   private cursor = 0;
   private idCounter = 0;
 
@@ -503,6 +514,27 @@ export class SceneBuilder {
     this.bindings.push({ id: this.next("binding"), target: { objectId: target.id, property }, expression });
   }
 
+  interaction(event: InteractionTrigger, actions: readonly StateAction[], id = this.next("interaction")): string {
+    if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(id)) throw new Error(`Invalid interaction id '${id}'.`);
+    if (actions.length === 0) throw new Error("Interaction requires at least one state action.");
+    this.interactions.push({ id, event: structuredClone(event), actions: structuredClone([...actions]) });
+    return id;
+  }
+
+  on(eventName: string, ...actions: StateAction[]): string {
+    if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(eventName)) throw new Error(`Invalid custom event name '${eventName}'.`);
+    if (eventName === "click" || eventName === "focus" || eventName === "hover") {
+      throw new Error(`Custom event name '${eventName}' is reserved.`);
+    }
+    return this.interaction({ type: "custom", name: eventName }, actions);
+  }
+
+  stateMachine(machine: StateMachine): void {
+    if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(machine.id)) throw new Error(`Invalid state machine id '${machine.id}'.`);
+    if (machine.states.length === 0) throw new Error("State machine requires at least one state.");
+    this.stateMachines.push(structuredClone(machine));
+  }
+
   pulse(target: NodeHandle, options: PulseOptions = {}): void {
     const duration = options.duration ?? 360;
     const scale = options.scale ?? 1.08;
@@ -586,10 +618,18 @@ export class SceneBuilder {
       timeline: structuredClone(this.timeline),
       ...(Object.keys(this.stateValues).length ? { state: structuredClone(this.stateValues) } : {}),
       ...(this.bindings.length ? { bindings: structuredClone(this.bindings) } : {}),
+      ...(this.interactions.length ? { interactions: structuredClone(this.interactions) } : {}),
+      ...(this.stateMachines.length ? { stateMachines: structuredClone(this.stateMachines) } : {}),
       ...(this.markers.length ? { markers: structuredClone(this.markers) } : {}),
     };
   }
 }
+
+export const stateAction = {
+  set(key: string, value: ScalarValue): StateAction { return { type: "set", key, value }; },
+  toggle(key: string): StateAction { return { type: "toggle", key }; },
+  increment(key: string, by = 1): StateAction { return { type: "increment", key, by }; },
+};
 
 export const expr = {
   literal(value: ScalarValue): Expression { return { kind: "literal", value }; },
