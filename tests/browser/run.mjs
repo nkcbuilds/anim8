@@ -267,6 +267,14 @@ async function runBrowserSuite(browserName, browserType, server) {
       await page.emulateMedia({ reducedMotion: "no-preference" });
     });
 
+    await runCase(caseName("hidden documents suspend playback without hidden-time catch-up"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.hiddenTabPolicy());
+      assert.ok(result.beforeHide > 250);
+      assert.equal(result.whileHidden, result.atHide);
+      assert.ok(result.afterResume > result.whileHidden);
+      assert.equal(result.playing, true);
+    });
+
     await runCase(caseName("multiple player instances remain isolated"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.multipleInstances());
       assert.equal(result.firstTime, 250);
@@ -311,7 +319,7 @@ async function runBrowserSuite(browserName, browserType, server) {
     }
 
     assert.equal(pageErrors.length, 0, pageErrors.map(error => error.message).join("\n"));
-    const caseCount = browserName === "chromium" ? 10 : 9;
+    const caseCount = browserName === "chromium" ? 11 : 10;
     console.log(`PASS browser harness (${browserName}, ${caseCount} cases)`);
     return true;
   } finally {
