@@ -34,6 +34,26 @@ const expectedFixtureIds = [
   "https-image",
   "multi-stage-timeline",
   "connector-three-nodes",
+  "routed-connector-obstacle",
+  "camera-pan-zoom",
+  "follow-polyline-path",
+  "draw-path-progress",
+  "compatible-path-morph",
+  "ellipse-polygon-polyline",
+  "nested-group-transform",
+  "state-bound-position",
+  "click-toggle-state",
+  "custom-event-increment",
+  "two-state-machine",
+  "guarded-state-machine",
+  "camera-and-object-concurrency",
+  "explicit-interruption",
+  "custom-cubic-bezier",
+  "database-request-flow",
+  "array-pointer-flow",
+  "graph-traversal-highlight",
+  "tree-parent-child-diagram",
+  "reactive-visibility",
 ];
 
 const sceneValidator: SchemaValidator<Record<string, unknown>> = value => {
@@ -66,6 +86,7 @@ describe("@anim8/ai fixtures", () => {
   it("ships a fixed, unique benchmark case set", () => {
     expect(BENCHMARK_CASES.map(testCase => testCase.id)).toEqual(expectedFixtureIds);
     expect(new Set(BENCHMARK_CASES.map(testCase => testCase.id)).size).toBe(BENCHMARK_CASES.length);
+    expect(BENCHMARK_CASES).toHaveLength(36);
 
     for (const testCase of BENCHMARK_CASES) {
       expect(testCase.prompt.length).toBeGreaterThan(30);
