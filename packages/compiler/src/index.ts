@@ -63,6 +63,8 @@ export const COMPILER_LIMITS = Object.freeze({
   groupChildren: 5_000,
   pointsPerObject: 10_000,
   followPathPoints: 10_000,
+  connectorClearance: 512,
+  connectorBendPenalty: 10_000,
   textLength: 32 * 1024,
   pathLength: 256 * 1024,
   imageUrlLength: 2_048,
@@ -711,21 +713,71 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       const to = parseAnchorRef(value.to, `${path}.to`, diagnostics);
       if (!from || !to) return null;
 
-      let kind: "straight" | "curve" | "orthogonal" = "straight";
+      let kind: "straight" | "curve" | "orthogonal" | "routed" = "straight";
       if (value.kind !== undefined) {
-        if (value.kind === "straight" || value.kind === "curve" || value.kind === "orthogonal") kind = value.kind;
+        if (value.kind === "straight" || value.kind === "curve" || value.kind === "orthogonal" || value.kind === "routed") kind = value.kind;
         else {
           diagnostic(
             diagnostics,
             "INVALID_CONNECTOR_KIND",
             `${path}.kind`,
-            "Connector kind must be straight, curve, or orthogonal.",
+            "Connector kind must be straight, curve, orthogonal, or routed.",
           );
           return null;
         }
       }
+
+      let routing: { clearance?: number; bendPenalty?: number } | undefined;
+      if (value.routing !== undefined) {
+        if (!isRecord(value.routing)) {
+          diagnostic(diagnostics, "INVALID_CONNECTOR_ROUTING", `${path}.routing`, "connector.routing must be an object.");
+          return null;
+        }
+        const clearance = value.routing.clearance;
+        const bendPenalty = value.routing.bendPenalty;
+        if (clearance !== undefined && (!finite(clearance) || clearance < 0 || clearance > COMPILER_LIMITS.connectorClearance)) {
+          diagnostic(
+            diagnostics,
+            "INVALID_CONNECTOR_ROUTING",
+            `${path}.routing.clearance`,
+            `routing.clearance must be a finite number between 0 and ${COMPILER_LIMITS.connectorClearance}.`,
+          );
+          return null;
+        }
+        if (bendPenalty !== undefined && (!finite(bendPenalty) || bendPenalty < 0 || bendPenalty > COMPILER_LIMITS.connectorBendPenalty)) {
+          diagnostic(
+            diagnostics,
+            "INVALID_CONNECTOR_ROUTING",
+            `${path}.routing.bendPenalty`,
+            `routing.bendPenalty must be a finite number between 0 and ${COMPILER_LIMITS.connectorBendPenalty}.`,
+          );
+          return null;
+        }
+        routing = {
+          ...(clearance !== undefined ? { clearance } : {}),
+          ...(bendPenalty !== undefined ? { bendPenalty } : {}),
+        };
+      }
+      if (routing && kind !== "routed") {
+        diagnostic(
+          diagnostics,
+          "INVALID_CONNECTOR_ROUTING",
+          `${path}.routing`,
+          "connector.routing is only valid when kind is routed.",
+        );
+        return null;
+      }
+
       const label = parseOptionalText(value.label, `${path}.label`, diagnostics);
-      return { ...base, type, from, to, kind, ...(label !== undefined ? { label } : {}) };
+      return {
+        ...base,
+        type,
+        from,
+        to,
+        kind,
+        ...(routing ? { routing } : {}),
+        ...(label !== undefined ? { label } : {}),
+      };
     }
     case "image": {
       const alt = parseOptionalText(value.alt, `${path}.alt`, diagnostics);
