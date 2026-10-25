@@ -17,9 +17,13 @@ import {
   type InteractionTrigger,
   type ScalarValue,
   type StateAction,
+  type StateMachine,
+  type StateMachineGuard,
+  type StateMachineState,
+  type StateMachineTransition,
   type Diagnostic,
   type DrawableObject,
-  type EasingName,
+  type Easing,
   type PointValue,
   type SceneDocument,
   type Style,
@@ -45,6 +49,10 @@ export const COMPILER_LIMITS = Object.freeze({
   bindings: 10_000,
   interactions: 5_000,
   interactionActions: 100,
+  stateMachines: 256,
+  machineStates: 256,
+  machineTransitions: 512,
+  machineTransitionActions: 100,
   stateEntries: 1_000,
   expressionNodes: 256,
   expressionDepth: 32,
@@ -55,6 +63,8 @@ export const COMPILER_LIMITS = Object.freeze({
   groupChildren: 5_000,
   pointsPerObject: 10_000,
   followPathPoints: 10_000,
+  connectorClearance: 512,
+  connectorBendPenalty: 10_000,
   textLength: 32 * 1024,
   pathLength: 256 * 1024,
   imageUrlLength: 2_048,
@@ -703,21 +713,71 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       const to = parseAnchorRef(value.to, `${path}.to`, diagnostics);
       if (!from || !to) return null;
 
-      let kind: "straight" | "curve" | "orthogonal" = "straight";
+      let kind: "straight" | "curve" | "orthogonal" | "routed" = "straight";
       if (value.kind !== undefined) {
-        if (value.kind === "straight" || value.kind === "curve" || value.kind === "orthogonal") kind = value.kind;
+        if (value.kind === "straight" || value.kind === "curve" || value.kind === "orthogonal" || value.kind === "routed") kind = value.kind;
         else {
           diagnostic(
             diagnostics,
             "INVALID_CONNECTOR_KIND",
             `${path}.kind`,
-            "Connector kind must be straight, curve, or orthogonal.",
+            "Connector kind must be straight, curve, orthogonal, or routed.",
           );
           return null;
         }
       }
+
+      let routing: { clearance?: number; bendPenalty?: number } | undefined;
+      if (value.routing !== undefined) {
+        if (!isRecord(value.routing)) {
+          diagnostic(diagnostics, "INVALID_CONNECTOR_ROUTING", `${path}.routing`, "connector.routing must be an object.");
+          return null;
+        }
+        const clearance = value.routing.clearance;
+        const bendPenalty = value.routing.bendPenalty;
+        if (clearance !== undefined && (!finite(clearance) || clearance < 0 || clearance > COMPILER_LIMITS.connectorClearance)) {
+          diagnostic(
+            diagnostics,
+            "INVALID_CONNECTOR_ROUTING",
+            `${path}.routing.clearance`,
+            `routing.clearance must be a finite number between 0 and ${COMPILER_LIMITS.connectorClearance}.`,
+          );
+          return null;
+        }
+        if (bendPenalty !== undefined && (!finite(bendPenalty) || bendPenalty < 0 || bendPenalty > COMPILER_LIMITS.connectorBendPenalty)) {
+          diagnostic(
+            diagnostics,
+            "INVALID_CONNECTOR_ROUTING",
+            `${path}.routing.bendPenalty`,
+            `routing.bendPenalty must be a finite number between 0 and ${COMPILER_LIMITS.connectorBendPenalty}.`,
+          );
+          return null;
+        }
+        routing = {
+          ...(clearance !== undefined ? { clearance } : {}),
+          ...(bendPenalty !== undefined ? { bendPenalty } : {}),
+        };
+      }
+      if (routing && kind !== "routed") {
+        diagnostic(
+          diagnostics,
+          "INVALID_CONNECTOR_ROUTING",
+          `${path}.routing`,
+          "connector.routing is only valid when kind is routed.",
+        );
+        return null;
+      }
+
       const label = parseOptionalText(value.label, `${path}.label`, diagnostics);
-      return { ...base, type, from, to, kind, ...(label !== undefined ? { label } : {}) };
+      return {
+        ...base,
+        type,
+        from,
+        to,
+        kind,
+        ...(routing ? { routing } : {}),
+        ...(label !== undefined ? { label } : {}),
+      };
     }
     case "image": {
       const alt = parseOptionalText(value.alt, `${path}.alt`, diagnostics);
@@ -928,6 +988,280 @@ function validateInteractionIds(interactions: Interaction[], diagnostics: Diagno
   });
 }
 
+function parseStateMachineEvent(
+  value: unknown,
+  path: string,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): InteractionTrigger | null {
+  if (!isRecord(value) || typeof value.type !== "string") {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_EVENT", path, "State-machine event must be an object with a type.");
+    return null;
+  }
+
+  if (value.type === "custom") {
+    const name = parseId(value.name, `${path}.name`, diagnostics, "INVALID_STATE_MACHINE_EVENT");
+    if (name === "click" || name === "focus" || name === "hover") {
+      diagnostic(
+        diagnostics,
+        "RESERVED_STATE_MACHINE_EVENT",
+        `${path}.name`,
+        "Custom event names must not use the reserved click, focus, or hover names.",
+      );
+      return null;
+    }
+    return name ? { type: "custom", name } : null;
+  }
+
+  if (value.type === "click" || value.type === "focus" || value.type === "hover") {
+    const target = parseReferenceId(value.target, `${path}.target`, diagnostics);
+    if (target && !objects.has(target)) {
+      diagnostic(diagnostics, "UNKNOWN_STATE_MACHINE_TARGET", `${path}.target`, `Object '${target}' does not exist.`);
+      return null;
+    }
+    return target ? { type: value.type, target } : null;
+  }
+
+  diagnostic(
+    diagnostics,
+    "INVALID_STATE_MACHINE_EVENT",
+    `${path}.type`,
+    "State-machine event type must be click, focus, hover, or custom.",
+  );
+  return null;
+}
+
+function parseStateMachineGuard(
+  value: unknown,
+  path: string,
+  declaredState: Record<string, ScalarValue>,
+  diagnostics: Diagnostic[],
+): StateMachineGuard | null {
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_GUARD", path, "State-machine guard must be an object.");
+    return null;
+  }
+
+  const key = value.key;
+  if (typeof key !== "string" || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(key) || key.length > COMPILER_LIMITS.idLength) {
+    diagnostic(diagnostics, "INVALID_STATE_KEY", `${path}.key`, "Guard key must be a valid declared state identifier.");
+    return null;
+  }
+  if (!Object.prototype.hasOwnProperty.call(declaredState, key)) {
+    diagnostic(diagnostics, "UNKNOWN_STATE_KEY", `${path}.key`, `State key '${key}' is not declared in scene.state.`);
+    return null;
+  }
+
+  const equals = parseScalar(value.equals, `${path}.equals`, diagnostics);
+  if (equals === null && value.equals !== null) return null;
+  return { key, equals };
+}
+
+function parseStateMachineTransition(
+  value: unknown,
+  path: string,
+  declaredState: Record<string, ScalarValue>,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): StateMachineTransition | null {
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_TRANSITION", path, "State-machine transition must be an object.");
+    return null;
+  }
+
+  const id = parseId(value.id, `${path}.id`, diagnostics, "INVALID_STATE_MACHINE_TRANSITION_ID");
+  const event = parseStateMachineEvent(value.event, `${path}.event`, objects, diagnostics);
+  const target = parseId(value.target, `${path}.target`, diagnostics, "INVALID_STATE_MACHINE_STATE_ID");
+
+  let guard: StateMachineGuard | undefined;
+  if (value.guard !== undefined) {
+    const parsed = parseStateMachineGuard(value.guard, `${path}.guard`, declaredState, diagnostics);
+    if (!parsed) return null;
+    guard = parsed;
+  }
+
+  let actions: StateAction[] | undefined;
+  if (value.actions !== undefined) {
+    if (!Array.isArray(value.actions)) {
+      diagnostic(diagnostics, "INVALID_STATE_MACHINE_ACTIONS", `${path}.actions`, "Transition actions must be an array.");
+      return null;
+    }
+    if (value.actions.length > COMPILER_LIMITS.machineTransitionActions) {
+      diagnostic(
+        diagnostics,
+        "LIMIT_STATE_MACHINE_ACTIONS",
+        `${path}.actions`,
+        `Transition exceeds the ${COMPILER_LIMITS.machineTransitionActions}-action limit.`,
+      );
+      return null;
+    }
+    const parsed = value.actions
+      .map((action, index) => parseStateAction(action, `${path}.actions[${index}]`, declaredState, diagnostics))
+      .filter((action): action is StateAction => action !== null);
+    if (parsed.length !== value.actions.length) return null;
+    actions = parsed;
+  }
+
+  if (!id || !event || !target) return null;
+  return {
+    id,
+    event,
+    target,
+    ...(guard ? { guard } : {}),
+    ...(actions ? { actions } : {}),
+  };
+}
+
+function parseStateMachineState(
+  value: unknown,
+  path: string,
+  declaredState: Record<string, ScalarValue>,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): StateMachineState | null {
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_STATE", path, "State-machine state must be an object.");
+    return null;
+  }
+
+  const id = parseId(value.id, `${path}.id`, diagnostics, "INVALID_STATE_MACHINE_STATE_ID");
+  if (!Array.isArray(value.transitions)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_TRANSITIONS", `${path}.transitions`, "State transitions must be an array.");
+    return null;
+  }
+  if (value.transitions.length > COMPILER_LIMITS.machineTransitions) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_STATE_MACHINE_TRANSITIONS",
+      `${path}.transitions`,
+      `State exceeds the ${COMPILER_LIMITS.machineTransitions}-transition limit.`,
+    );
+    return null;
+  }
+
+  const transitions = value.transitions
+    .map((transition, index) =>
+      parseStateMachineTransition(transition, `${path}.transitions[${index}]`, declaredState, objects, diagnostics)
+    )
+    .filter((transition): transition is StateMachineTransition => transition !== null);
+
+  if (!id || transitions.length !== value.transitions.length) return null;
+  return { id, transitions };
+}
+
+function parseStateMachine(
+  value: unknown,
+  index: number,
+  declaredState: Record<string, ScalarValue>,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): StateMachine | null {
+  const path = `stateMachines[${index}]`;
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE", path, "State machine must be an object.");
+    return null;
+  }
+
+  const id = parseId(value.id, `${path}.id`, diagnostics, "INVALID_STATE_MACHINE_ID");
+  const initial = parseId(value.initial, `${path}.initial`, diagnostics, "INVALID_STATE_MACHINE_STATE_ID");
+  if (!Array.isArray(value.states) || value.states.length === 0) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINE_STATES", `${path}.states`, "State machine must contain at least one state.");
+    return null;
+  }
+  if (value.states.length > COMPILER_LIMITS.machineStates) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_STATE_MACHINE_STATES",
+      `${path}.states`,
+      `State machine exceeds the ${COMPILER_LIMITS.machineStates}-state limit.`,
+    );
+    return null;
+  }
+
+  const rawStateIds = new Set(
+    value.states.flatMap(state =>
+      isRecord(state) && typeof state.id === "string" && /^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(state.id)
+        ? [state.id]
+        : []
+    ),
+  );
+
+  if (initial && !rawStateIds.has(initial)) {
+    diagnostic(
+      diagnostics,
+      "UNKNOWN_STATE_MACHINE_INITIAL",
+      `${path}.initial`,
+      `Initial state '${initial}' does not exist in machine '${id ?? "<invalid>"}'.`,
+    );
+  }
+
+  value.states.forEach((rawState, stateIndex) => {
+    if (!isRecord(rawState) || !Array.isArray(rawState.transitions)) return;
+    rawState.transitions.forEach((rawTransition, transitionIndex) => {
+      if (!isRecord(rawTransition) || typeof rawTransition.target !== "string") return;
+      if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(rawTransition.target)) return;
+      if (rawStateIds.has(rawTransition.target)) return;
+      diagnostic(
+        diagnostics,
+        "UNKNOWN_STATE_MACHINE_STATE",
+        `${path}.states[${stateIndex}].transitions[${transitionIndex}].target`,
+        `Target state '${rawTransition.target}' does not exist in machine '${id ?? "<invalid>"}'.`,
+      );
+    });
+  });
+
+  const states = value.states
+    .map((state, stateIndex) =>
+      parseStateMachineState(state, `${path}.states[${stateIndex}]`, declaredState, objects, diagnostics)
+    )
+    .filter((state): state is StateMachineState => state !== null);
+
+  if (!id || !initial || states.length !== value.states.length) return null;
+
+  const stateIds = new Set<string>();
+  const transitionIds = new Set<string>();
+  states.forEach((state, stateIndex) => {
+    if (stateIds.has(state.id)) {
+      diagnostic(
+        diagnostics,
+        "DUPLICATE_STATE_MACHINE_STATE_ID",
+        `${path}.states[${stateIndex}].id`,
+        `State '${state.id}' is duplicated in machine '${id}'.`,
+      );
+    }
+    stateIds.add(state.id);
+
+    state.transitions.forEach((transition, transitionIndex) => {
+      if (transitionIds.has(transition.id)) {
+        diagnostic(
+          diagnostics,
+          "DUPLICATE_STATE_MACHINE_TRANSITION_ID",
+          `${path}.states[${stateIndex}].transitions[${transitionIndex}].id`,
+          `Transition '${transition.id}' is duplicated in machine '${id}'.`,
+        );
+      }
+      transitionIds.add(transition.id);
+    });
+  });
+
+  return { id, initial, states };
+}
+
+function validateStateMachineIds(stateMachines: StateMachine[], diagnostics: Diagnostic[]): void {
+  const ids = new Set<string>();
+  stateMachines.forEach((machine, index) => {
+    if (ids.has(machine.id)) {
+      diagnostic(
+        diagnostics,
+        "DUPLICATE_STATE_MACHINE_ID",
+        `stateMachines[${index}].id`,
+        `State machine '${machine.id}' is duplicated.`,
+      );
+    }
+    ids.add(machine.id);
+  });
+}
+
 function parseExpression(
   value: unknown,
   path: string,
@@ -1007,7 +1341,7 @@ function parseBinding(value: unknown, index: number, diagnostics: Diagnostic[]):
   return { id, target: { objectId, property: property as BindingProperty }, expression };
 }
 
-type ActionProperty = BindingProperty | "width" | "height" | "drawProgress";
+type ActionProperty = BindingProperty | "width" | "height" | "drawProgress" | "parentId" | "z";
 
 function actionProperties(action: Action): readonly ActionProperty[] {
   switch (action.type) {
@@ -1020,6 +1354,8 @@ function actionProperties(action: Action): readonly ActionProperty[] {
     case "stroke": return ["stroke"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
+    case "reparent": return ["parentId"];
+    case "zOrder": return ["z"];
     case "morph":
     case "visibility":
     case "camera":
@@ -1093,17 +1429,50 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
     return null;
   }
 
-  let easing: EasingName = "linear";
+  let easing: Easing = "linear";
   if (value.easing !== undefined) {
     if (value.easing === "linear" || value.easing === "easeIn" || value.easing === "easeOut" || value.easing === "easeInOut" || value.easing === "spring") {
       easing = value.easing;
+    } else if (isRecord(value.easing) && value.easing.type === "cubicBezier") {
+      const { x1, y1, x2, y2 } = value.easing;
+      if (
+        !finite(x1) || x1 < 0 || x1 > 1 ||
+        !finite(x2) || x2 < 0 || x2 > 1 ||
+        !finite(y1) || Math.abs(y1) > 10 ||
+        !finite(y2) || Math.abs(y2) > 10
+      ) {
+        diagnostic(
+          diagnostics,
+          "INVALID_EASING",
+          `${path}.easing`,
+          "cubicBezier requires finite x1/x2 in [0, 1] and finite y1/y2 with absolute value <= 10.",
+        );
+        return null;
+      }
+      easing = { type: "cubicBezier", x1, y1, x2, y2 };
     } else {
-      diagnostic(diagnostics, "INVALID_EASING", `${path}.easing`, "Unsupported easing value.");
+      diagnostic(
+        diagnostics,
+        "INVALID_EASING",
+        `${path}.easing`,
+        "Easing must be linear, easeIn, easeOut, easeInOut, spring, or a cubicBezier object.",
+      );
       return null;
     }
   }
 
-  const base = { id, start: value.start, duration: value.duration, easing };
+  if (value.interrupt !== undefined && typeof value.interrupt !== "boolean") {
+    diagnostic(diagnostics, "INVALID_INTERRUPT", `${path}.interrupt`, "interrupt must be a boolean.");
+    return null;
+  }
+
+  const base = {
+    id,
+    start: value.start,
+    duration: value.duration,
+    easing,
+    ...(value.interrupt === true ? { interrupt: true } : {}),
+  };
 
   if (value.type === "camera") {
     if (value.target !== undefined) {
@@ -1283,13 +1652,47 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
       if (typeof value.visible === "boolean") return { ...objectBase, type: "visibility", visible: value.visible };
       diagnostic(diagnostics, "INVALID_VISIBILITY_TARGET", `${path}.visible`, "visibility.visible must be a boolean.");
       return null;
+    case "reparent": {
+      if (value.duration !== 0) {
+        diagnostic(diagnostics, "INVALID_STRUCTURAL_DURATION", `${path}.duration`, "reparent actions must have duration 0.");
+        return null;
+      }
+      if (value.parentId !== null && typeof value.parentId !== "string") {
+        diagnostic(diagnostics, "INVALID_REPARENT_TARGET", `${path}.parentId`, "reparent.parentId must be an object id or null.");
+        return null;
+      }
+      if (value.parentId === target) {
+        diagnostic(diagnostics, "REPARENT_SELF", `${path}.parentId`, "An object cannot be parented to itself.");
+        return null;
+      }
+      if (value.preserveWorld !== undefined && typeof value.preserveWorld !== "boolean") {
+        diagnostic(diagnostics, "INVALID_REPARENT_POLICY", `${path}.preserveWorld`, "preserveWorld must be a boolean.");
+        return null;
+      }
+      return {
+        ...objectBase,
+        type: "reparent",
+        parentId: value.parentId,
+        ...(value.preserveWorld === false ? { preserveWorld: false } : {}),
+      };
+    }
+    case "zOrder":
+      if (value.duration !== 0) {
+        diagnostic(diagnostics, "INVALID_STRUCTURAL_DURATION", `${path}.duration`, "zOrder actions must have duration 0.");
+        return null;
+      }
+      if (typeof value.to === "number" && Number.isInteger(value.to) && Math.abs(value.to) <= COMPILER_LIMITS.absoluteNumber) {
+        return { ...objectBase, type: "zOrder", to: value.to };
+      }
+      diagnostic(diagnostics, "INVALID_Z_ORDER", `${path}.to`, "zOrder.to must be a bounded integer.");
+      return null;
     default:
       diagnostic(
         diagnostics,
         "UNKNOWN_ACTION",
         `${path}.type`,
         `Unsupported action type '${value.type}'.`,
-        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, morph, or visibility.",
+        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, morph, visibility, reparent, or zOrder.",
       );
       return null;
   }
@@ -1491,6 +1894,41 @@ function validateTimelineReferences(
         objectIds.length ? `Use one of: ${objectIds.slice(0, 8).join(", ")}` : "Create the object before targeting it.",
       );
       return;
+    }
+
+    if (action.type === "reparent" && action.parentId !== null) {
+      const parent = objects.get(action.parentId);
+      if (!parent) {
+        diagnostic(
+          diagnostics,
+          "UNKNOWN_REPARENT_TARGET",
+          `timeline[${index}].parentId`,
+          `Parent object '${action.parentId}' does not exist.`,
+        );
+      } else if (parent.type !== "group") {
+        diagnostic(
+          diagnostics,
+          "INVALID_REPARENT_TARGET",
+          `timeline[${index}].parentId`,
+          `Parent '${action.parentId}' must be a group.`,
+        );
+      } else {
+        let current: DrawableObject | undefined = parent;
+        const seen = new Set<string>();
+        while (current?.parentId && !seen.has(current.id)) {
+          if (current.parentId === action.target) {
+            diagnostic(
+              diagnostics,
+              "REPARENT_CYCLE",
+              `timeline[${index}].parentId`,
+              `Reparenting '${action.target}' under '${action.parentId}' would create a parent cycle in the base graph.`,
+            );
+            break;
+          }
+          seen.add(current.id);
+          current = objects.get(current.parentId);
+        }
+      }
     }
 
     if (action.type === "resize") {
@@ -1743,6 +2181,17 @@ export function compile(input: unknown): CompileResult {
     );
   }
 
+  if (input.stateMachines !== undefined && !Array.isArray(input.stateMachines)) {
+    diagnostic(diagnostics, "INVALID_STATE_MACHINES", "stateMachines", "stateMachines must be an array.");
+  } else if (Array.isArray(input.stateMachines) && input.stateMachines.length > COMPILER_LIMITS.stateMachines) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_STATE_MACHINES",
+      "stateMachines",
+      `stateMachines exceeds the ${COMPILER_LIMITS.stateMachines}-entry limit.`,
+    );
+  }
+
   const preflightDiagnostics = sortedDiagnostics(diagnostics);
   if (
     !scene ||
@@ -1751,7 +2200,8 @@ export function compile(input: unknown): CompileResult {
     input.objects.length > COMPILER_LIMITS.objects ||
     input.timeline.length > COMPILER_LIMITS.timelineActions ||
     (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings) ||
-    (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions)
+    (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions) ||
+    (Array.isArray(input.stateMachines) && input.stateMachines.length > COMPILER_LIMITS.stateMachines)
   ) {
     return { ok: false, diagnostics: preflightDiagnostics };
   }
@@ -1775,10 +2225,16 @@ export function compile(input: unknown): CompileResult {
         .map((value, index) => parseInteraction(value, index, state ?? {}, objectIndex, diagnostics))
         .filter((value): value is Interaction => value !== null)
     : [];
+  const stateMachines = Array.isArray(input.stateMachines)
+    ? input.stateMachines
+        .map((value, index) => parseStateMachine(value, index, state ?? {}, objectIndex, diagnostics))
+        .filter((value): value is StateMachine => value !== null)
+    : [];
 
   validateTimelineReferences(timeline, objectIndex, diagnostics);
   validateBindings(bindings, timeline, objectIndex, diagnostics);
   validateInteractionIds(interactions, diagnostics);
+  validateStateMachineIds(stateMachines, diagnostics);
 
   const doc: SceneDocument = {
     version: "1.0",
@@ -1788,6 +2244,7 @@ export function compile(input: unknown): CompileResult {
     ...(state ? { state } : {}),
     ...(bindings.length ? { bindings } : {}),
     ...(interactions.length ? { interactions } : {}),
+    ...(stateMachines.length ? { stateMachines } : {}),
   };
 
   // Compiler owns the stable duplicate/reference/time diagnostics above.
@@ -1825,3 +2282,5 @@ export function compileJson(source: string): CompileResult {
     };
   }
 }
+
+export * from "./migrations.js";

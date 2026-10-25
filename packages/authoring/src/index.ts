@@ -1,4 +1,4 @@
-import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type EasingName, type Expression, type Marker, type PointValue, type ScalarValue, type SceneDocument, type ThemeName } from "@anim8/core";
+import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
 
 export interface SceneOptions {
   width?: number;
@@ -11,26 +11,31 @@ export interface SceneOptions {
 
 export interface MotionOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
   path?: "linear" | "arc-up" | "arc-down";
   arcHeight?: number;
+  /** Explicitly replace an already-active action on the same property. */
+  interrupt?: boolean;
   /** Margin used when the destination is a semantic scene position. */
   margin?: number;
 }
 
 export interface FollowPathOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
 }
 
 export interface MorphOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
 }
 
 export interface CameraMotionOptions {
   duration?: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
 }
 
 export interface PulseOptions {
@@ -38,7 +43,7 @@ export interface PulseOptions {
   duration?: number;
   /** Multiplicative peak scale relative to the current scale. Defaults to 1.08. */
   scale?: number;
-  easing?: EasingName;
+  easing?: Easing;
 }
 
 export interface ShakeOptions {
@@ -47,7 +52,7 @@ export interface ShakeOptions {
   /** Scene-coordinate offset from the current position. Defaults to 8. */
   distance?: number;
   axis?: "x" | "y";
-  easing?: EasingName;
+  easing?: Easing;
 }
 
 export type SemanticPosition =
@@ -81,7 +86,26 @@ export interface StrokeShapeOptions extends ShapeOptions {
 }
 
 type WithoutSchedule<T> = T extends Action ? Omit<T, "id" | "start"> : never;
-type Pending = WithoutSchedule<Action>;
+export type PendingAction = WithoutSchedule<Action>;
+type Pending = PendingAction;
+
+export interface Keyframe {
+  /** Normalized target time in (0, 1]. The current evaluated pose is implicit at 0. */
+  offset: number;
+  position?: PointValue;
+  rotation?: number;
+  scale?: number | { x: number; y: number };
+  opacity?: number;
+  fill?: string;
+  stroke?: string;
+  /** Easing for the segment ending at this keyframe. */
+  easing?: Easing;
+}
+
+export interface KeyframeOptions {
+  duration: number;
+  easing?: Easing;
+}
 
 export class NodeHandle {
   constructor(public readonly id: string, private readonly owner: SceneBuilder) {}
@@ -91,7 +115,7 @@ export class NodeHandle {
       : to instanceof NodeHandle
         ? this.owner.positionOf(to.id)
         : to;
-    return { type: "move", target: this.id, to: point, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.path && options.path !== "linear" ? { path: options.path } : {}), ...(options.arcHeight !== undefined ? { arcHeight: options.arcHeight } : {}) };
+    return { type: "move", target: this.id, to: point, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.path && options.path !== "linear" ? { path: options.path } : {}), ...(options.arcHeight !== undefined ? { arcHeight: options.arcHeight } : {}), ...(options.interrupt ? { interrupt: true } : {}) };
   }
   followPath(points: readonly PointValue[], options: FollowPathOptions = {}): Pending {
     this.owner.assertFollowPath(points);
@@ -101,32 +125,33 @@ export class NodeHandle {
       points: points.map(point => ({ ...point })),
       duration: options.duration ?? 800,
       easing: options.easing ?? "easeInOut",
+      ...(options.interrupt ? { interrupt: true } : {}),
     };
   }
   rotate(to: number, options: MotionOptions = {}): Pending {
-    return { type: "rotate", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "rotate", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   scale(to: number | { x: number; y: number }, options: MotionOptions = {}): Pending {
     const value = typeof to === "number" ? { x: to, y: to } : to;
-    return { type: "scale", target: this.id, to: value, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "scale", target: this.id, to: value, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   resize(to: { width: number; height: number }, options: MotionOptions = {}): Pending {
     this.owner.assertResizable(this.id, to);
-    return { type: "resize", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "resize", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   draw(to = 1, options: MotionOptions = {}): Pending {
     this.owner.assertDrawableStroke(this.id, to);
-    return { type: "draw", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "draw", target: this.id, to, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   morphTo(to: string, options: MorphOptions = {}): Pending {
     const canonical = this.owner.assertMorphable(this.id, to);
-    return { type: "morph", target: this.id, to: canonical, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut" };
+    return { type: "morph", target: this.id, to: canonical, duration: options.duration ?? 600, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   fadeTo(to: number, options: MotionOptions = {}): Pending {
-    return { type: "opacity", target: this.id, to, duration: options.duration ?? 400, easing: options.easing ?? "easeInOut" };
+    return { type: "opacity", target: this.id, to, duration: options.duration ?? 400, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   highlight(color = "#fef08a", options: MotionOptions = {}): Pending {
-    return { type: "fill", target: this.id, to: color, duration: options.duration ?? 300, easing: options.easing ?? "easeInOut" };
+    return { type: "fill", target: this.id, to: color, duration: options.duration ?? 300, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   show(): Pending {
     return { type: "visibility", target: this.id, visible: true, duration: 0 };
@@ -143,6 +168,29 @@ export class NodeHandle {
   bind(property: BindingProperty, expression: Expression): void {
     this.owner.bind(this, property, expression);
   }
+  onClick(...actions: StateAction[]): void {
+    this.owner.interaction({ type: "click", target: this.id }, actions);
+  }
+  onFocus(...actions: StateAction[]): void {
+    this.owner.interaction({ type: "focus", target: this.id }, actions);
+  }
+  onHover(...actions: StateAction[]): void {
+    this.owner.interaction({ type: "hover", target: this.id }, actions);
+  }
+  reparent(parent: NodeHandle | null, options: { preserveWorld?: boolean } = {}): PendingAction {
+    return {
+      type: "reparent",
+      target: this.id,
+      parentId: parent?.id ?? null,
+      duration: 0,
+      easing: "linear",
+      ...(options.preserveWorld === false ? { preserveWorld: false } : {}),
+    };
+  }
+  reorder(to: number): PendingAction {
+    if (!Number.isInteger(to)) throw new Error("z-order must be an integer.");
+    return { type: "zOrder", target: this.id, to, duration: 0, easing: "linear" };
+  }
 }
 
 export class SceneBuilder {
@@ -151,6 +199,8 @@ export class SceneBuilder {
   private markers: Marker[] = [];
   private stateValues: Record<string, ScalarValue> = {};
   private bindings: Binding[] = [];
+  private interactions: Interaction[] = [];
+  private stateMachines: StateMachine[] = [];
   private cursor = 0;
   private idCounter = 0;
 
@@ -299,6 +349,7 @@ export class SceneBuilder {
       to: { ...to },
       duration: options.duration ?? 600,
       easing: options.easing ?? "easeInOut",
+      ...(options.interrupt ? { interrupt: true } : {}),
     };
   }
 
@@ -451,11 +502,11 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  connect(from: NodeHandle, to: NodeHandle, options: { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; label?: string } = {}): NodeHandle {
+  connect(from: NodeHandle, to: NodeHandle, options: { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string } = {}): NodeHandle {
     const id = this.next("connector");
     this.objects.push({
       id, type: "connector", from: { objectId: from.id, ...(options.from ? { anchor: options.from } : {}) }, to: { objectId: to.id, ...(options.to ? { anchor: options.to } : {}) },
-      kind: options.kind ?? "straight", ...(options.label ? { label: options.label } : {}),
+      kind: options.kind ?? "straight", ...(options.routing ? { routing: structuredClone(options.routing) } : {}), ...(options.label ? { label: options.label } : {}),
       transform: defaultTransform(), style: { ...defaultStyle(), fill: "none" }, visible: true, z: this.objects.length,
     });
     return new NodeHandle(id, this);
@@ -470,21 +521,303 @@ export class SceneBuilder {
     return evaluated ? { x: evaluated.transform.x, y: evaluated.transform.y } : { x: object.transform.x, y: object.transform.y };
   }
 
-  sequence(...actions: Pending[]): void {
-    for (const action of actions) {
-      this.timeline.push({ ...action, id: this.next(action.type), start: this.cursor } as Action);
-      this.cursor += action.duration;
-    }
+  private scheduleAt(start: number, action: Pending): string {
+    if (!Number.isFinite(start) || start < 0) throw new Error("Action start must be a finite number >= 0.");
+    if (!Number.isFinite(action.duration) || action.duration < 0) throw new Error("Action duration must be a finite number >= 0.");
+    const id = this.next(action.type);
+    this.timeline.push({ ...structuredClone(action), id, start } as Action);
+    return id;
   }
 
-  parallel(...actions: Pending[]): void {
+  sequence(...actions: Pending[]): string[] {
+    const ids: string[] = [];
+    for (const action of actions) {
+      ids.push(this.scheduleAt(this.cursor, action));
+      this.cursor += action.duration;
+    }
+    return ids;
+  }
+
+  parallel(...actions: Pending[]): string[] {
     const start = this.cursor;
     let end = start;
+    const ids: string[] = [];
     for (const action of actions) {
-      this.timeline.push({ ...action, id: this.next(action.type), start } as Action);
+      ids.push(this.scheduleAt(start, action));
       end = Math.max(end, start + action.duration);
     }
     this.cursor = end;
+    return ids;
+  }
+
+  /** Schedule actions at an absolute timeline time. */
+  atTime(time: number, ...actions: Pending[]): string[] {
+    if (!Number.isFinite(time) || time < 0) throw new Error("Absolute timeline time must be a finite number >= 0.");
+    let end = this.cursor;
+    const ids: string[] = [];
+    for (const action of actions) {
+      ids.push(this.scheduleAt(time, action));
+      end = Math.max(end, time + action.duration);
+    }
+    this.cursor = end;
+    return ids;
+  }
+
+  /** Schedule actions relative to the current authoring cursor. */
+  after(delay: number, ...actions: Pending[]): string[] {
+    if (!Number.isFinite(delay) || delay < 0) throw new Error("Relative delay must be a finite number >= 0.");
+    const start = this.cursor + delay;
+    return this.atTime(start, ...actions);
+  }
+
+  /** Start each action after a fixed offset while allowing overlap. */
+  stagger(gap: number, ...actions: Pending[]): string[] {
+    if (!Number.isFinite(gap) || gap < 0) throw new Error("Stagger gap must be a finite number >= 0.");
+    const start = this.cursor;
+    let end = start;
+    const ids: string[] = [];
+    actions.forEach((action, index) => {
+      const actionStart = start + gap * index;
+      ids.push(this.scheduleAt(actionStart, action));
+      end = Math.max(end, actionStart + action.duration);
+    });
+    this.cursor = end;
+    return ids;
+  }
+
+  /** Repeat a sequence of pending actions a fixed number of times. */
+  repeat(count: number, ...actions: Pending[]): string[] {
+    if (!Number.isInteger(count) || count < 0 || count > 10_000) {
+      throw new Error("Repeat count must be an integer between 0 and 10000.");
+    }
+    const ids: string[] = [];
+    for (let iteration = 0; iteration < count; iteration += 1) {
+      ids.push(...this.sequence(...actions));
+    }
+    return ids;
+  }
+
+  /**
+   * Compile timed keyframes into ordinary primitive actions.
+   *
+   * The current evaluated pose is the implicit value at offset 0. A keyframe at
+   * offset 0 is allowed to intentionally establish an immediate value.
+   */
+  keyframes(target: NodeHandle, frames: readonly Keyframe[], options: KeyframeOptions): string[] {
+    if (!Number.isFinite(options.duration) || options.duration <= 0) {
+      throw new Error("Keyframe duration must be a finite number > 0.");
+    }
+    if (frames.length === 0) throw new Error("Keyframes require at least one target frame.");
+
+    let previousOffset = 0;
+    const start = this.cursor;
+    const ids: string[] = [];
+    for (const [index, frame] of frames.entries()) {
+      if (!Number.isFinite(frame.offset) || frame.offset < 0 || frame.offset > 1) {
+        throw new Error(`Keyframe offset at index ${index} must be between 0 and 1.`);
+      }
+      if (frame.offset < previousOffset || (index > 0 && frame.offset === previousOffset)) {
+        throw new Error("Keyframe offsets must be strictly increasing.");
+      }
+
+      const segmentStart = start + previousOffset * options.duration;
+      const segmentDuration = (frame.offset - previousOffset) * options.duration;
+      const easing = frame.easing ?? options.easing ?? "easeInOut";
+      const pending: Pending[] = [];
+
+      if (frame.position) {
+        pending.push({
+          type: "move",
+          target: target.id,
+          to: { ...frame.position },
+          duration: segmentDuration,
+          easing,
+        });
+      }
+      if (frame.rotation !== undefined) {
+        pending.push({ type: "rotate", target: target.id, to: frame.rotation, duration: segmentDuration, easing });
+      }
+      if (frame.scale !== undefined) {
+        const scale = typeof frame.scale === "number"
+          ? { x: frame.scale, y: frame.scale }
+          : { ...frame.scale };
+        pending.push({ type: "scale", target: target.id, to: scale, duration: segmentDuration, easing });
+      }
+      if (frame.opacity !== undefined) {
+        pending.push({ type: "opacity", target: target.id, to: frame.opacity, duration: segmentDuration, easing });
+      }
+      if (frame.fill !== undefined) {
+        pending.push({ type: "fill", target: target.id, to: frame.fill, duration: segmentDuration, easing });
+      }
+      if (frame.stroke !== undefined) {
+        pending.push({ type: "stroke", target: target.id, to: frame.stroke, duration: segmentDuration, easing });
+      }
+
+      for (const action of pending) ids.push(this.scheduleAt(segmentStart, action));
+      previousOffset = frame.offset;
+    }
+
+    if (frames.at(-1)!.offset !== 1) {
+      throw new Error("The final keyframe offset must be 1.");
+    }
+    this.cursor = Math.max(this.cursor, start + options.duration);
+    return ids;
+  }
+
+  private pendingProperties(action: Pending | Action): readonly string[] {
+    switch (action.type) {
+      case "move":
+      case "followPath": return ["x", "y"];
+      case "rotate": return ["rotation"];
+      case "scale": return ["scaleX", "scaleY"];
+      case "opacity": return ["opacity"];
+      case "fill": return ["fill"];
+      case "stroke": return ["stroke"];
+      case "resize": return ["width", "height"];
+      case "draw": return ["drawProgress"];
+      case "morph": return ["d"];
+      case "visibility": return ["visible"];
+      case "reparent": return ["parentId"];
+      case "zOrder": return ["z"];
+      case "camera": return [
+        ...(action.to.x !== undefined ? ["camera.x"] : []),
+        ...(action.to.y !== undefined ? ["camera.y"] : []),
+        ...(action.to.zoom !== undefined ? ["camera.zoom"] : []),
+      ];
+    }
+  }
+
+  /**
+   * Retarget an active action without jumping by explicitly interrupting it at
+   * the requested absolute time.
+   */
+  retarget(actionId: string, replacement: Pending, at = this.cursor): string {
+    const original = this.timeline.find(action => action.id === actionId);
+    if (!original) throw new Error(`Unknown action '${actionId}'.`);
+    if (!Number.isFinite(at) || at <= original.start || at >= original.start + original.duration) {
+      throw new Error("Retarget time must fall strictly inside the original action.");
+    }
+
+    const sameTarget =
+      original.type === "camera" || replacement.type === "camera"
+        ? original.type === "camera" && replacement.type === "camera"
+        : original.target === replacement.target;
+    const conflicts = this.pendingProperties(original).some(property =>
+      this.pendingProperties(replacement).includes(property)
+    );
+    if (!sameTarget || !conflicts) {
+      throw new Error("Retarget replacement must write the same target and at least one of the original action's properties.");
+    }
+
+    const id = this.scheduleAt(at, { ...replacement, interrupt: true } as Pending);
+    this.cursor = Math.max(this.cursor, at + replacement.duration);
+    return id;
+  }
+
+  /**
+   * Freeze an active action at its sampled pose. Cancelling before it starts
+   * removes it outright; cancelling after it ends is a no-op.
+   */
+  cancel(actionId: string, at = this.cursor): string | undefined {
+    const index = this.timeline.findIndex(action => action.id === actionId);
+    if (index < 0) throw new Error(`Unknown action '${actionId}'.`);
+    const original = this.timeline[index]!;
+    if (!Number.isFinite(at) || at < 0) throw new Error("Cancellation time must be a finite number >= 0.");
+
+    if (at <= original.start) {
+      this.timeline.splice(index, 1);
+      return undefined;
+    }
+    if (at >= original.start + original.duration || original.duration === 0) return undefined;
+
+    const document: SceneDocument = {
+      version: "1.0",
+      scene: {
+        width: this.options.width ?? 800,
+        height: this.options.height ?? 450,
+        camera: this.baseCamera(),
+      },
+      objects: this.objects,
+      timeline: this.timeline,
+    };
+    const frame = evaluate(document, at);
+    let hold: Pending | undefined;
+
+    if (original.type === "camera") {
+      const to: CameraTarget = {};
+      if (original.to.x !== undefined) to.x = frame.camera.x;
+      if (original.to.y !== undefined) to.y = frame.camera.y;
+      if (original.to.zoom !== undefined) to.zoom = frame.camera.zoom;
+      hold = { type: "camera", to, duration: 0, easing: "linear", interrupt: true };
+    } else {
+      const object = frame.objects.find(item => item.id === original.target);
+      if (!object) throw new Error(`Unknown target '${original.target}'.`);
+      switch (original.type) {
+        case "move":
+        case "followPath":
+          hold = { type: "move", target: original.target, to: { x: object.transform.x, y: object.transform.y }, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "rotate":
+          hold = { type: "rotate", target: original.target, to: object.transform.rotation, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "scale":
+          hold = { type: "scale", target: original.target, to: { x: object.transform.scaleX, y: object.transform.scaleY }, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "opacity":
+          hold = { type: "opacity", target: original.target, to: object.transform.opacity, duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "fill":
+          hold = { type: "fill", target: original.target, to: object.style.fill ?? "none", duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "stroke":
+          hold = { type: "stroke", target: original.target, to: object.style.stroke ?? "none", duration: 0, easing: "linear", interrupt: true };
+          break;
+        case "resize": {
+          if (object.type === "rect" || object.type === "image") {
+            hold = { type: "resize", target: original.target, to: { width: object.width, height: object.height }, duration: 0, easing: "linear", interrupt: true };
+          } else if (object.type === "circle") {
+            hold = { type: "resize", target: original.target, to: { width: object.radius * 2, height: object.radius * 2 }, duration: 0, easing: "linear", interrupt: true };
+          } else if (object.type === "ellipse") {
+            hold = { type: "resize", target: original.target, to: { width: object.rx * 2, height: object.ry * 2 }, duration: 0, easing: "linear", interrupt: true };
+          }
+          break;
+        }
+        case "draw":
+          if (object.type === "path" || object.type === "polygon" || object.type === "polyline") {
+            hold = { type: "draw", target: original.target, to: object.drawProgress ?? 1, duration: 0, easing: "linear", interrupt: true };
+          }
+          break;
+        case "morph":
+          if (object.type === "path") {
+            hold = { type: "morph", target: original.target, to: object.d, duration: 0, easing: "linear", interrupt: true };
+          }
+          break;
+        case "visibility":
+        case "reparent":
+        case "zOrder":
+          return undefined;
+      }
+    }
+
+    if (!hold) throw new Error(`Action '${actionId}' cannot be cancelled safely.`);
+    const id = this.scheduleAt(at, hold);
+    this.cursor = Math.max(this.cursor, at);
+    return id;
+  }
+
+  /** Compile grouping into deterministic reparent actions. The destination group must already exist. */
+  groupInto(group: NodeHandle, ...children: NodeHandle[]): PendingAction[] {
+    return children.map(child => child.reparent(group));
+  }
+
+  /** Compile ungrouping/moving to the scene root into deterministic reparent actions. */
+  ungroup(...children: NodeHandle[]): PendingAction[] {
+    return children.map(child => child.reparent(null));
+  }
+
+  /** Compile moving an object between existing containers; null means scene root. */
+  moveBetweenContainers(child: NodeHandle, parent: NodeHandle | null): PendingAction {
+    return child.reparent(parent);
   }
 
   step(label: string, build: () => void): void {
@@ -492,7 +825,12 @@ export class SceneBuilder {
     build();
   }
 
-  wait(duration: number): void { this.cursor += duration; }
+  wait(duration: number): void {
+    if (!Number.isFinite(duration) || duration < 0) throw new Error("Wait duration must be a finite number >= 0.");
+    this.cursor += duration;
+  }
+
+  delay(duration: number): void { this.wait(duration); }
 
   state(name: string, value: ScalarValue): void {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) throw new Error(`Invalid state name '${name}'.`);
@@ -501,6 +839,27 @@ export class SceneBuilder {
 
   bind(target: NodeHandle, property: BindingProperty, expression: Expression): void {
     this.bindings.push({ id: this.next("binding"), target: { objectId: target.id, property }, expression });
+  }
+
+  interaction(event: InteractionTrigger, actions: readonly StateAction[], id = this.next("interaction")): string {
+    if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(id)) throw new Error(`Invalid interaction id '${id}'.`);
+    if (actions.length === 0) throw new Error("Interaction requires at least one state action.");
+    this.interactions.push({ id, event: structuredClone(event), actions: structuredClone([...actions]) });
+    return id;
+  }
+
+  on(eventName: string, ...actions: StateAction[]): string {
+    if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(eventName)) throw new Error(`Invalid custom event name '${eventName}'.`);
+    if (eventName === "click" || eventName === "focus" || eventName === "hover") {
+      throw new Error(`Custom event name '${eventName}' is reserved.`);
+    }
+    return this.interaction({ type: "custom", name: eventName }, actions);
+  }
+
+  stateMachine(machine: StateMachine): void {
+    if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(machine.id)) throw new Error(`Invalid state machine id '${machine.id}'.`);
+    if (machine.states.length === 0) throw new Error("State machine requires at least one state.");
+    this.stateMachines.push(structuredClone(machine));
   }
 
   pulse(target: NodeHandle, options: PulseOptions = {}): void {
@@ -586,10 +945,18 @@ export class SceneBuilder {
       timeline: structuredClone(this.timeline),
       ...(Object.keys(this.stateValues).length ? { state: structuredClone(this.stateValues) } : {}),
       ...(this.bindings.length ? { bindings: structuredClone(this.bindings) } : {}),
+      ...(this.interactions.length ? { interactions: structuredClone(this.interactions) } : {}),
+      ...(this.stateMachines.length ? { stateMachines: structuredClone(this.stateMachines) } : {}),
       ...(this.markers.length ? { markers: structuredClone(this.markers) } : {}),
     };
   }
 }
+
+export const stateAction = {
+  set(key: string, value: ScalarValue): StateAction { return { type: "set", key, value }; },
+  toggle(key: string): StateAction { return { type: "toggle", key }; },
+  increment(key: string, by = 1): StateAction { return { type: "increment", key, by }; },
+};
 
 export const expr = {
   literal(value: ScalarValue): Expression { return { kind: "literal", value }; },

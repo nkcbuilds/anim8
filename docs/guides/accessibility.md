@@ -61,3 +61,17 @@ nonvisual representations.
 - Provide a static or textual alternative for important animated explanations.
 - Test with reduced motion and without JavaScript when publishing instructional
   content.
+
+
+## Framework integrations
+
+React and Vue player components generate a deterministic accessible label from
+`@anim8/a11y` by default. Pass an `accessibility` options object to customize
+the summary, or `accessibility={false}` to disable generation when the host
+application supplies its own accessible name/description. Explicit host
+`aria-label` and `role` values take precedence.
+
+The framework-independent web component exposes a visually hidden
+`aria-describedby` summary. It refreshes from evaluated frames and current
+declarative scalar state as playback or interactions change, without inspecting
+rendered SVG geometry.

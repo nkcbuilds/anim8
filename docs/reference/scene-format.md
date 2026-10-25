@@ -20,6 +20,7 @@ interface SceneDocument {
   state?: Record<string, string | number | boolean | null>;
   bindings?: Binding[];
   interactions?: Interaction[];
+  stateMachines?: StateMachine[];
   markers?: Marker[];
 }
 ```
@@ -68,7 +69,9 @@ A connector references two object IDs and optional named anchors:
 }
 ```
 
-Supported connector kinds are `straight`, `curve`, and `orthogonal`. Endpoints are recomputed from the evaluated world-space anchors, so connectors remain attached during movement and parent/group transforms.
+Supported connector kinds are `straight`, `curve`, `orthogonal`, and `routed`. Endpoints are recomputed from evaluated world-space anchors, so connectors remain attached during movement and parent/group transforms.
+
+`routed` connectors perform deterministic obstacle-aware Manhattan routing from the current evaluated geometry. Optional `routing.clearance` and `routing.bendPenalty` tune the bounded router. The core considers at most 48 nearby visible obstacles per routed connector and never measures the DOM.
 
 ## Declarative state and bindings
 
@@ -87,6 +90,12 @@ Interaction actions are limited to:
 - `increment` a declared numeric state key.
 
 Matching interactions and their actions run in document order. Only keys declared in `state` may be changed, and the transition helper is pure for a given scene, current state, and event.
+
+## Serializable state machines
+
+Scenes may also declare `stateMachines`. A machine has a stable `id`, an `initial` state, and named states containing event-driven transitions. Transitions may carry an optional scalar-equality guard and the same bounded `set`/`toggle`/`increment` actions used by interactions.
+
+Machine runtime state is explicit: the player owns a machine-state snapshot and passes it to pure transition helpers. Timeline evaluation itself does not consume event history, preserving arbitrary-time seek/reverse determinism. For one event, legacy interactions run first; machines then run in document order and each machine takes the first matching transition from its current state.
 
 ## Path morphing
 

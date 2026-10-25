@@ -192,4 +192,23 @@ describe("SVG renderer", () => {
     expect(renderSvg(evaluate(doc, time))).toBe(first);
     expect(first).not.toMatch(/\d+\.\d{7,}/);
   });
+  it("renders routed connectors around evaluated obstacles deterministically", () => {
+    const doc: SceneDocument = {
+      version: "1.0",
+      scene: { width: 360, height: 180 },
+      objects: [
+        { id:"a", type:"rect", width:40, height:40, transform:{...defaultTransform(),x:20,y:90}, style:defaultStyle(), visible:true,z:1 },
+        { id:"block", type:"rect", width:80, height:80, transform:{...defaultTransform(),x:160,y:90}, style:defaultStyle(), visible:true,z:1 },
+        { id:"b", type:"rect", width:40, height:40, transform:{...defaultTransform(),x:300,y:90}, style:defaultStyle(), visible:true,z:1 },
+        { id:"edge", type:"connector", from:{objectId:"a",anchor:"right"}, to:{objectId:"b",anchor:"left"}, kind:"routed", routing:{clearance:10}, transform:defaultTransform(), style:defaultStyle(), visible:true,z:0 },
+      ],
+      timeline: [],
+    };
+    const first = renderSceneAt(doc, 0);
+    const second = renderSceneAt(doc, 0);
+    expect(second).toBe(first);
+    const path = first.match(/data-anim8-id="edge" d="([^"]+)"/)?.[1] ?? "";
+    expect(path).toBe("M 40 90 L 40 140 L 280 140 L 280 90");
+  });
+
 });

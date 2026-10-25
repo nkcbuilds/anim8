@@ -1,6 +1,6 @@
 import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
 import { morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
-import type { Action, SceneDocument } from "./types.js";
+import type { Action, ScalarValue, SceneDocument, StateAction } from "./types.js";
 
 export interface Diagnostic {
   code: string;
@@ -22,13 +22,70 @@ const props = (action: Action): string[] => {
     case "draw": return ["drawProgress"];
     case "morph": return ["d"];
     case "visibility": return ["visible"];
+    case "reparent": return ["parentId"];
+    case "zOrder": return ["z"];
     case "camera": return [
       ...(action.to.x !== undefined ? ["camera.x"] : []),
       ...(action.to.y !== undefined ? ["camera.y"] : []),
       ...(action.to.zoom !== undefined ? ["camera.zoom"] : []),
     ];
   }
+  return [];
 };
+
+function validateStateActionAtPath(
+  declaredState: Record<string, ScalarValue>,
+  action: StateAction,
+  actionPath: string,
+  diagnostics: Diagnostic[],
+): void {
+  if (!Object.prototype.hasOwnProperty.call(declaredState, action.key)) {
+    diagnostics.push({
+      code: "UNKNOWN_STATE_KEY",
+      path: `${actionPath}.key`,
+      message: `State key '${action.key}' is not declared in scene.state.`,
+    });
+    return;
+  }
+
+  const initial = declaredState[action.key];
+  if (action.type === "set") {
+    if (typeof action.value === "number" && (!Number.isFinite(action.value) || Math.abs(action.value) > STATE_NUMBER_LIMIT)) {
+      diagnostics.push({
+        code: "INVALID_STATE_ACTION_VALUE",
+        path: `${actionPath}.value`,
+        message: `Set number must be finite with absolute value <= ${STATE_NUMBER_LIMIT}.`,
+      });
+    }
+    if (typeof action.value === "string" && action.value.length > STATE_STRING_LIMIT) {
+      diagnostics.push({
+        code: "INVALID_STATE_ACTION_VALUE",
+        path: `${actionPath}.value`,
+        message: `Set string must be at most ${STATE_STRING_LIMIT} characters.`,
+      });
+    }
+  } else if (action.type === "toggle") {
+    if (typeof initial !== "boolean") {
+      diagnostics.push({
+        code: "INVALID_STATE_ACTION_TYPE",
+        path: `${actionPath}.key`,
+        message: `toggle requires boolean state; '${action.key}' is not boolean.`,
+      });
+    }
+  } else if (
+    typeof initial !== "number" ||
+    !Number.isFinite(action.by) ||
+    Math.abs(action.by) > STATE_NUMBER_LIMIT
+  ) {
+    diagnostics.push({
+      code: "INVALID_STATE_ACTION_TYPE",
+      path: !Number.isFinite(action.by) || Math.abs(action.by) > STATE_NUMBER_LIMIT
+        ? `${actionPath}.by`
+        : `${actionPath}.key`,
+      message: `increment requires numeric state and a finite delta with absolute value <= ${STATE_NUMBER_LIMIT}.`,
+    });
+  }
+}
 
 export function validateScene(scene: SceneDocument): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
@@ -84,6 +141,38 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
         path: `objects[${index}].drawProgress`,
         message: "drawProgress must be a finite number between 0 and 1.",
       });
+    }
+
+    if (object.type === "connector") {
+      if (object.routing && object.kind !== "routed") {
+        diagnostics.push({
+          code: "INVALID_CONNECTOR_ROUTING",
+          path: `objects[${index}].routing`,
+          message: "connector.routing is only valid when kind is routed.",
+        });
+      }
+      if (object.routing?.clearance !== undefined && (
+        !Number.isFinite(object.routing.clearance) ||
+        object.routing.clearance < 0 ||
+        object.routing.clearance > 512
+      )) {
+        diagnostics.push({
+          code: "INVALID_CONNECTOR_ROUTING",
+          path: `objects[${index}].routing.clearance`,
+          message: "routing.clearance must be a finite number between 0 and 512.",
+        });
+      }
+      if (object.routing?.bendPenalty !== undefined && (
+        !Number.isFinite(object.routing.bendPenalty) ||
+        object.routing.bendPenalty < 0 ||
+        object.routing.bendPenalty > 10_000
+      )) {
+        diagnostics.push({
+          code: "INVALID_CONNECTOR_ROUTING",
+          path: `objects[${index}].routing.bendPenalty`,
+          message: "routing.bendPenalty must be a finite number between 0 and 10000.",
+        });
+      }
     }
   });
 
@@ -345,6 +434,140 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
     });
   });
 
+  const stateMachineIds = new Set<string>();
+  scene.stateMachines?.forEach((machine, machineIndex) => {
+    const machinePath = `stateMachines[${machineIndex}]`;
+    if (stateMachineIds.has(machine.id)) {
+      diagnostics.push({
+        code: "DUPLICATE_STATE_MACHINE_ID",
+        path: `${machinePath}.id`,
+        message: `State machine '${machine.id}' is duplicated.`,
+      });
+    }
+    stateMachineIds.add(machine.id);
+
+    const stateIds = new Set<string>();
+    machine.states.forEach((state, stateIndex) => {
+      if (stateIds.has(state.id)) {
+        diagnostics.push({
+          code: "DUPLICATE_STATE_MACHINE_STATE_ID",
+          path: `${machinePath}.states[${stateIndex}].id`,
+          message: `State '${state.id}' is duplicated in machine '${machine.id}'.`,
+        });
+      }
+      stateIds.add(state.id);
+    });
+
+    if (!stateIds.has(machine.initial)) {
+      diagnostics.push({
+        code: "UNKNOWN_STATE_MACHINE_INITIAL",
+        path: `${machinePath}.initial`,
+        message: `Initial state '${machine.initial}' does not exist in machine '${machine.id}'.`,
+      });
+    }
+
+    const transitionIds = new Set<string>();
+    machine.states.forEach((state, stateIndex) => {
+      state.transitions.forEach((transition, transitionIndex) => {
+        const transitionPath = `${machinePath}.states[${stateIndex}].transitions[${transitionIndex}]`;
+        if (transitionIds.has(transition.id)) {
+          diagnostics.push({
+            code: "DUPLICATE_STATE_MACHINE_TRANSITION_ID",
+            path: `${transitionPath}.id`,
+            message: `Transition '${transition.id}' is duplicated in machine '${machine.id}'.`,
+          });
+        }
+        transitionIds.add(transition.id);
+
+        if (!stateIds.has(transition.target)) {
+          diagnostics.push({
+            code: "UNKNOWN_STATE_MACHINE_STATE",
+            path: `${transitionPath}.target`,
+            message: `Target state '${transition.target}' does not exist in machine '${machine.id}'.`,
+          });
+        }
+
+        if (transition.event.type === "custom") {
+          if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(transition.event.name)) {
+            diagnostics.push({
+              code: "INVALID_STATE_MACHINE_EVENT",
+              path: `${transitionPath}.event.name`,
+              message: "Custom event names must be stable identifiers.",
+            });
+          }
+          if (transition.event.name === "click" || transition.event.name === "focus" || transition.event.name === "hover") {
+            diagnostics.push({
+              code: "RESERVED_STATE_MACHINE_EVENT",
+              path: `${transitionPath}.event.name`,
+              message: "Custom event names must not use the reserved click, focus, or hover names.",
+            });
+          }
+        } else if (!ids.has(transition.event.target)) {
+          diagnostics.push({
+            code: "UNKNOWN_STATE_MACHINE_TARGET",
+            path: `${transitionPath}.event.target`,
+            message: `Object '${transition.event.target}' does not exist.`,
+          });
+        }
+
+        if (transition.guard && !Object.prototype.hasOwnProperty.call(declaredState, transition.guard.key)) {
+          diagnostics.push({
+            code: "UNKNOWN_STATE_KEY",
+            path: `${transitionPath}.guard.key`,
+            message: `State key '${transition.guard.key}' is not declared in scene.state.`,
+          });
+        }
+
+        transition.actions?.forEach((action, actionIndex) =>
+          validateStateActionAtPath(declaredState, action, `${transitionPath}.actions[${actionIndex}]`, diagnostics)
+        );
+      });
+    });
+  });
+
+  scene.timeline.forEach((action, index) => {
+    if (action.type === "reparent") {
+      if (action.duration !== 0) {
+        diagnostics.push({
+          code: "INVALID_STRUCTURAL_DURATION",
+          path: `timeline[${index}].duration`,
+          message: "reparent actions must have duration 0.",
+        });
+      }
+      if (action.parentId !== null) {
+        const parent = scene.objects.find(object => object.id === action.parentId);
+        if (!parent) {
+          diagnostics.push({
+            code: "UNKNOWN_REPARENT_TARGET",
+            path: `timeline[${index}].parentId`,
+            message: `Parent object '${action.parentId}' does not exist.`,
+          });
+        } else if (parent.type !== "group") {
+          diagnostics.push({
+            code: "INVALID_REPARENT_TARGET",
+            path: `timeline[${index}].parentId`,
+            message: `Parent '${action.parentId}' must be a group.`,
+          });
+        }
+      }
+    } else if (action.type === "zOrder") {
+      if (action.duration !== 0) {
+        diagnostics.push({
+          code: "INVALID_STRUCTURAL_DURATION",
+          path: `timeline[${index}].duration`,
+          message: "zOrder actions must have duration 0.",
+        });
+      }
+      if (!Number.isInteger(action.to) || Math.abs(action.to) > 1_000_000) {
+        diagnostics.push({
+          code: "INVALID_Z_ORDER",
+          path: `timeline[${index}].to`,
+          message: "zOrder.to must be a bounded integer.",
+        });
+      }
+    }
+  });
+
   const actions = scene.timeline;
   for (let i = 0; i < actions.length; i++) {
     const a = actions[i]!;
@@ -356,22 +579,28 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
       if (a.type === "camera" || b.type === "camera") {
         if (a.type !== "camera" || b.type !== "camera") continue;
         const conflicts = props(a).filter(p => props(b).includes(p));
-        if (conflicts.length) diagnostics.push({
+        const laterInterrupts =
+          conflicts.length > 0 &&
+          ((b.start > a.start && b.interrupt === true) || (a.start > b.start && a.interrupt === true));
+        if (conflicts.length && !laterInterrupts) diagnostics.push({
           code: "OVERLAPPING_PROPERTY_ACTIONS",
           path: `timeline[${j}]`,
           message: `Actions '${a.id}' and '${b.id}' overlap on ${conflicts.join(", ")}.`,
-          suggestion: "Sequence the camera actions or animate distinct camera properties.",
+          suggestion: "Sequence the camera actions, animate distinct camera properties, or mark the later action interrupt: true.",
         });
         continue;
       }
 
       if (a.target !== b.target) continue;
       const conflicts = props(a).filter(p => props(b).includes(p));
-      if (conflicts.length) diagnostics.push({
+      const laterInterrupts =
+        conflicts.length > 0 &&
+        ((b.start > a.start && b.interrupt === true) || (a.start > b.start && a.interrupt === true));
+      if (conflicts.length && !laterInterrupts) diagnostics.push({
         code: "OVERLAPPING_PROPERTY_ACTIONS",
         path: `timeline[${j}]`,
         message: `Actions '${a.id}' and '${b.id}' overlap on ${conflicts.join(", ")} for object '${a.target}'.`,
-        suggestion: "Sequence the actions or animate distinct properties.",
+        suggestion: "Sequence the actions, animate distinct properties, or mark the later action interrupt: true.",
       });
     }
   }

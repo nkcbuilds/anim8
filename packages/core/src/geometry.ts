@@ -34,6 +34,44 @@ export function applyMatrix(matrix: Matrix, point: Point): Point {
   return { x: matrix.a * point.x + matrix.c * point.y + matrix.e, y: matrix.b * point.x + matrix.d * point.y + matrix.f };
 }
 
+export function invertMatrix(matrix: Matrix): Matrix | null {
+  const determinant = matrix.a * matrix.d - matrix.b * matrix.c;
+  if (!Number.isFinite(determinant) || Math.abs(determinant) < 1e-12) return null;
+  const inv = 1 / determinant;
+  return {
+    a: matrix.d * inv,
+    b: -matrix.b * inv,
+    c: -matrix.c * inv,
+    d: matrix.a * inv,
+    e: (matrix.c * matrix.f - matrix.d * matrix.e) * inv,
+    f: (matrix.b * matrix.e - matrix.a * matrix.f) * inv,
+  };
+}
+
+/**
+ * Decompose the translation/rotation/scale portion of a 2D affine matrix.
+ *
+ * Anim8 transforms intentionally have no skew field. Matrices produced by
+ * normal Anim8 parent chains with uniform/compatible scaling round-trip
+ * exactly; skew introduced by rotated non-uniform parent scales is reduced to
+ * the closest representable rotation/scale transform.
+ */
+export function decomposeMatrix(matrix: Matrix): Transform {
+  const scaleX = Math.hypot(matrix.a, matrix.b);
+  const safeScaleX = scaleX > 1e-12 ? scaleX : 0;
+  const determinant = matrix.a * matrix.d - matrix.b * matrix.c;
+  const scaleY = safeScaleX > 0 ? determinant / safeScaleX : Math.hypot(matrix.c, matrix.d);
+  const rotation = safeScaleX > 0 ? Math.atan2(matrix.b, matrix.a) * 180 / Math.PI : 0;
+  return {
+    x: matrix.e,
+    y: matrix.f,
+    rotation,
+    scaleX: safeScaleX,
+    scaleY,
+    opacity: 1,
+  };
+}
+
 export function objectBounds(object: DrawableObject): Bounds {
   switch (object.type) {
     case "rect":

@@ -1,4 +1,4 @@
-import { applyInteractions, evaluate, sceneDuration, type EvaluatedScene, type ScalarValue, type SceneDocument } from "@anim8/core";
+import { applySceneEvent, evaluate, initializeStateMachines, sceneDuration, type EvaluatedScene, type ScalarValue, type SceneDocument } from "@anim8/core";
 import { mountSvg, type SvgMount } from "@anim8/renderer-svg";
 
 export type PlayerObjectEventType =
@@ -37,6 +37,8 @@ export interface PlayerController {
   previousStep(): void;
   getTime(): number;
   getDuration(): number;
+  getState(): Readonly<Record<string, ScalarValue>>;
+  getMachineState(id: string): string | undefined;
   isPlaying(): boolean;
   destroy(): void;
 }
@@ -47,20 +49,29 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
   let playing = false;
   let raf = 0;
   let previousTimestamp: number | null = null;
+  const ownerDocument = container.ownerDocument ?? (typeof document !== "undefined" ? document : undefined);
   const inputs: Record<string, ScalarValue> = {};
   let localState: Record<string, ScalarValue> = { ...(scene.state ?? {}) };
+  let localMachines = initializeStateMachines(scene);
   const duration = sceneDuration(scene);
   const mount: SvgMount = mountSvg(container, evaluate(scene, time, { inputs, state: localState }));
+  const machineTransitions = (scene.stateMachines ?? []).flatMap(machine =>
+    machine.states.flatMap(state => state.transitions),
+  );
+  const declarativeEvents = [
+    ...(scene.interactions ?? []).map(interaction => interaction.event),
+    ...machineTransitions.map(transition => transition.event),
+  ];
   const objectInteractionKeys = new Set(
-    (scene.interactions ?? []).flatMap(interaction =>
-      interaction.event.type === "custom"
+    declarativeEvents.flatMap(event =>
+      event.type === "custom"
         ? []
-        : [`${interaction.event.type}:${interaction.event.target}`],
+        : [`${event.type}:${event.target}`],
     ),
   );
   const customEventNames = new Set(
-    (scene.interactions ?? []).flatMap(interaction =>
-      interaction.event.type === "custom" ? [interaction.event.name] : [],
+    declarativeEvents.flatMap(event =>
+      event.type === "custom" ? [event.name] : [],
     ),
   );
   const handlesObjectEvents = Boolean(options.onObjectEvent) || objectInteractionKeys.size > 0;
@@ -97,7 +108,9 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
       null;
 
     if (declarativeType && objectInteractionKeys.has(`${declarativeType}:${objectId}`)) {
-      localState = applyInteractions(scene, localState, { type: declarativeType, target: objectId });
+      const result = applySceneEvent(scene, localState, localMachines, { type: declarativeType, target: objectId });
+      localState = result.state;
+      localMachines = result.machines;
       render();
     }
 
@@ -166,17 +179,36 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     }
 
     render();
-    if (playing) raf = requestAnimationFrame(tick);
+    if (playing && !ownerDocument?.hidden && typeof requestAnimationFrame !== "undefined") {
+      raf = requestAnimationFrame(tick);
+    }
   };
 
   const play = () => {
     if (options.reducedMotion || duration === 0 || playing) return;
     playing = true;
     previousTimestamp = null;
-    raf = requestAnimationFrame(tick);
+    if (!ownerDocument?.hidden && typeof requestAnimationFrame !== "undefined") {
+      raf = requestAnimationFrame(tick);
+    }
   };
 
   const pause = () => { playing = false; stopRaf(); };
+
+  const visibilityHandler = () => {
+    if (!playing) return;
+    if (ownerDocument?.hidden) {
+      // Preserve the exact current timeline time and discard wall-clock time
+      // spent hidden. Resuming starts with a fresh RAF timestamp.
+      stopRaf();
+      return;
+    }
+    previousTimestamp = null;
+    if (!raf && typeof requestAnimationFrame !== "undefined") {
+      raf = requestAnimationFrame(tick);
+    }
+  };
+  ownerDocument?.addEventListener?.("visibilitychange", visibilityHandler);
   const seek = (next: number) => { time = Math.max(0, Math.min(duration, next)); render(); };
   const markerTimes = (scene.markers ?? []).map(m => m.time).sort((a,b) => a-b);
 
@@ -190,7 +222,9 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     setInput: (name, value) => { inputs[name] = value; render(); },
     dispatch: name => {
       if (!customEventNames.has(name)) return;
-      localState = applyInteractions(scene, localState, { type: "custom", name });
+      const result = applySceneEvent(scene, localState, localMachines, { type: "custom", name });
+      localState = result.state;
+      localMachines = result.machines;
       render();
     },
     nextStep: () => {
@@ -203,6 +237,8 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     },
     getTime: () => time,
     getDuration: () => duration,
+    getState: () => ({ ...localState }),
+    getMachineState: id => localMachines[id],
     isPlaying: () => playing,
     destroy: () => {
       pause();
@@ -212,6 +248,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
       container.removeEventListener("pointerover", pointerOverHandler);
       container.removeEventListener("pointerout", pointerOutHandler);
       container.removeEventListener("keydown", keyHandler);
+      ownerDocument?.removeEventListener?.("visibilitychange", visibilityHandler);
       mount.destroy();
     },
   };
@@ -239,6 +276,8 @@ export class Anim8PlayerElement extends HTMLElementBase {
   setSpeed(speed: number): void { this.#controller?.setSpeed(speed); }
   setInput(name: string, value: ScalarValue): void { this.#controller?.setInput(name, value); }
   dispatch(name: string): void { this.#controller?.dispatch(name); }
+  getState(): Readonly<Record<string, ScalarValue>> { return this.#controller?.getState() ?? {}; }
+  getMachineState(id: string): string | undefined { return this.#controller?.getMachineState(id); }
 
   disconnectedCallback(): void { this.#controller?.destroy(); }
 
