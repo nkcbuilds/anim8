@@ -9,7 +9,10 @@ import {
   type BindingProperty,
   type CameraState,
   type Expression,
+  type Interaction,
+  type InteractionTrigger,
   type ScalarValue,
+  type StateAction,
   type Diagnostic,
   type DrawableObject,
   type EasingName,
@@ -36,6 +39,8 @@ export const COMPILER_LIMITS = Object.freeze({
   objects: 5_000,
   timelineActions: 10_000,
   bindings: 10_000,
+  interactions: 5_000,
+  interactionActions: 100,
   stateEntries: 1_000,
   expressionNodes: 256,
   expressionDepth: 32,
@@ -754,6 +759,156 @@ function parseState(value: unknown, diagnostics: Diagnostic[]): Record<string, S
   return out;
 }
 
+function parseStateAction(
+  value: unknown,
+  path: string,
+  declaredState: Record<string, ScalarValue>,
+  diagnostics: Diagnostic[],
+): StateAction | null {
+  if (!isRecord(value) || typeof value.type !== "string") {
+    diagnostic(diagnostics, "INVALID_STATE_ACTION", path, "State action must be an object with a type.");
+    return null;
+  }
+
+  const key = value.key;
+  if (typeof key !== "string" || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(key) || key.length > COMPILER_LIMITS.idLength) {
+    diagnostic(diagnostics, "INVALID_STATE_KEY", `${path}.key`, "State action key must be a valid declared state identifier.");
+    return null;
+  }
+  if (!Object.prototype.hasOwnProperty.call(declaredState, key)) {
+    diagnostic(diagnostics, "UNKNOWN_STATE_KEY", `${path}.key`, `State key '${key}' is not declared in scene.state.`);
+    return null;
+  }
+
+  if (value.type === "set") {
+    const parsed = parseScalar(value.value, `${path}.value`, diagnostics);
+    if (parsed === null && value.value !== null) return null;
+    return { type: "set", key, value: parsed };
+  }
+
+  if (value.type === "toggle") {
+    if (typeof declaredState[key] !== "boolean") {
+      diagnostic(diagnostics, "INVALID_STATE_ACTION_TYPE", `${path}.key`, `toggle requires boolean state; '${key}' is not boolean.`);
+      return null;
+    }
+    return { type: "toggle", key };
+  }
+
+  if (value.type === "increment") {
+    if (typeof declaredState[key] !== "number") {
+      diagnostic(diagnostics, "INVALID_STATE_ACTION_TYPE", `${path}.key`, `increment requires numeric state; '${key}' is not numeric.`);
+      return null;
+    }
+    if (!boundedNumber(value.by)) {
+      diagnostic(
+        diagnostics,
+        "INVALID_STATE_INCREMENT",
+        `${path}.by`,
+        `increment.by must be a finite number with absolute value <= ${COMPILER_LIMITS.absoluteNumber}.`,
+      );
+      return null;
+    }
+    return { type: "increment", key, by: value.by };
+  }
+
+  diagnostic(
+    diagnostics,
+    "INVALID_STATE_ACTION",
+    `${path}.type`,
+    `Unsupported state action '${String(value.type)}'; use set, toggle, or increment.`,
+  );
+  return null;
+}
+
+function parseInteraction(
+  value: unknown,
+  index: number,
+  declaredState: Record<string, ScalarValue>,
+  objects: ReadonlyMap<string, DrawableObject>,
+  diagnostics: Diagnostic[],
+): Interaction | null {
+  const path = `interactions[${index}]`;
+  if (!isRecord(value)) {
+    diagnostic(diagnostics, "INVALID_INTERACTION", path, "Interaction must be a JSON object.");
+    return null;
+  }
+
+  const id = parseId(value.id, `${path}.id`, diagnostics, "INVALID_INTERACTION_ID");
+  if (!isRecord(value.event) || typeof value.event.type !== "string") {
+    diagnostic(diagnostics, "INVALID_INTERACTION_EVENT", `${path}.event`, "Interaction event must be an object with a type.");
+    return null;
+  }
+
+  let event: InteractionTrigger | null = null;
+  if (value.event.type === "custom") {
+    const name = parseId(value.event.name, `${path}.event.name`, diagnostics, "INVALID_INTERACTION_EVENT");
+    if (name === "click" || name === "focus" || name === "hover") {
+      diagnostic(
+        diagnostics,
+        "RESERVED_INTERACTION_EVENT",
+        `${path}.event.name`,
+        "Custom event names must not use the reserved click, focus, or hover names.",
+      );
+    } else if (name) {
+      event = { type: "custom", name };
+    }
+  } else if (value.event.type === "click" || value.event.type === "focus" || value.event.type === "hover") {
+    const target = parseReferenceId(value.event.target, `${path}.event.target`, diagnostics);
+    if (target && !objects.has(target)) {
+      diagnostic(diagnostics, "UNKNOWN_INTERACTION_TARGET", `${path}.event.target`, `Object '${target}' does not exist.`);
+    } else if (target) {
+      event = { type: value.event.type, target };
+    }
+  } else {
+    diagnostic(
+      diagnostics,
+      "INVALID_INTERACTION_EVENT",
+      `${path}.event.type`,
+      "Interaction event type must be click, focus, hover, or custom.",
+    );
+  }
+
+  if (!Array.isArray(value.actions)) {
+    diagnostic(diagnostics, "INVALID_INTERACTION_ACTIONS", `${path}.actions`, "Interaction actions must be an array.");
+    return null;
+  }
+  if (value.actions.length === 0) {
+    diagnostic(diagnostics, "EMPTY_INTERACTION", `${path}.actions`, "Interaction must contain at least one state action.");
+    return null;
+  }
+  if (value.actions.length > COMPILER_LIMITS.interactionActions) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_INTERACTION_ACTIONS",
+      `${path}.actions`,
+      `Interaction exceeds the ${COMPILER_LIMITS.interactionActions}-action limit.`,
+    );
+    return null;
+  }
+
+  const actions = value.actions
+    .map((action, actionIndex) => parseStateAction(action, `${path}.actions[${actionIndex}]`, declaredState, diagnostics))
+    .filter((action): action is StateAction => action !== null);
+
+  if (!id || !event || actions.length !== value.actions.length) return null;
+  return { id, event, actions };
+}
+
+function validateInteractionIds(interactions: Interaction[], diagnostics: Diagnostic[]): void {
+  const ids = new Set<string>();
+  interactions.forEach((interaction, index) => {
+    if (ids.has(interaction.id)) {
+      diagnostic(
+        diagnostics,
+        "DUPLICATE_INTERACTION_ID",
+        `interactions[${index}].id`,
+        `Interaction '${interaction.id}' is duplicated.`,
+      );
+    }
+    ids.add(interaction.id);
+  });
+}
+
 function parseExpression(
   value: unknown,
   path: string,
@@ -1464,6 +1619,17 @@ export function compile(input: unknown): CompileResult {
     diagnostic(diagnostics, "LIMIT_BINDINGS", "bindings", `bindings exceeds the ${COMPILER_LIMITS.bindings}-entry limit.`);
   }
 
+  if (input.interactions !== undefined && !Array.isArray(input.interactions)) {
+    diagnostic(diagnostics, "INVALID_INTERACTIONS", "interactions", "interactions must be an array.");
+  } else if (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions) {
+    diagnostic(
+      diagnostics,
+      "LIMIT_INTERACTIONS",
+      "interactions",
+      `interactions exceeds the ${COMPILER_LIMITS.interactions}-entry limit.`,
+    );
+  }
+
   const preflightDiagnostics = sortedDiagnostics(diagnostics);
   if (
     !scene ||
@@ -1471,7 +1637,8 @@ export function compile(input: unknown): CompileResult {
     !Array.isArray(input.timeline) ||
     input.objects.length > COMPILER_LIMITS.objects ||
     input.timeline.length > COMPILER_LIMITS.timelineActions ||
-    (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings)
+    (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings) ||
+    (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions)
   ) {
     return { ok: false, diagnostics: preflightDiagnostics };
   }
@@ -1490,8 +1657,15 @@ export function compile(input: unknown): CompileResult {
     : [];
 
   const objectIndex = validateObjectGraph(objects, diagnostics);
+  const interactions = Array.isArray(input.interactions)
+    ? input.interactions
+        .map((value, index) => parseInteraction(value, index, state ?? {}, objectIndex, diagnostics))
+        .filter((value): value is Interaction => value !== null)
+    : [];
+
   validateTimelineReferences(timeline, objectIndex, diagnostics);
   validateBindings(bindings, timeline, objectIndex, diagnostics);
+  validateInteractionIds(interactions, diagnostics);
 
   const doc: SceneDocument = {
     version: "1.0",
@@ -1500,6 +1674,7 @@ export function compile(input: unknown): CompileResult {
     timeline,
     ...(state ? { state } : {}),
     ...(bindings.length ? { bindings } : {}),
+    ...(interactions.length ? { interactions } : {}),
   };
 
   // Compiler owns the stable duplicate/reference/time diagnostics above.

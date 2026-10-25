@@ -19,5 +19,15 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "description": "Command-line validation and static rendering tools for Anim8 scene documents.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkcbuilds/anim8.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/nkcbuilds/anim8#readme",
+  "bugs": {
+    "url": "https://github.com/nkcbuilds/anim8/issues"
   }
 }

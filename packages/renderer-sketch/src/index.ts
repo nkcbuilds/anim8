@@ -37,12 +37,23 @@ const escapeXml = (value: string): string =>
     "'": "&#39;",
   }[char]!));
 
+const SERIALIZED_DECIMAL_PLACES = 6;
+const SVG_PATH_NUMBER = /[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g;
+
+/**
+ * Canonical renderer number format: finite values, rounded to at most six
+ * decimal places, with trailing zeroes omitted and negative zero collapsed.
+ */
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) {
     throw new RangeError("Sketch renderer received a non-finite numeric value.");
   }
-  const rounded = Math.round(value * 1_000_000) / 1_000_000;
-  return String(Object.is(rounded, -0) ? 0 : rounded);
+  const rounded = Number(value.toFixed(SERIALIZED_DECIMAL_PLACES));
+  return rounded === 0 ? "0" : String(rounded);
+}
+
+function formatPathData(path: string): string {
+  return path.replace(SVG_PATH_NUMBER, token => formatNumber(Number(token)));
 }
 
 function sketchContext(seed: SketchSeed, objectId: string): SketchContext {
@@ -92,7 +103,7 @@ function renderSketchPaths(
   const draw = drawAttributes(drawProgress);
   return paths
     .map((path, index) =>
-      `<path data-sketch-part="${escapeXml(part)}" data-sketch-pass="${index}" d="${escapeXml(sketchPathToSvg(path))}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${draw}/>`,
+      `<path data-sketch-part="${escapeXml(part)}" data-sketch-pass="${index}" d="${escapeXml(formatPathData(sketchPathToSvg(path)))}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${draw}/>`,
     )
     .join("");
 }
@@ -229,7 +240,7 @@ function renderPath(
   const fill = object.style.fill ?? "none";
   const base = fill === "none"
     ? ""
-    : `<path data-sketch-part="fill" d="${escapeXml(object.d)}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<path data-sketch-part="fill" d="${escapeXml(formatPathData(object.d))}" fill="${escapeXml(fill)}" stroke="none"/>`;
   if (strokeColor(object.style) === "none" || strokeWidth(object.style) <= 0) return base;
 
   const color = escapeXml(strokeColor(object.style));
@@ -238,7 +249,7 @@ function renderPath(
   const outlines = Array.from({ length: PASSES }, (_, pass) => {
     const dx = sketchJitter(seed, object.id, `path:pass:${pass}:x`, ROUGHNESS * 0.35);
     const dy = sketchJitter(seed, object.id, `path:pass:${pass}:y`, ROUGHNESS * 0.35);
-    return `<path data-sketch-part="path" data-sketch-pass="${pass}" d="${escapeXml(object.d)}" transform="translate(${formatNumber(dx)} ${formatNumber(dy)})" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${draw}/>`;
+    return `<path data-sketch-part="path" data-sketch-pass="${pass}" d="${escapeXml(formatPathData(object.d))}" transform="translate(${formatNumber(dx)} ${formatNumber(dy)})" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${draw}/>`;
   }).join("");
 
   return base + outlines;

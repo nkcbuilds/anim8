@@ -4,7 +4,7 @@ Anim8 is a small, model-first 2D animation library for diagrams and technical ex
 
 The core idea is simple: author a scene with stable objects and a deterministic timeline, then evaluate the scene at **any timestamp**. Rendering is a separate concern, so the same scene can be inspected headlessly, rendered to SVG, played in a browser, reversed, scrubbed, or exported without making DOM state authoritative.
 
-> Status: early implementation. The repository currently contains the first tested vertical slice of the architecture and is not yet a 1.0 release.
+> Status: active pre-1.0 development. The repository contains a coherent deterministic runtime, renderers, player, framework adapters, validation/tooling, layouts, presets, and release checks, but it is not yet a 1.0 release.
 
 ## Why Anim8?
 
@@ -61,6 +61,7 @@ Every object keeps a stable identity. The boxes, their text, and attached connec
 | `@anim8/vue` | SSR-safe Vue 3 component and composable |
 | `@anim8/cli` | Validate and render scene files |
 | `@anim8/layout` | Deterministic row/column/grid/stack/radial/tree layouts |
+| `@anim8/layout-dagre` | Optional Dagre-backed directed graph layout adapter |
 | `@anim8/presets` | Technical shapes composed from generic primitives |
 | `@anim8/dsl` | Optional concise text authoring syntax |
 | `@anim8/ai` | Provider-neutral model-generation benchmark harness |
@@ -141,9 +142,10 @@ anim8 render examples/two-sum/scene.json 700 frame.svg
 
 ```bash
 pnpm install
-pnpm typecheck
-pnpm test
-pnpm build
+pnpm check
+pnpm exec playwright install chromium
+pnpm browser
+pnpm benchmark
 ```
 
 Research and architectural decisions live in `docs/research` and `docs/architecture/decisions`.

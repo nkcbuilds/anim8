@@ -3,14 +3,33 @@ import { evaluate } from "@anim8/core";
 
 const esc = (value: string): string => value.replace(/[&<>"']/g, char => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[char]!));
 
+const SERIALIZED_DECIMAL_PLACES = 6;
+const SVG_PATH_NUMBER = /[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g;
+
+/**
+ * Canonical renderer number format: finite values, rounded to at most six
+ * decimal places, with trailing zeroes omitted and negative zero collapsed.
+ */
+function formatNumber(value: number): string {
+  if (!Number.isFinite(value)) {
+    throw new RangeError("SVG renderer received a non-finite numeric value.");
+  }
+  const rounded = Number(value.toFixed(SERIALIZED_DECIMAL_PLACES));
+  return rounded === 0 ? "0" : String(rounded);
+}
+
+function formatPathData(path: string): string {
+  return path.replace(SVG_PATH_NUMBER, token => formatNumber(Number(token)));
+}
+
 function cameraTransform(frame: EvaluatedScene): string {
   const { x, y, zoom } = frame.camera;
-  return `matrix(${zoom} 0 0 ${zoom} ${x} ${y})`;
+  return `matrix(${formatNumber(zoom)} 0 0 ${formatNumber(zoom)} ${formatNumber(x)} ${formatNumber(y)})`;
 }
 
 function transform(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): string {
   const m = worldMatrix(object, objects);
-  return `matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})`;
+  return `matrix(${formatNumber(m.a)} ${formatNumber(m.b)} ${formatNumber(m.c)} ${formatNumber(m.d)} ${formatNumber(m.e)} ${formatNumber(m.f)})`;
 }
 
 function style(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): string {
@@ -18,19 +37,19 @@ function style(object: DrawableObject, objects: ReadonlyMap<string, DrawableObje
   return [
     `fill="${esc(s.fill ?? "none")}"`,
     `stroke="${esc(s.stroke ?? "none")}"`,
-    `stroke-width="${s.strokeWidth ?? 0}"`,
-    `opacity="${worldOpacity(object, objects)}"`,
+    `stroke-width="${formatNumber(s.strokeWidth ?? 0)}"`,
+    `opacity="${formatNumber(worldOpacity(object, objects))}"`,
   ].join(" ");
 }
 
 function drawAttributes(object: DrawableObject): string {
   if ((object.type !== "path" && object.type !== "polygon" && object.type !== "polyline") || object.drawProgress === undefined) return "";
   const progress = Math.max(0, Math.min(1, object.drawProgress));
-  return ` pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1 - progress}"`;
+  return ` pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - progress)}"`;
 }
 
 function points(points: readonly { x: number; y: number }[]): string {
-  return points.map(point => `${point.x},${point.y}`).join(" ");
+  return points.map(point => `${formatNumber(point.x)},${formatNumber(point.y)}`).join(" ");
 }
 
 function connectorPath(connector: ConnectorObject, objects: ReadonlyMap<string, DrawableObject>): string {
@@ -41,20 +60,20 @@ function connectorPath(connector: ConnectorObject, objects: ReadonlyMap<string, 
   const to = anchorPoint(toObject, connector.to.anchor, objects);
   if (connector.kind === "curve") {
     const mx = (from.x + to.x) / 2;
-    return `M ${from.x} ${from.y} C ${mx} ${from.y}, ${mx} ${to.y}, ${to.x} ${to.y}`;
+    return `M ${formatNumber(from.x)} ${formatNumber(from.y)} C ${formatNumber(mx)} ${formatNumber(from.y)}, ${formatNumber(mx)} ${formatNumber(to.y)}, ${formatNumber(to.x)} ${formatNumber(to.y)}`;
   }
   if (connector.kind === "orthogonal") {
     const mx = (from.x + to.x) / 2;
-    return `M ${from.x} ${from.y} L ${mx} ${from.y} L ${mx} ${to.y} L ${to.x} ${to.y}`;
+    return `M ${formatNumber(from.x)} ${formatNumber(from.y)} L ${formatNumber(mx)} ${formatNumber(from.y)} L ${formatNumber(mx)} ${formatNumber(to.y)} L ${formatNumber(to.x)} ${formatNumber(to.y)}`;
   }
-  return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
+  return `M ${formatNumber(from.x)} ${formatNumber(from.y)} L ${formatNumber(to.x)} ${formatNumber(to.y)}`;
 }
 
 function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): string {
   if (!worldVisible(object, objects)) return "";
   if (object.type === "connector") {
     const d = connectorPath(object, objects);
-    return `<path data-anim8-id="${esc(object.id)}" d="${d}" fill="none" stroke="${esc(object.style.stroke ?? "#1f2937")}" stroke-width="${object.style.strokeWidth ?? 2}" opacity="${worldOpacity(object, objects)}" marker-end="url(#anim8-arrow)"/>`;
+    return `<path data-anim8-id="${esc(object.id)}" d="${d}" fill="none" stroke="${esc(object.style.stroke ?? "#1f2937")}" stroke-width="${formatNumber(object.style.strokeWidth ?? 2)}" opacity="${formatNumber(worldOpacity(object, objects))}" marker-end="url(#anim8-arrow)"/>`;
   }
   if (object.type === "group") return "";
   const t = transform(object, objects);
@@ -63,29 +82,29 @@ function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, Drawable
     case "rect": {
       const x = -object.width / 2, y = -object.height / 2;
       const r = object.style.radius ?? 10;
-      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${object.style.fontSize ?? 16}">${esc(object.text)}</text>` : "";
-      return `<g ${common}><rect x="${x}" y="${y}" width="${object.width}" height="${object.height}" rx="${r}"/>${text}</g>`;
+      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>` : "";
+      return `<g ${common}><rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" rx="${formatNumber(r)}"/>${text}</g>`;
     }
     case "circle": {
-      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${object.style.fontSize ?? 16}">${esc(object.text)}</text>` : "";
-      return `<g ${common}><circle cx="0" cy="0" r="${object.radius}"/>${text}</g>`;
+      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>` : "";
+      return `<g ${common}><circle cx="0" cy="0" r="${formatNumber(object.radius)}"/>${text}</g>`;
     }
     case "ellipse": {
-      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${object.style.fontSize ?? 16}">${esc(object.text)}</text>` : "";
-      return `<g ${common}><ellipse cx="0" cy="0" rx="${object.rx}" ry="${object.ry}"/>${text}</g>`;
+      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>` : "";
+      return `<g ${common}><ellipse cx="0" cy="0" rx="${formatNumber(object.rx)}" ry="${formatNumber(object.ry)}"/>${text}</g>`;
     }
     case "polygon":
       return `<polygon ${common} points="${points(object.points)}"${drawAttributes(object)}/>`;
     case "polyline":
       return `<polyline ${common} points="${points(object.points)}"${drawAttributes(object)}/>`;
     case "text":
-      return `<text data-anim8-id="${esc(object.id)}" transform="${t}" x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" opacity="${worldOpacity(object, objects)}" font-size="${object.style.fontSize ?? 16}">${esc(object.text)}</text>`;
+      return `<text data-anim8-id="${esc(object.id)}" transform="${t}" x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" opacity="${formatNumber(worldOpacity(object, objects))}" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>`;
     case "line":
-      return `<line ${common} x1="0" y1="0" x2="${object.x2}" y2="${object.y2}"/>`;
+      return `<line ${common} x1="0" y1="0" x2="${formatNumber(object.x2)}" y2="${formatNumber(object.y2)}"/>`;
     case "path":
-      return `<path ${common} d="${esc(object.d)}"${drawAttributes(object)}/>`;
+      return `<path ${common} d="${esc(formatPathData(object.d))}"${drawAttributes(object)}/>`;
     case "image":
-      return `<image ${common} x="${-object.width/2}" y="${-object.height/2}" width="${object.width}" height="${object.height}" href="${esc(object.href)}"/>`;
+      return `<image ${common} x="${formatNumber(-object.width/2)}" y="${formatNumber(-object.height/2)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" href="${esc(object.href)}"/>`;
   }
 }
 
@@ -95,7 +114,7 @@ export function renderSvg(frame: EvaluatedScene): string {
   const body = ordered.map(object => objectSvg(object, objects)).join("");
   const bg = frame.scene.background ? `<rect width="100%" height="100%" fill="${esc(frame.scene.background)}"/>` : "";
   const world = `<g data-anim8-camera="world" transform="${cameraTransform(frame)}">${body}</g>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${frame.scene.width} ${frame.scene.height}" role="img"><defs><marker id="anim8-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#1f2937"/></marker></defs>${bg}${world}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(frame.scene.width)} ${formatNumber(frame.scene.height)}" role="img"><defs><marker id="anim8-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#1f2937"/></marker></defs>${bg}${world}</svg>`;
 }
 
 export function renderSceneAt(scene: SceneDocument, time: number): string {
@@ -123,7 +142,7 @@ function createSvgElement<K extends keyof SVGElementTagNameMap>(
 }
 
 function setAttribute(element: Element, name: string, value: string | number): void {
-  element.setAttribute(name, String(value));
+  element.setAttribute(name, typeof value === "number" ? formatNumber(value) : value);
 }
 
 function syncCommonAttributes(
@@ -290,7 +309,7 @@ function syncObjectRecord(
       setAttribute(record.element, "y2", object.y2);
       return;
     case "path":
-      setAttribute(record.element, "d", object.d);
+      setAttribute(record.element, "d", formatPathData(object.d));
       syncDrawAttributes(record.element, object);
       return;
     case "image":
@@ -354,7 +373,7 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
   let background: SVGRectElement | undefined;
 
   const update = (next: EvaluatedScene): void => {
-    setAttribute(svg, "viewBox", `0 0 ${next.scene.width} ${next.scene.height}`);
+    setAttribute(svg, "viewBox", `0 0 ${formatNumber(next.scene.width)} ${formatNumber(next.scene.height)}`);
     setAttribute(world, "transform", cameraTransform(next));
 
     if (next.scene.background) {

@@ -31,5 +31,15 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "description": "SSR-safe React integration for Anim8.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkcbuilds/anim8.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/nkcbuilds/anim8#readme",
+  "bugs": {
+    "url": "https://github.com/nkcbuilds/anim8/issues"
   }
 }

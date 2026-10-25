@@ -36,3 +36,38 @@ controller.setInput("index", 3);
 ```
 
 The player re-evaluates the scene at the current timeline timestamp. Bindings do not execute arbitrary JavaScript and cannot access browser globals.
+
+## Declarative interactions
+
+Scene state can also change through a small serializable interaction vocabulary:
+
+```json
+{
+  "state": { "count": 0, "active": false },
+  "interactions": [
+    {
+      "id": "increment-on-click",
+      "event": { "type": "click", "target": "counter" },
+      "actions": [
+        { "type": "increment", "key": "count", "by": 1 },
+        { "type": "toggle", "key": "active" }
+      ]
+    },
+    {
+      "id": "reset",
+      "event": { "type": "custom", "name": "reset" },
+      "actions": [
+        { "type": "set", "key": "count", "value": 0 }
+      ]
+    }
+  ]
+}
+```
+
+Built-in object events currently cover click, focus, and hover. Custom named events can be dispatched through the player:
+
+```ts
+controller.dispatch("reset");
+```
+
+Only keys declared in `scene.state` can be changed. State actions are bounded, deterministic data operations (`set`, `toggle`, and `increment`); they are not callbacks or executable code.

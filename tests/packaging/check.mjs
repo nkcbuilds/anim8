@@ -49,6 +49,10 @@ let checkedPackages = 0;
 let importedPackages = 0;
 let packedPackages = 0;
 let isolatedImports = 0;
+let boundaryImports = 0;
+let boundaryResolutions = 0;
+let privateBoundaryBlocks = 0;
+let optionalToolRuns = 0;
 
 function problem(packageName, code, message) {
   problems.push({ packageName, code, message });
@@ -206,6 +210,53 @@ async function verifyDeclaredFiles(packageName, packageDir, files, packageEntrie
 
     if (!(await exists(path.join(packageDir, relative)))) {
       problem(packageName, "FILES_TARGET_MISSING", `declared files entry '${entry}' does not exist after build.`);
+    }
+  }
+}
+
+function hasRootReadme(entries) {
+  return entries.some(entry => entry.split("/").length === 1 && /^readme(?:\..*)?$/i.test(entry));
+}
+
+function hasRootLicense(entries) {
+  return entries.some(entry => entry.split("/").length === 1 && /^(?:licen[cs]e|copying)(?:\..*)?$/i.test(entry));
+}
+
+function packageHasRuntimeRoot(manifest) {
+  const rootExport = rootExportValue(manifest.exports);
+  return rootExport !== undefined && Boolean(conditionTarget(rootExport, "import"));
+}
+
+function verifyManifestQualification(packageName, manifest, packageEntries) {
+  const hasBin = normalizeBins(manifest.bin, manifest.name ?? packageName).length > 0;
+
+  if (typeof manifest.license !== "string" || manifest.license.trim() === "") {
+    problem(packageName, "LICENSE_MISSING", "package.json must declare a non-empty license field.");
+  }
+
+  if (manifest.exports === undefined && !hasBin) {
+    problem(packageName, "EXPORTS_MISSING", "buildable library package must declare package.json exports.");
+  }
+
+  if (packageHasRuntimeRoot(manifest)) {
+    if (manifest.sideEffects === undefined) {
+      problem(packageName, "SIDE_EFFECTS_MISSING", "importable package must declare package.json sideEffects explicitly.");
+    } else if (
+      typeof manifest.sideEffects !== "boolean"
+      && !Array.isArray(manifest.sideEffects)
+    ) {
+      problem(packageName, "SIDE_EFFECTS_INVALID", "package.json sideEffects must be a boolean or an array of glob strings.");
+    }
+
+    const rootExport = rootExportValue(manifest.exports);
+    const rootTypes = conditionTarget(rootExport, "types");
+    const topLevelTypes = typeof manifest.types === "string"
+      ? manifest.types
+      : typeof manifest.typings === "string"
+        ? manifest.typings
+        : undefined;
+    if (!rootTypes && !topLevelTypes) {
+      problem(packageName, "TYPES_MISSING", "importable package must expose declarations through exports.types or package.json types/typings.");
     }
   }
 }
@@ -502,7 +553,7 @@ function verifyPackedDependencyProtocols(packageName, manifest) {
 }
 
 function verifyPackedManifestDrift(packageName, sourceManifest, packedManifest) {
-  for (const field of ["name", "version", "type", "files", "exports", "types", "typings", "bin"]) {
+  for (const field of ["name", "version", "license", "type", "sideEffects", "files", "exports", "types", "typings", "bin"]) {
     if (JSON.stringify(sourceManifest[field]) !== JSON.stringify(packedManifest[field])) {
       problem(packageName, "PACKED_MANIFEST_FIELD_DRIFT", `pnpm pack changed package.json field '${field}' unexpectedly.`);
     }
@@ -514,6 +565,14 @@ function verifyTarballEntries(packageName, manifest, entries) {
   if (!entryMap.has("package.json")) {
     problem(packageName, "TARBALL_MANIFEST_MISSING", "actual tarball does not contain package.json.");
     return entryMap;
+  }
+
+  const packedPaths = [...entryMap.keys()];
+  if (!hasRootReadme(packedPaths)) {
+    problem(packageName, "PACKED_README_MISSING", "actual tarball does not contain a root README file.");
+  }
+  if (!hasRootLicense(packedPaths)) {
+    problem(packageName, "PACKED_LICENSE_FILE_MISSING", "actual tarball does not contain a root LICENSE/LICENCE/COPYING file.");
   }
 
   for (const entry of entries) {
@@ -753,36 +812,144 @@ function externalRuntimeDependencies(manifest, packedNames) {
   return [...names].filter(name => !packedNames.has(name)).sort();
 }
 
+function exportEntries(exportsField) {
+  if (exportsField === undefined) return [];
+  if (
+    typeof exportsField === "string"
+    || Array.isArray(exportsField)
+  ) {
+    return [{ key: ".", value: exportsField }];
+  }
+  if (!exportsField || typeof exportsField !== "object") return [];
+
+  const keys = Object.keys(exportsField);
+  if (keys.some(key => key.startsWith("."))) {
+    return keys
+      .filter(key => key.startsWith("."))
+      .map(key => ({ key, value: exportsField[key] }));
+  }
+  return [{ key: ".", value: exportsField }];
+}
+
+function exportSpecifier(packageName, key) {
+  return key === "." ? packageName : `${packageName}/${key.slice(2)}`;
+}
+
+function runtimeExportChecks(packed, allowImport, requiredRuntimeExports) {
+  const checks = [];
+  for (const { key, value } of exportEntries(packed.packedManifest.exports)) {
+    const target = conditionTarget(value, "import");
+    if (!target || hasPattern(target) || !target.startsWith("./") || !isSafePackageRelative(target)) continue;
+    const relative = stripDotSlash(target).replaceAll("\\", "/");
+    checks.push({
+      key,
+      specifier: exportSpecifier(packed.packageName, key),
+      target: relative,
+      importRuntime: allowImport && /\.(?:js|mjs|cjs)$/i.test(relative),
+      requiredRuntimeExports: key === "." ? requiredRuntimeExports : [],
+    });
+  }
+  return checks;
+}
+
+function privateDeepSpecifiers(packed, checks) {
+  if (packed.packedManifest.exports === undefined) return [];
+  const publicSpecifiers = new Set(checks.map(check => check.specifier));
+  const candidates = [];
+  for (const check of checks) {
+    const deep = `${packed.packageName}/${check.target}`;
+    if (!publicSpecifiers.has(deep)) candidates.push(deep);
+  }
+  return [...new Set(candidates)];
+}
+
 async function isolatedImportSmoke(packed, isolatedRoot, packedNames, requiredRuntimeExports = []) {
   const external = externalRuntimeDependencies(packed.packedManifest, packedNames);
-  if (external.length > 0) {
-    notice(`isolated tarball import for ${packed.packageName} skipped because external runtime/peer dependencies are not installed: ${external.join(", ")}`);
-    return;
+  const allowImport = external.length === 0;
+  if (!allowImport) {
+    notice(`isolated tarball runtime import for ${packed.packageName} skipped because external runtime/peer dependencies are not installed: ${external.join(", ")}`);
   }
 
-  const rootExport = rootExportValue(packed.packedManifest.exports);
-  if (rootExport === undefined) return;
-  const importTarget = conditionTarget(rootExport, "import");
-  if (!importTarget || hasPattern(importTarget) || !importTarget.startsWith("./") || !isSafePackageRelative(importTarget)) return;
+  const checks = runtimeExportChecks(packed, allowImport, requiredRuntimeExports);
+  if (checks.length === 0) return;
 
-  const installDir = installDirectoryForPackage(isolatedRoot, packed.packageName);
-  const absolute = path.join(installDir, stripDotSlash(importTarget));
-  if (!(await exists(absolute))) return;
+  const privateSpecifiers = privateDeepSpecifiers(packed, checks);
+  const safeName = packed.packageName.replace(/[^A-Za-z0-9_.-]+/g, "_");
+  const scriptPath = path.join(isolatedRoot, `.boundary-${safeName}.mjs`);
+  const payload = {
+    packageName: packed.packageName,
+    checks,
+    privateSpecifiers,
+  };
 
+  await writeFile(scriptPath, `
+const payload = ${JSON.stringify(payload)};
+const result = { resolutions: 0, imports: 0, privateBlocks: 0, errors: [] };
+
+for (const check of payload.checks) {
   try {
-    const namespace = await import(pathToFileURL(absolute).href);
-    isolatedImports += 1;
-    for (const symbol of requiredRuntimeExports) {
-      if (!(symbol in namespace)) {
-        problem(packed.packageName, "ISOLATED_RUNTIME_EXPORT_MISSING", `tarball-like isolated import is missing runtime export '${symbol}'.`);
-      }
+    const resolved = import.meta.resolve(check.specifier);
+    result.resolutions += 1;
+    if (!resolved.includes("/node_modules/") && !resolved.includes("\\\\node_modules\\\\")) {
+      result.errors.push("specifier " + check.specifier + " escaped isolated node_modules: " + resolved);
     }
+  } catch (error) {
+    result.errors.push("failed to resolve " + check.specifier + ": " + (error?.code ?? "") + " " + (error?.message ?? error));
+    continue;
+  }
+
+  if (check.importRuntime) {
+    try {
+      const namespace = await import(check.specifier);
+      result.imports += 1;
+      for (const symbol of check.requiredRuntimeExports) {
+        if (!(symbol in namespace)) result.errors.push("runtime export " + symbol + " missing from " + check.specifier);
+      }
+    } catch (error) {
+      result.errors.push("failed to import " + check.specifier + ": " + (error?.code ?? "") + " " + (error?.stack ?? error?.message ?? error));
+    }
+  }
+}
+
+for (const specifier of payload.privateSpecifiers) {
+  try {
+    import.meta.resolve(specifier);
+    result.errors.push("private deep import unexpectedly resolved: " + specifier);
+  } catch (error) {
+    if (error?.code === "ERR_PACKAGE_PATH_NOT_EXPORTED") {
+      result.privateBlocks += 1;
+    } else {
+      result.errors.push("private deep import " + specifier + " failed with unexpected " + (error?.code ?? "error") + ": " + (error?.message ?? error));
+    }
+  }
+}
+
+console.log(JSON.stringify(result));
+if (result.errors.length > 0) process.exitCode = 1;
+`, "utf8");
+
+  const result = await runProcess("node", [scriptPath], isolatedRoot);
+  let parsed;
+  try {
+    parsed = JSON.parse(result.stdout.trim());
   } catch (error) {
     problem(
       packed.packageName,
-      "ISOLATED_IMPORT_FAILED",
-      `unpacked tarball-like root module failed to import in isolated node_modules: ${error instanceof Error ? error.stack ?? error.message : String(error)}`,
+      "ISOLATED_BOUNDARY_OUTPUT_INVALID",
+      `package-boundary smoke returned invalid JSON: ${error instanceof Error ? error.message : String(error)}; stdout=${JSON.stringify(result.stdout)} stderr=${JSON.stringify(result.stderr)}`,
     );
+    return;
+  }
+
+  boundaryResolutions += parsed.resolutions ?? 0;
+  boundaryImports += parsed.imports ?? 0;
+  privateBoundaryBlocks += parsed.privateBlocks ?? 0;
+  isolatedImports += parsed.imports ?? 0;
+
+  if (result.code !== 0 || parsed.errors?.length > 0) {
+    for (const message of parsed.errors ?? [result.stderr.trim() || `boundary process exited ${result.code}`]) {
+      problem(packed.packageName, "ISOLATED_IMPORT_BOUNDARY_FAILED", message);
+    }
   }
 }
 
@@ -830,6 +997,63 @@ async function verifyFixture(fixture, discoveredByDirectory) {
   }
 }
 
+async function localOptionalBin(name) {
+  const binDir = path.join(ROOT, "node_modules", ".bin");
+  const candidates = process.platform === "win32"
+    ? [`${name}.cmd`, `${name}.exe`, name]
+    : [name];
+  for (const candidate of candidates) {
+    const absolute = path.join(binDir, candidate);
+    if (await exists(absolute)) return absolute;
+  }
+  return undefined;
+}
+
+function summarizeToolOutput(result) {
+  const text = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
+  if (text.length <= 2000) return text;
+  return `${text.slice(0, 2000)}…`;
+}
+
+async function runOptionalPackagingTools(packedByDirectory, isolatedRoot) {
+  const publintBin = await localOptionalBin("publint");
+  if (!publintBin) {
+    notice("SKIP publint: optional publint executable is not installed in root node_modules/.bin.");
+  } else {
+    for (const packed of packedByDirectory.values()) {
+      const installDir = installDirectoryForPackage(isolatedRoot, packed.packageName);
+      const result = await runProcess("pnpm", ["exec", "publint", installDir], ROOT);
+      optionalToolRuns += 1;
+      if (result.code !== 0) {
+        problem(
+          packed.packageName,
+          "PUBLINT_FAILED",
+          `publint failed against the extracted actual tarball (exit ${result.code}): ${summarizeToolOutput(result)}`,
+        );
+      }
+    }
+    notice(`publint executed against ${packedByDirectory.size} extracted tarball package${packedByDirectory.size === 1 ? "" : "s"}.`);
+  }
+
+  const attwBin = await localOptionalBin("attw");
+  if (!attwBin) {
+    notice("SKIP @arethetypeswrong/cli: optional attw executable is not installed in root node_modules/.bin.");
+  } else {
+    for (const packed of packedByDirectory.values()) {
+      const result = await runProcess("pnpm", ["exec", "attw", "--profile", "esm-only", packed.tarballPath], ROOT);
+      optionalToolRuns += 1;
+      if (result.code !== 0) {
+        problem(
+          packed.packageName,
+          "ATTW_FAILED",
+          `@arethetypeswrong/cli failed against the actual tarball (exit ${result.code}): ${summarizeToolOutput(result)}`,
+        );
+      }
+    }
+    notice(`@arethetypeswrong/cli executed against ${packedByDirectory.size} actual tarball${packedByDirectory.size === 1 ? "" : "s"}.`);
+  }
+}
+
 async function main() {
   const discovered = await discoverBuildablePackages();
   const discoveredByDirectory = new Map(discovered.map(info => [info.directory, info]));
@@ -838,6 +1062,7 @@ async function main() {
     const packageName = typeof manifest.name === "string" ? manifest.name : toPosix(path.relative(ROOT, packageDir));
     checkedPackages += 1;
     const packageEntries = await listPackageEntries(packageDir);
+    verifyManifestQualification(packageName, manifest, packageEntries);
     await verifyDeclaredFiles(packageName, packageDir, manifest.files, packageEntries);
     await verifyExports(packageName, packageDir, manifest, packageEntries);
     await verifyBins(packageName, packageDir, manifest);
@@ -875,6 +1100,8 @@ async function main() {
         fixture?.nodeImport ? (fixture.requiredRuntimeExports ?? []) : [],
       );
     }
+
+    await runOptionalPackagingTools(packedByDirectory, isolatedRoot);
   } catch (error) {
     problem("workspace", "TARBALL_QUALIFICATION_FAILED", error instanceof Error ? error.stack ?? error.message : String(error));
   } finally {
@@ -889,6 +1116,10 @@ async function main() {
 
   for (const message of notices) console.log(`[packaging] NOTE: ${message}`);
 
+  console.log(
+    `[packaging] QUALIFICATION: checked ${checkedPackages} buildable manifests; packed ${packedPackages} tarballs; ${importedPackages} built imports; ${boundaryResolutions} isolated package-specifier resolutions; ${boundaryImports} isolated package-specifier imports; ${privateBoundaryBlocks} private deep-import boundaries enforced; ${optionalToolRuns} optional-tool runs.`,
+  );
+
   if (problems.length > 0) {
     console.error(`[packaging] FAILED: ${problems.length} packaging problem${problems.length === 1 ? "" : "s"} found.`);
     for (const item of problems) {
@@ -900,7 +1131,7 @@ async function main() {
   }
 
   console.log(
-    `[packaging] OK: checked ${checkedPackages} buildable package manifests; packed and inspected ${packedPackages} actual tarballs; ${importedPackages} built Node/SSR imports and ${isolatedImports} isolated tarball imports passed.`,
+    `[packaging] OK: all packaging checks passed, including ${boundaryResolutions} actual tarball export resolutions, ${isolatedImports} isolated package-specifier imports, and ${privateBoundaryBlocks} blocked private deep imports.`,
   );
 }
 

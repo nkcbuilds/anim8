@@ -1,3 +1,4 @@
+import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
 import type { Action, SceneDocument } from "./types.js";
 
 export interface Diagnostic {
@@ -198,6 +199,101 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
         });
       }
     }
+  });
+
+  const declaredState = scene.state ?? {};
+  const interactionIds = new Set<string>();
+  scene.interactions?.forEach((interaction, index) => {
+    const path = `interactions[${index}]`;
+    if (interactionIds.has(interaction.id)) {
+      diagnostics.push({
+        code: "DUPLICATE_INTERACTION_ID",
+        path: `${path}.id`,
+        message: `Interaction '${interaction.id}' is duplicated.`,
+      });
+    }
+    interactionIds.add(interaction.id);
+
+    if (interaction.event.type === "custom") {
+      if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(interaction.event.name)) {
+        diagnostics.push({
+          code: "INVALID_INTERACTION_EVENT",
+          path: `${path}.event.name`,
+          message: "Custom event names must be stable identifiers.",
+        });
+      }
+      if (interaction.event.name === "click" || interaction.event.name === "focus" || interaction.event.name === "hover") {
+        diagnostics.push({
+          code: "RESERVED_INTERACTION_EVENT",
+          path: `${path}.event.name`,
+          message: "Custom event names must not use the reserved click, focus, or hover names.",
+        });
+      }
+    } else if (!ids.has(interaction.event.target)) {
+      diagnostics.push({
+        code: "UNKNOWN_INTERACTION_TARGET",
+        path: `${path}.event.target`,
+        message: `Object '${interaction.event.target}' does not exist.`,
+      });
+    }
+
+    if (interaction.actions.length === 0) {
+      diagnostics.push({
+        code: "EMPTY_INTERACTION",
+        path: `${path}.actions`,
+        message: "Interaction must contain at least one state action.",
+      });
+    }
+
+    interaction.actions.forEach((action, actionIndex) => {
+      const actionPath = `${path}.actions[${actionIndex}]`;
+      if (!Object.prototype.hasOwnProperty.call(declaredState, action.key)) {
+        diagnostics.push({
+          code: "UNKNOWN_STATE_KEY",
+          path: `${actionPath}.key`,
+          message: `State key '${action.key}' is not declared in scene.state.`,
+        });
+        return;
+      }
+
+      const initial = declaredState[action.key];
+      if (action.type === "set") {
+        if (typeof action.value === "number" && (!Number.isFinite(action.value) || Math.abs(action.value) > STATE_NUMBER_LIMIT)) {
+          diagnostics.push({
+            code: "INVALID_STATE_ACTION_VALUE",
+            path: `${actionPath}.value`,
+            message: `Set number must be finite with absolute value <= ${STATE_NUMBER_LIMIT}.`,
+          });
+        }
+        if (typeof action.value === "string" && action.value.length > STATE_STRING_LIMIT) {
+          diagnostics.push({
+            code: "INVALID_STATE_ACTION_VALUE",
+            path: `${actionPath}.value`,
+            message: `Set string must be at most ${STATE_STRING_LIMIT} characters.`,
+          });
+        }
+      } else if (action.type === "toggle") {
+        if (typeof initial !== "boolean") {
+          diagnostics.push({
+            code: "INVALID_STATE_ACTION_TYPE",
+            path: `${actionPath}.key`,
+            message: `toggle requires boolean state; '${action.key}' is not boolean.`,
+          });
+        }
+      } else if (
+        typeof initial !== "number" ||
+        !Number.isFinite(action.by) ||
+        Math.abs(action.by) > STATE_NUMBER_LIMIT
+      ) {
+        diagnostics.push({
+          code: "INVALID_STATE_ACTION_TYPE",
+          path: action.type === "increment" && (!Number.isFinite(action.by) || Math.abs(action.by) > STATE_NUMBER_LIMIT)
+            ? `${actionPath}.by`
+            : `${actionPath}.key`,
+          message: `increment requires numeric state and a finite delta with absolute value <= ${STATE_NUMBER_LIMIT}.`,
+        });
+      }
+    });
   });
 
   const actions = scene.timeline;

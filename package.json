@@ -11,12 +11,18 @@
     "packaging": "node tests/packaging/check.mjs",
     "consumers": "node tests/consumers/run.mjs",
     "benchmark": "node benchmarks/run-baseline.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers"
+    "browser": "node tests/browser/run.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers",
+    "release:check": "pnpm check && pnpm browser"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@types/node": "^24.10.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.64.1",
+    "publint": "^0.3.25",
     "tsup": "^8.5.0",
-    "@types/node": "^24.10.0"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

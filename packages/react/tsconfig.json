@@ -4,5 +4,19 @@
     "src",
     "test",
     "vitest.config.ts"
-  ]
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@anim8/core": [
+        "../core/src/index.ts"
+      ],
+      "@anim8/player": [
+        "../player/src/index.ts"
+      ],
+      "@anim8/renderer-svg": [
+        "../renderer-svg/src/index.ts"
+      ]
+    }
+  }
 }

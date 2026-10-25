@@ -7,27 +7,66 @@ pnpm build
 node tests/packaging/check.mjs
 ```
 
-The validator is intentionally outside package manifests and does not mutate them.
+The validator lives outside package manifests and never rewrites them. A failure is a release-qualification report.
 
-It:
+## What it checks
 
-- discovers every package under `packages/` that declares a build script;
-- checks each package's `files`, `exports`, `types`/`typings`, and `bin` targets against built output;
-- verifies export/bin/type targets are covered by the declared publish `files`;
-- verifies declared `dist/` export files exist after the build;
-- dynamically imports library root exports in plain Node as an SSR-safety smoke test;
-- creates **real `pnpm pack` tarballs** for every buildable package in an OS temp directory;
-- parses the generated `.tgz` archives directly in Node and validates the actual package contents rather than trusting the working tree or packer's file listing;
-- rejects raw source/tests, workspace/config files, unsafe paths, and undeclared accidental tarball contents while allowing standard automatically included package docs such as LICENSE/README;
-- verifies the packed `package.json` still has valid export/type/bin mappings and no unreplaced `workspace:` dependency protocols;
-- checks directly shipped `dist` JS/declaration entrypoints are represented by `exports`/`types`/`bin`;
-- checks CLI bins exist in the actual archive, have a shebang, and carry an executable mode bit in the tar header;
-- unpacks the generated packages into an isolated temporary `node_modules` tree and smoke-imports every package with a usable root import export when its runtime dependency closure is fully represented by the packed workspace packages;
-- checks a small public runtime surface for core, compiler, authoring, renderer-svg, player, layout, sketch, renderer-sketch, and dsl;
-- checks the CLI as a published executable instead of importing its command entrypoint;
-- applies the same focused import/export checks to react, web-component, and ai when those packages are present;
-- always removes its temporary tarballs and unpacked installation tree.
+For every buildable package under `packages/`, the checker validates both the working package metadata and the **actual `pnpm pack` tarball**.
 
-Packages with external runtime/peer dependencies (for example React) are still checked from built output and have their tarballs inspected, but their isolated import smoke test is skipped with an explicit note unless those external dependencies are part of the isolated packed set.
+Manifest/build checks include:
 
-A failure is a packaging report, not an auto-fix. In particular, this test must not rewrite package manifests when it finds a missing export, publish-file declaration, bin target, executable bit, leaked source file, unreplaced workspace protocol, or SSR-unsafe import.
+- a non-empty `files` array whose entries exist after build;
+- a public `exports` map for importable/library packages (bin-only packages are exempt);
+- explicit `sideEffects` metadata for importable packages;
+- a non-empty `license` field;
+- declaration exposure through `exports.types` or `types`/`typings`;
+- export/type/bin targets that exist and are covered by `files`;
+- expected public runtime symbols for focused package fixtures;
+- CLI bin existence and shebang.
+
+Actual tarball checks include:
+
+- `package.json`, a root README, and root LICENSE/LICENCE/COPYING text;
+- every exported/type/bin target really being present in the archive;
+- no raw source, tests, workspace configuration, lockfiles, or unsafe/link entries;
+- no unreplaced `workspace:` dependency protocols;
+- no shipped direct `dist` JS or declarations that are not represented by package exports/types/bin;
+- executable mode + shebang for packaged CLI bins.
+
+## Real package-boundary smoke tests
+
+The checker extracts every generated tarball into an isolated temporary `node_modules` tree.
+
+It then launches child Node processes **from that isolated tree** and resolves/imports packages using their public package specifiers such as:
+
+```js
+import("@anim8/core")
+```
+
+This intentionally does not import `dist/index.js` by absolute path, so broken or missing `exports` entries are caught.
+
+For packages with an `exports` map, the checker also attempts private deep imports corresponding to exported runtime files (for example `@anim8/core/dist/index.js`) and requires Node to reject them with `ERR_PACKAGE_PATH_NOT_EXPORTED`. Public subpath exports are resolved independently.
+
+Packages whose runtime/peer dependency closure is not present in the isolated packed set are still checked for export resolution and private-boundary enforcement, but their runtime import is explicitly skipped with a note.
+
+## Optional ecosystem validators
+
+If installed in the repository's root `node_modules/.bin`, the checker automatically invokes:
+
+- `publint` against each **extracted actual tarball package**;
+- `@arethetypeswrong/cli` (`attw`) against each generated `.tgz` using its `esm-only` profile, matching Anim8's intentional ESM-only package contract.
+
+These tools are optional. When absent, the checker prints explicit messages such as:
+
+```text
+[packaging] NOTE: SKIP publint: ...
+[packaging] NOTE: SKIP @arethetypeswrong/cli: ...
+```
+
+It never silently pretends those checks ran.
+
+## Cleanup
+
+Tarballs, extraction trees, and generated boundary-smoke scripts are created in an OS temporary directory and removed at the end of the run.
+
+If qualification finds missing exports, README/license content, types, side-effects metadata, publish-file declarations, bin metadata, accidental tarball files, or package-boundary failures, it reports them without modifying package or root manifests.
