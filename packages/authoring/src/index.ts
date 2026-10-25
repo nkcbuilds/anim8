@@ -793,6 +793,8 @@ export class SceneBuilder {
           }
           break;
         case "visibility":
+        case "reparent":
+        case "zOrder":
           return undefined;
       }
     }
