@@ -188,6 +188,51 @@ describe("mountSvg incremental DOM updates", () => {
     expect(box.getAttribute("transform")).toBe("matrix(1 0 0 1 80 100)");
   });
 
+  it("canonicalizes mounted numeric attributes and path data", () => {
+    const document = new FakeDocument();
+    const container = new FakeElement("div", document);
+    const line: DrawableObject = {
+      id: "line",
+      type: "line",
+      x2: -0,
+      y2: 1.23456789,
+      transform: { ...defaultTransform(), x: 10.123456789, y: -0.0000004 },
+      style: { ...defaultStyle(), strokeWidth: 1.23456789 },
+      visible: true,
+      z: 0,
+    };
+    const path: DrawableObject = {
+      id: "path",
+      type: "path",
+      d: "M -0 -0.0000004 L 1.23456789 2.34567891",
+      transform: defaultTransform(),
+      style: { ...defaultStyle(), fill: "none" },
+      visible: true,
+      z: 1,
+    };
+
+    mountSvg(
+      container as unknown as Element,
+      frame(
+        [line, path],
+        undefined,
+        { x: -0.0000004, y: 2.34567891, zoom: 1.23456789 },
+      ),
+    );
+
+    const svg = container.childNodes[0]!;
+    const world = svg.childNodes.find(child => child.getAttribute("data-anim8-camera") === "world")!;
+    const mountedLine = findByAnim8Id(svg, "line")!;
+    const mountedPath = findByAnim8Id(svg, "path")!;
+
+    expect(world.getAttribute("transform")).toBe("matrix(1.234568 0 0 1.234568 0 2.345679)");
+    expect(mountedLine.getAttribute("transform")).toBe("matrix(1 0 0 1 10.123457 0)");
+    expect(mountedLine.getAttribute("stroke-width")).toBe("1.234568");
+    expect(mountedLine.getAttribute("x2")).toBe("0");
+    expect(mountedLine.getAttribute("y2")).toBe("1.234568");
+    expect(mountedPath.getAttribute("d")).toBe("M 0 0 L 1.234568 2.345679");
+  });
+
   it("updates an existing connector path when endpoint geometry moves", () => {
     const document = new FakeDocument();
     const container = new FakeElement("div", document);

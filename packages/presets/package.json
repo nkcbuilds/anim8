@@ -22,5 +22,15 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "description": "Higher-level technical diagram primitives composed from Anim8 generic scene objects.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkcbuilds/anim8.git",
+    "directory": "packages/presets"
+  },
+  "homepage": "https://github.com/nkcbuilds/anim8#readme",
+  "bugs": {
+    "url": "https://github.com/nkcbuilds/anim8/issues"
   }
 }

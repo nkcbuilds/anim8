@@ -16,8 +16,9 @@ Current primitive actions include:
 - `stroke`
 - `visibility`
 - `draw`
+- `camera`
 
-Every action has an `id`, `target`, `start`, and `duration`.
+Object actions have an `id`, `target`, `start`, and `duration`. Scene-level `camera` actions intentionally have no object target.
 
 ## Random-access evaluation
 
@@ -89,9 +90,13 @@ Unsupported resize targets are rejected.
 
 Helpers such as `pulse` and `shake` compile to ordinary primitive scale/move actions. They do not introduce renderer-specific effect state.
 
+## Camera
+
+`camera` animates scene-level pan/zoom using absolute `x`, `y`, and `zoom` values. It is sampled from absolute timeline time and therefore obeys the same seek/reverse determinism as object actions.
+
 ## Playback
 
-The browser player supplies play, pause, seek, reverse, restart, speed, named-step navigation, looping, and reactive inputs while delegating semantic frame evaluation back to the core.
+The browser player supplies play, pause, seek, reverse, restart, speed, named-step navigation, looping, reactive inputs, and safe declarative interaction dispatch while delegating semantic frame evaluation back to the core.
 
 ## Future composition
 

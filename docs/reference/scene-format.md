@@ -13,11 +13,13 @@ interface SceneDocument {
     theme?: "clean" | "sketch";
     background?: string;
     seed?: number;
+    camera?: { x: number; y: number; zoom: number };
   };
   objects: DrawableObject[];
   timeline: Action[];
   state?: Record<string, string | number | boolean | null>;
   bindings?: Binding[];
+  interactions?: Interaction[];
   markers?: Marker[];
 }
 ```
@@ -73,6 +75,22 @@ Supported connector kinds are `straight`, `curve`, and `orthogonal`. Endpoints a
 Portable scenes may define scalar state and constrained expression bindings. Safe expression paths are limited to `time`, `progress`, `inputs.<name>`, and `state.<name>`.
 
 Bindings cannot execute JavaScript or access browser globals.
+
+## Declarative interactions
+
+Scenes may declare bounded state transitions for object `click`, `focus`, and `hover` events or custom named events.
+
+Interaction actions are limited to:
+
+- `set` a declared scalar state key,
+- `toggle` a declared boolean state key,
+- `increment` a declared numeric state key.
+
+Matching interactions and their actions run in document order. Only keys declared in `state` may be changed, and the transition helper is pure for a given scene, current state, and event.
+
+## Camera
+
+`scene.camera` defines the base camera as `{ x, y, zoom }`. A `camera` timeline action can animate any subset of those absolute values. Camera state is evaluated from absolute time just like object actions, so seek and reverse do not depend on previous rendered frames.
 
 ## Security
 

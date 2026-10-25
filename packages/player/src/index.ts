@@ -1,4 +1,4 @@
-import { evaluate, sceneDuration, type EvaluatedScene, type ScalarValue, type SceneDocument } from "@anim8/core";
+import { applyInteractions, evaluate, sceneDuration, type EvaluatedScene, type ScalarValue, type SceneDocument } from "@anim8/core";
 import { mountSvg, type SvgMount } from "@anim8/renderer-svg";
 
 export type PlayerObjectEventType =
@@ -32,6 +32,7 @@ export interface PlayerController {
   reverse(): void;
   setSpeed(speed: number): void;
   setInput(name: string, value: ScalarValue): void;
+  dispatch(name: string): void;
   nextStep(): void;
   previousStep(): void;
   getTime(): number;
@@ -47,8 +48,22 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
   let raf = 0;
   let previousTimestamp: number | null = null;
   const inputs: Record<string, ScalarValue> = {};
+  let localState: Record<string, ScalarValue> = { ...(scene.state ?? {}) };
   const duration = sceneDuration(scene);
-  const mount: SvgMount = mountSvg(container, evaluate(scene, time, { inputs }));
+  const mount: SvgMount = mountSvg(container, evaluate(scene, time, { inputs, state: localState }));
+  const objectInteractionKeys = new Set(
+    (scene.interactions ?? []).flatMap(interaction =>
+      interaction.event.type === "custom"
+        ? []
+        : [`${interaction.event.type}:${interaction.event.target}`],
+    ),
+  );
+  const customEventNames = new Set(
+    (scene.interactions ?? []).flatMap(interaction =>
+      interaction.event.type === "custom" ? [interaction.event.name] : [],
+    ),
+  );
+  const handlesObjectEvents = Boolean(options.onObjectEvent) || objectInteractionKeys.size > 0;
 
   const interactiveTarget = (target: EventTarget | null): Element | null => {
     if (!target || typeof Element === "undefined" || !(target instanceof Element)) return null;
@@ -56,9 +71,17 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
   };
 
   const prepareInteractiveDom = () => {
-    if (!options.onObjectEvent) return;
+    if (!handlesObjectEvents) return;
     container.querySelectorAll("[data-anim8-id]").forEach(element => {
-      if (!element.hasAttribute("tabindex")) element.setAttribute("tabindex", "0");
+      const objectId = element.getAttribute("data-anim8-id");
+      const declarativeTarget = objectId !== null && (
+        objectInteractionKeys.has(`click:${objectId}`) ||
+        objectInteractionKeys.has(`focus:${objectId}`) ||
+        objectInteractionKeys.has(`hover:${objectId}`)
+      );
+      if ((options.onObjectEvent || declarativeTarget) && !element.hasAttribute("tabindex")) {
+        element.setAttribute("tabindex", "0");
+      }
     });
   };
 
@@ -66,6 +89,18 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     const element = interactiveTarget(target);
     const objectId = element?.getAttribute("data-anim8-id");
     if (!objectId) return;
+
+    const declarativeType =
+      type === "click" || type === "focus" ? type :
+      type === "hover-enter" ? "hover" :
+      type === "activate" ? "click" :
+      null;
+
+    if (declarativeType && objectInteractionKeys.has(`${declarativeType}:${objectId}`)) {
+      localState = applyInteractions(scene, localState, { type: declarativeType, target: objectId });
+      render();
+    }
+
     options.onObjectEvent?.({ type, objectId, nativeEvent });
   };
 
@@ -91,7 +126,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     emitObjectEvent("activate", keyboard, target);
   };
 
-  if (options.onObjectEvent) {
+  if (handlesObjectEvents) {
     container.addEventListener("click", clickHandler);
     container.addEventListener("focusin", focusHandler);
     container.addEventListener("focusout", blurHandler);
@@ -101,7 +136,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
   }
 
   const render = () => {
-    const frame = evaluate(scene, time, { inputs });
+    const frame = evaluate(scene, time, { inputs, state: localState });
     mount.update(frame);
     prepareInteractiveDom();
     options.onFrame?.(frame);
@@ -153,6 +188,11 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     reverse: () => { speed = speed === 0 ? -1 : -speed; if (!playing) play(); },
     setSpeed: next => { speed = Number.isFinite(next) ? next : speed; },
     setInput: (name, value) => { inputs[name] = value; render(); },
+    dispatch: name => {
+      if (!customEventNames.has(name)) return;
+      localState = applyInteractions(scene, localState, { type: "custom", name });
+      render();
+    },
     nextStep: () => {
       const next = markerTimes.find(marker => marker > time + 0.001);
       seek(next ?? duration);
@@ -198,6 +238,7 @@ export class Anim8PlayerElement extends HTMLElementBase {
   restart(): void { this.#controller?.restart(); }
   setSpeed(speed: number): void { this.#controller?.setSpeed(speed); }
   setInput(name: string, value: ScalarValue): void { this.#controller?.setInput(name, value); }
+  dispatch(name: string): void { this.#controller?.dispatch(name); }
 
   disconnectedCallback(): void { this.#controller?.destroy(); }
 

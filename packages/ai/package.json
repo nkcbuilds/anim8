@@ -18,5 +18,15 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "description": "Provider-neutral fixtures, metrics, and harnesses for evaluating model-generated Anim8 scenes.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkcbuilds/anim8.git",
+    "directory": "packages/ai"
+  },
+  "homepage": "https://github.com/nkcbuilds/anim8#readme",
+  "bugs": {
+    "url": "https://github.com/nkcbuilds/anim8/issues"
   }
 }

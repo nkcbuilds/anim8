@@ -432,4 +432,112 @@ describe("@anim8/renderer-sketch", () => {
     expect(child.transform).toBe("matrix(1 0 0 1 125 60)");
     expect(allSketchPathData(child.body, "outline").length).toBeGreaterThan(0);
   });
+
+  it("canonicalizes renderer numbers to six decimals and removes negative zero", () => {
+    const scene: SceneDocument = {
+      version: "1.0",
+      scene: {
+        width: 300.123456789,
+        height: 160.0000004,
+        seed: 99,
+        camera: { x: -0.0000004, y: 2.34567891, zoom: 1.23456789 },
+      },
+      objects: [
+        {
+          id: "path",
+          type: "path",
+          d: "M -0 -0.0000004 L 1.23456789 2.34567891",
+          drawProgress: 0.123456789,
+          transform: { ...defaultTransform(), x: 10.123456789, y: -0.0000004 },
+          style: { ...defaultStyle(), fill: "#ffffff", strokeWidth: 1.23456789 },
+          visible: true,
+          z: 0,
+        },
+      ],
+      timeline: [],
+    };
+
+    const svg = renderSketchSceneAt(scene, 0);
+
+    expect(svg).toContain('viewBox="0 0 300.123457 160"');
+    expect(svg).toContain('data-anim8-camera="world" transform="matrix(1.234568 0 0 1.234568 0 2.345679)"');
+    expect(svg).toContain('data-anim8-id="path" transform="matrix(1 0 0 1 10.123457 0)"');
+    expect(svg).toContain('d="M 0 0 L 1.234568 2.345679"');
+    expect(svg).toContain('stroke-width="1.234568"');
+    expect(svg).toContain('stroke-dashoffset="0.876543"');
+    expect(svg).not.toMatch(/\d+\.\d{7,}/);
+  });
+
+  it("is byte-stable when seeking away and re-rendering an equivalent frame", () => {
+    const scene: SceneDocument = {
+      version: "1.0",
+      scene: {
+        width: 500,
+        height: 220,
+        seed: 2026,
+        camera: { x: 0.123456789, y: -0.123456789, zoom: 1 },
+      },
+      objects: [
+        {
+          id: "moving",
+          type: "rect",
+          width: 80,
+          height: 40,
+          transform: { ...defaultTransform(), x: 80.123456789, y: 100 },
+          style: defaultStyle(),
+          visible: true,
+          z: 1,
+        },
+        {
+          id: "fixed",
+          type: "rect",
+          width: 80,
+          height: 40,
+          transform: { ...defaultTransform(), x: 300, y: 100 },
+          style: defaultStyle(),
+          visible: true,
+          z: 1,
+        },
+        {
+          id: "edge",
+          type: "connector",
+          from: { objectId: "moving", anchor: "right" },
+          to: { objectId: "fixed", anchor: "left" },
+          kind: "curve",
+          transform: defaultTransform(),
+          style: defaultStyle(),
+          visible: true,
+          z: 0,
+        },
+      ],
+      timeline: [
+        {
+          id: "move",
+          type: "move",
+          target: "moving",
+          start: 0,
+          duration: 1000,
+          to: { x: 180.987654321, y: 100 },
+          easing: "linear",
+        },
+        {
+          id: "camera",
+          type: "camera",
+          start: 0,
+          duration: 1000,
+          easing: "linear",
+          to: { x: 50.987654321, y: 10.123456789, zoom: 1.75 },
+        },
+      ],
+    };
+
+    const time = 333.333333;
+    const first = renderSketchSceneAt(scene, time);
+    renderSketchSceneAt(scene, 812.345678);
+    const second = renderSketchSceneAt(scene, time);
+
+    expect(second).toBe(first);
+    expect(renderSketchSvg(evaluate(scene, time))).toBe(first);
+    expect(first).not.toMatch(/\d+\.\d{7,}/);
+  });
 });

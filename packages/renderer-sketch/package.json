@@ -22,5 +22,15 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "description": "Deterministic hand-drawn SVG renderer for Anim8 scenes.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkcbuilds/anim8.git",
+    "directory": "packages/renderer-sketch"
+  },
+  "homepage": "https://github.com/nkcbuilds/anim8#readme",
+  "bugs": {
+    "url": "https://github.com/nkcbuilds/anim8/issues"
   }
 }

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Anim8 browser harness</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: #ffffff; }
+    body { font-family: system-ui, sans-serif; }
+    .host { width: 480px; height: 270px; }
+    .host > svg { display: block; width: 100%; height: 100%; }
+    #snapshot-root { width: 480px; height: 270px; overflow: hidden; background: #ffffff; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "@anim8/core": "/packages/core/dist/index.js",
+      "@anim8/renderer-svg": "/packages/renderer-svg/dist/index.js",
+      "@anim8/player": "/packages/player/dist/index.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="fixture-root"></div>
+  <script type="module" src="/tests/browser/fixture.mjs"></script>
+</body>
+</html>

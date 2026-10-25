@@ -248,6 +248,21 @@ export interface Marker {
 
 export type ScalarValue = string | number | boolean | null;
 
+export type InteractionTrigger =
+  | { type: "click" | "focus" | "hover"; target: string }
+  | { type: "custom"; name: string };
+
+export type StateAction =
+  | { type: "set"; key: string; value: ScalarValue }
+  | { type: "toggle"; key: string }
+  | { type: "increment"; key: string; by: number };
+
+export interface Interaction {
+  id: string;
+  event: InteractionTrigger;
+  actions: StateAction[];
+}
+
 export type Expression =
   | { kind: "literal"; value: ScalarValue }
   | { kind: "get"; path: string }
@@ -275,6 +290,7 @@ export interface SceneDocument {
   timeline: Action[];
   state?: Record<string, ScalarValue>;
   bindings?: Binding[];
+  interactions?: Interaction[];
   markers?: Marker[];
 }
 

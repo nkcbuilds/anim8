@@ -28,6 +28,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
 
+      - name: Install Chromium for browser tests
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run browser tests
+        run: pnpm browser
+
       - name: Validate reference scenes
         run: |
           node packages/cli/dist/cli.js validate examples/two-sum/scene.json
