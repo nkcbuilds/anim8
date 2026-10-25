@@ -379,7 +379,7 @@ function adoptObjectRecord(object: MountedObject, element: Element): ObjectDomRe
   }
 }
 
-function findHydratableSvg(container: Element): {
+function findHydratableSvg(container: Element, frame: EvaluatedScene): {
   svg: SVGSVGElement;
   defs: SVGDefsElement;
   world: SVGGElement;
@@ -448,7 +448,7 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
     };
   }
 
-  const hydrated = findHydratableSvg(container);
+  const hydrated = findHydratableSvg(container, frame);
   const svg = hydrated?.svg ?? createSvgElement(document, "svg");
   setAttribute(svg, "xmlns", SVG_NS);
   setAttribute(svg, "role", "img");
