@@ -28,6 +28,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
 
+      - name: Run baseline benchmark
+        run: pnpm benchmark
+
       - name: Install browser matrix
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
