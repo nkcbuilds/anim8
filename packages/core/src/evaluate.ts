@@ -1,6 +1,6 @@
 import { defaultCamera } from "./defaults.js";
 import { ease, lerp, lerpColor } from "./easing.js";
-import { quadraticPoint } from "./geometry.js";
+import { decomposeMatrix, identityMatrix, invertMatrix, multiply, quadraticPoint, worldMatrix, worldOpacity } from "./geometry.js";
 import { canonicalMorphPathToString, interpolateMorphPath, morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
 import { evaluateExpression } from "./expression.js";
 import type { Action, Binding, CameraAction, CameraState, DrawableObject, EvaluatedScene, EvaluationContext, PointValue, SceneDocument, ScalarValue } from "./types.js";
@@ -21,6 +21,8 @@ function actionProperties(action: Action): readonly string[] {
     case "draw": return ["drawProgress"];
     case "morph": return ["d"];
     case "visibility": return ["visible"];
+    case "reparent": return ["parentId"];
+    case "zOrder": return ["z"];
     case "camera": return [
       ...(action.to.x !== undefined ? ["camera.x"] : []),
       ...(action.to.y !== undefined ? ["camera.y"] : []),
@@ -94,6 +96,65 @@ function applyAction(state: Map<string, DrawableObject>, action: ObjectAction, t
 
   if (action.type === "visibility") {
     if (time >= action.start) target.visible = action.visible;
+    return;
+  }
+
+  if (action.type === "zOrder") {
+    if (time >= action.start) target.z = action.to;
+    return;
+  }
+
+  if (action.type === "reparent") {
+    if (time < action.start) return;
+    const nextParent = action.parentId === null ? undefined : state.get(action.parentId);
+    if (action.parentId !== null && (!nextParent || nextParent.type !== "group")) return;
+
+    // Guard against dynamic cycles even if an untrusted caller bypasses validation.
+    let ancestor = nextParent;
+    const seen = new Set<string>();
+    while (ancestor) {
+      if (ancestor.id === target.id || seen.has(ancestor.id)) return;
+      seen.add(ancestor.id);
+      ancestor = ancestor.parentId ? state.get(ancestor.parentId) : undefined;
+    }
+
+    const preserveWorld = action.preserveWorld !== false;
+    const oldWorld = preserveWorld ? worldMatrix(target, state) : undefined;
+    const oldWorldOpacity = preserveWorld ? worldOpacity(target, state) : undefined;
+
+    if (target.parentId) {
+      const oldParent = state.get(target.parentId);
+      if (oldParent?.type === "group") {
+        oldParent.children = oldParent.children.filter(id => id !== target.id);
+      }
+    }
+
+    if (action.parentId === null) {
+      delete target.parentId;
+    } else {
+      target.parentId = action.parentId;
+      const group = state.get(action.parentId);
+      if (group?.type === "group" && !group.children.includes(target.id)) {
+        group.children = [...group.children, target.id];
+      }
+    }
+
+    if (preserveWorld && oldWorld) {
+      const parentMatrix = nextParent ? worldMatrix(nextParent, state) : identityMatrix();
+      const inverseParent = invertMatrix(parentMatrix);
+      if (inverseParent) {
+        const local = decomposeMatrix(multiply(inverseParent, oldWorld));
+        const opacity = target.transform.opacity;
+        target.transform = { ...local, opacity };
+      }
+
+      if (oldWorldOpacity !== undefined) {
+        const parentOpacity = nextParent ? worldOpacity(nextParent, state) : 1;
+        if (parentOpacity > Number.EPSILON) {
+          target.transform.opacity = oldWorldOpacity / parentOpacity;
+        }
+      }
+    }
     return;
   }
 
