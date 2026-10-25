@@ -1,4 +1,4 @@
-import { applyInteractions, evaluate, sceneDuration, type EvaluatedScene, type ScalarValue, type SceneDocument } from "@anim8/core";
+import { applySceneEvent, evaluate, initializeStateMachines, sceneDuration, type EvaluatedScene, type ScalarValue, type SceneDocument } from "@anim8/core";
 import { mountSvg, type SvgMount } from "@anim8/renderer-svg";
 
 export type PlayerObjectEventType =
@@ -37,6 +37,7 @@ export interface PlayerController {
   previousStep(): void;
   getTime(): number;
   getDuration(): number;
+  getMachineState(id: string): string | undefined;
   isPlaying(): boolean;
   destroy(): void;
 }
@@ -49,18 +50,26 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
   let previousTimestamp: number | null = null;
   const inputs: Record<string, ScalarValue> = {};
   let localState: Record<string, ScalarValue> = { ...(scene.state ?? {}) };
+  let localMachines = initializeStateMachines(scene);
   const duration = sceneDuration(scene);
   const mount: SvgMount = mountSvg(container, evaluate(scene, time, { inputs, state: localState }));
+  const machineTransitions = (scene.stateMachines ?? []).flatMap(machine =>
+    machine.states.flatMap(state => state.transitions),
+  );
+  const declarativeEvents = [
+    ...(scene.interactions ?? []).map(interaction => interaction.event),
+    ...machineTransitions.map(transition => transition.event),
+  ];
   const objectInteractionKeys = new Set(
-    (scene.interactions ?? []).flatMap(interaction =>
-      interaction.event.type === "custom"
+    declarativeEvents.flatMap(event =>
+      event.type === "custom"
         ? []
-        : [`${interaction.event.type}:${interaction.event.target}`],
+        : [`${event.type}:${event.target}`],
     ),
   );
   const customEventNames = new Set(
-    (scene.interactions ?? []).flatMap(interaction =>
-      interaction.event.type === "custom" ? [interaction.event.name] : [],
+    declarativeEvents.flatMap(event =>
+      event.type === "custom" ? [event.name] : [],
     ),
   );
   const handlesObjectEvents = Boolean(options.onObjectEvent) || objectInteractionKeys.size > 0;
@@ -97,7 +106,9 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
       null;
 
     if (declarativeType && objectInteractionKeys.has(`${declarativeType}:${objectId}`)) {
-      localState = applyInteractions(scene, localState, { type: declarativeType, target: objectId });
+      const result = applySceneEvent(scene, localState, localMachines, { type: declarativeType, target: objectId });
+      localState = result.state;
+      localMachines = result.machines;
       render();
     }
 
@@ -190,7 +201,9 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     setInput: (name, value) => { inputs[name] = value; render(); },
     dispatch: name => {
       if (!customEventNames.has(name)) return;
-      localState = applyInteractions(scene, localState, { type: "custom", name });
+      const result = applySceneEvent(scene, localState, localMachines, { type: "custom", name });
+      localState = result.state;
+      localMachines = result.machines;
       render();
     },
     nextStep: () => {
@@ -203,6 +216,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     },
     getTime: () => time,
     getDuration: () => duration,
+    getMachineState: id => localMachines[id],
     isPlaying: () => playing,
     destroy: () => {
       pause();
@@ -239,6 +253,7 @@ export class Anim8PlayerElement extends HTMLElementBase {
   setSpeed(speed: number): void { this.#controller?.setSpeed(speed); }
   setInput(name: string, value: ScalarValue): void { this.#controller?.setInput(name, value); }
   dispatch(name: string): void { this.#controller?.dispatch(name); }
+  getMachineState(id: string): string | undefined { return this.#controller?.getMachineState(id); }
 
   disconnectedCallback(): void { this.#controller?.destroy(); }
 
