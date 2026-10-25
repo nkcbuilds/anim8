@@ -160,12 +160,28 @@ export interface AnchorRef {
 
 export type EasingName = "linear" | "easeIn" | "easeOut" | "easeInOut" | "spring";
 
+export interface CubicBezierEasing {
+  type: "cubicBezier";
+  /** CSS-compatible x control points must remain in [0, 1]. */
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export type Easing = EasingName | CubicBezierEasing;
+
 export interface ActionBase {
   id: string;
   target: string;
   start: number;
   duration: number;
-  easing?: EasingName;
+  easing?: Easing;
+  /**
+   * Explicitly retargets an already-active conflicting action from its sampled
+   * pose at this action's start time. Without this flag, overlaps are invalid.
+   */
+  interrupt?: boolean;
 }
 
 export interface MoveAction extends ActionBase {
@@ -236,7 +252,8 @@ export interface CameraAction {
   type: "camera";
   start: number;
   duration: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
   /** Absolute camera values. Omitted fields retain their current value. */
   to: CameraTarget;
 }
