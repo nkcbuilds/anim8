@@ -17,6 +17,7 @@ const optionalRuntime = join(runtimeRoot, "optional");
 
 const workspacePackages = [
   "core",
+  "authoring",
   "renderer-svg",
   "player",
   "react",
@@ -254,12 +255,13 @@ async function main() {
     runFixture(join("vanilla-esm", "index.mjs"));
     runFixture(join("ssr-node", "index.mjs"));
     runFixture(join("react-ssr", "index.mjs"));
+    runFixture(join("custom-extension", "index.mjs"));
 
     const rootRequire = createRequire(join(repoRoot, "package.json"));
     runDesktopWebviewBuild(rootRequire);
 
     const frameworkCount = await runOptionalFrameworks();
-    console.log(`PASS consumer package-boundary suite (${4 + frameworkCount} executed fixtures)`);
+    console.log(`PASS consumer package-boundary suite (${5 + frameworkCount} executed fixtures)`);
   } finally {
     if (process.env.KEEP_CONSUMER_RUNTIME !== "1") {
       await rm(runtimeRoot, { recursive: true, force: true });
