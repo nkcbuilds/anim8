@@ -152,6 +152,10 @@ pnpm benchmark
 
 Research and architectural decisions live in `docs/research` and `docs/architecture/decisions`.
 
+## 150 teaching examples
+
+The [teaching scene catalog](examples/catalog/README.md) contains 150 portable and independently validated animations across computing, math/science, and real-world workflows. Each teaches a concept in four narrated, seekable stages. Browse and scrub the full collection with `pnpm catalog:serve` after building; then open `http://127.0.0.1:4178`. Catalog determinism checks run as part of `pnpm check`, and a dedicated Chromium layout pass runs in CI after browser installation.
+
 ## Security model
 
 Remote/model-generated scene documents are untrusted data. Anim8 does not evaluate JavaScript from JSON, and the compiler enforces structural/resource policies before rendering. See [docs/security.md](docs/security.md).

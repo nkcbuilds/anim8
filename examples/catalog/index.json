@@ -1,0 +1,3156 @@
+{
+  "version": 1,
+  "count": 150,
+  "examples": [
+    {
+      "id": "binary-search",
+      "category": "computing",
+      "title": "Binary search halves the search space",
+      "pattern": "ladder",
+      "description": "Start with ordered elements Inspect the midpoint Discard the impossible half Repeat until the target matches",
+      "entities": [
+        "Sorted range",
+        "Middle value",
+        "Keep one half",
+        "Target found"
+      ],
+      "steps": [
+        "Start with ordered elements",
+        "Inspect the midpoint",
+        "Discard the impossible half",
+        "Repeat until the target matches"
+      ],
+      "durationMs": 2700,
+      "file": "computing/binary-search/scene.json"
+    },
+    {
+      "id": "linear-search",
+      "category": "computing",
+      "title": "Linear search examines each element",
+      "pattern": "sequence",
+      "description": "Start at the beginning Compare against the query Advance when values differ Stop when the target matches",
+      "entities": [
+        "First item",
+        "Next item",
+        "Candidate",
+        "Found match"
+      ],
+      "steps": [
+        "Start at the beginning",
+        "Compare against the query",
+        "Advance when values differ",
+        "Stop when the target matches"
+      ],
+      "durationMs": 2700,
+      "file": "computing/linear-search/scene.json"
+    },
+    {
+      "id": "bubble-sort",
+      "category": "computing",
+      "title": "Bubble sort pushes larger values right",
+      "pattern": "sequence",
+      "description": "Consider two neighbors Compare their keys Swap an inverted pair Repeat passes until ordered",
+      "entities": [
+        "Adjacent pair",
+        "Compare",
+        "Swap",
+        "Sorted suffix"
+      ],
+      "steps": [
+        "Consider two neighbors",
+        "Compare their keys",
+        "Swap an inverted pair",
+        "Repeat passes until ordered"
+      ],
+      "durationMs": 2700,
+      "file": "computing/bubble-sort/scene.json"
+    },
+    {
+      "id": "merge-sort",
+      "category": "computing",
+      "title": "Merge sort divides then combines",
+      "pattern": "tree",
+      "description": "Split the problem in half Sort the left partition Sort the right partition Merge two ordered runs",
+      "entities": [
+        "Unsorted list",
+        "Left half",
+        "Right half",
+        "Sorted merge"
+      ],
+      "steps": [
+        "Split the problem in half",
+        "Sort the left partition",
+        "Sort the right partition",
+        "Merge two ordered runs"
+      ],
+      "durationMs": 2700,
+      "file": "computing/merge-sort/scene.json"
+    },
+    {
+      "id": "quick-sort",
+      "category": "computing",
+      "title": "Quicksort partitions around a pivot",
+      "pattern": "branch",
+      "description": "Choose a pivot value Compare each element to it Partition values below it Keep values above it",
+      "entities": [
+        "Unsorted set",
+        "Pivot",
+        "Smaller values",
+        "Larger values"
+      ],
+      "steps": [
+        "Choose a pivot value",
+        "Compare each element to it",
+        "Partition values below it",
+        "Keep values above it"
+      ],
+      "durationMs": 2700,
+      "file": "computing/quick-sort/scene.json"
+    },
+    {
+      "id": "heap-sort",
+      "category": "computing",
+      "title": "Heapsort extracts the maximum",
+      "pattern": "stack",
+      "description": "Construct a max heap The largest value reaches the root Swap it into the sorted tail Restore heap order",
+      "entities": [
+        "Array",
+        "Max heap",
+        "Root extracted",
+        "Sorted tail"
+      ],
+      "steps": [
+        "Construct a max heap",
+        "The largest value reaches the root",
+        "Swap it into the sorted tail",
+        "Restore heap order"
+      ],
+      "durationMs": 2700,
+      "file": "computing/heap-sort/scene.json"
+    },
+    {
+      "id": "insertion-sort",
+      "category": "computing",
+      "title": "Insertion sort grows a sorted prefix",
+      "pattern": "ladder",
+      "description": "Maintain an ordered prefix Take the next key Shift larger values right Insert the key into its slot",
+      "entities": [
+        "Sorted prefix",
+        "Next key",
+        "Shift larger",
+        "Insert key"
+      ],
+      "steps": [
+        "Maintain an ordered prefix",
+        "Take the next key",
+        "Shift larger values right",
+        "Insert the key into its slot"
+      ],
+      "durationMs": 2700,
+      "file": "computing/insertion-sort/scene.json"
+    },
+    {
+      "id": "selection-sort",
+      "category": "computing",
+      "title": "Selection sort chooses the minimum",
+      "pattern": "sequence",
+      "description": "Inspect the unsorted region Track the smallest item Finish scanning candidates Place the minimum at the front",
+      "entities": [
+        "Unsorted prefix",
+        "Scan",
+        "Minimum",
+        "Fixed position"
+      ],
+      "steps": [
+        "Inspect the unsorted region",
+        "Track the smallest item",
+        "Finish scanning candidates",
+        "Place the minimum at the front"
+      ],
+      "durationMs": 2700,
+      "file": "computing/selection-sort/scene.json"
+    },
+    {
+      "id": "two-pointers",
+      "category": "computing",
+      "title": "Two pointers converge on a pair",
+      "pattern": "compare",
+      "description": "Start at both ends Compute the current sum Move left if too small Move right if too large",
+      "entities": [
+        "Left pointer",
+        "Right pointer",
+        "Current sum",
+        "Target sum"
+      ],
+      "steps": [
+        "Start at both ends",
+        "Compute the current sum",
+        "Move left if too small",
+        "Move right if too large"
+      ],
+      "durationMs": 2700,
+      "file": "computing/two-pointers/scene.json"
+    },
+    {
+      "id": "sliding-window",
+      "category": "computing",
+      "title": "Sliding window keeps a bounded range",
+      "pattern": "timeline",
+      "description": "Add the incoming value Track the active window Evict an outgoing value Record the current optimum",
+      "entities": [
+        "Expand right",
+        "Window data",
+        "Remove left",
+        "Update answer"
+      ],
+      "steps": [
+        "Add the incoming value",
+        "Track the active window",
+        "Evict an outgoing value",
+        "Record the current optimum"
+      ],
+      "durationMs": 2700,
+      "file": "computing/sliding-window/scene.json"
+    },
+    {
+      "id": "prefix-sum",
+      "category": "computing",
+      "title": "Prefix sums answer range totals",
+      "pattern": "pipeline",
+      "description": "Read values in order Accumulate a running sum Store each prefix total Subtract two prefixes for a range",
+      "entities": [
+        "Original values",
+        "Running total",
+        "Prefix array",
+        "Range subtraction"
+      ],
+      "steps": [
+        "Read values in order",
+        "Accumulate a running sum",
+        "Store each prefix total",
+        "Subtract two prefixes for a range"
+      ],
+      "durationMs": 2700,
+      "file": "computing/prefix-sum/scene.json"
+    },
+    {
+      "id": "difference-array",
+      "category": "computing",
+      "title": "Difference arrays batch range updates",
+      "pattern": "pipeline",
+      "description": "Identify an interval update Add the delta at its start Subtract it after the end Prefix sum reconstructs values",
+      "entities": [
+        "Range update",
+        "Start delta",
+        "End delta",
+        "Final prefix"
+      ],
+      "steps": [
+        "Identify an interval update",
+        "Add the delta at its start",
+        "Subtract it after the end",
+        "Prefix sum reconstructs values"
+      ],
+      "durationMs": 2700,
+      "file": "computing/difference-array/scene.json"
+    },
+    {
+      "id": "hash-table",
+      "category": "computing",
+      "title": "Hash tables map keys to buckets",
+      "pattern": "hub",
+      "description": "Start with a lookup key Compute its deterministic hash Index the bucket array Compare keys in the bucket",
+      "entities": [
+        "Hash key",
+        "Compute index",
+        "Bucket",
+        "Resolve collision"
+      ],
+      "steps": [
+        "Start with a lookup key",
+        "Compute its deterministic hash",
+        "Index the bucket array",
+        "Compare keys in the bucket"
+      ],
+      "durationMs": 2700,
+      "file": "computing/hash-table/scene.json"
+    },
+    {
+      "id": "stack-lifo",
+      "category": "computing",
+      "title": "A stack removes the newest item",
+      "pattern": "stack",
+      "description": "Push an item onto the stack Push another above it Inspect the most recent entry Pop that entry first",
+      "entities": [
+        "Push A",
+        "Push B",
+        "Top B",
+        "Pop B"
+      ],
+      "steps": [
+        "Push an item onto the stack",
+        "Push another above it",
+        "Inspect the most recent entry",
+        "Pop that entry first"
+      ],
+      "durationMs": 2700,
+      "file": "computing/stack-lifo/scene.json"
+    },
+    {
+      "id": "queue-fifo",
+      "category": "computing",
+      "title": "A queue processes arrivals in order",
+      "pattern": "queue",
+      "description": "A arrives before B Both wait in sequence The head becomes eligible Remove the oldest entry",
+      "entities": [
+        "Enqueue A",
+        "Enqueue B",
+        "Front A",
+        "Dequeue A"
+      ],
+      "steps": [
+        "A arrives before B",
+        "Both wait in sequence",
+        "The head becomes eligible",
+        "Remove the oldest entry"
+      ],
+      "durationMs": 2700,
+      "file": "computing/queue-fifo/scene.json"
+    },
+    {
+      "id": "deque",
+      "category": "computing",
+      "title": "A deque supports both ends",
+      "pattern": "compare",
+      "description": "Insert at the leading end Insert at the trailing end Remove the leading element Either end can be removed",
+      "entities": [
+        "Push front",
+        "Push back",
+        "Pop front",
+        "Pop back"
+      ],
+      "steps": [
+        "Insert at the leading end",
+        "Insert at the trailing end",
+        "Remove the leading element",
+        "Either end can be removed"
+      ],
+      "durationMs": 2700,
+      "file": "computing/deque/scene.json"
+    },
+    {
+      "id": "linked-list",
+      "category": "computing",
+      "title": "Linked lists follow references",
+      "pattern": "pipeline",
+      "description": "Start at the head Follow the stored reference Visit the next node Stop at the null tail",
+      "entities": [
+        "Head node",
+        "Next pointer",
+        "Middle node",
+        "Tail node"
+      ],
+      "steps": [
+        "Start at the head",
+        "Follow the stored reference",
+        "Visit the next node",
+        "Stop at the null tail"
+      ],
+      "durationMs": 2700,
+      "file": "computing/linked-list/scene.json"
+    },
+    {
+      "id": "binary-tree-search",
+      "category": "computing",
+      "title": "BST searches by ordered branches",
+      "pattern": "tree",
+      "description": "Compare with the root Choose left for smaller keys Choose right for larger keys Continue to the matching leaf",
+      "entities": [
+        "Root key",
+        "Smaller branch",
+        "Larger branch",
+        "Matching leaf"
+      ],
+      "steps": [
+        "Compare with the root",
+        "Choose left for smaller keys",
+        "Choose right for larger keys",
+        "Continue to the matching leaf"
+      ],
+      "durationMs": 2700,
+      "file": "computing/binary-tree-search/scene.json"
+    },
+    {
+      "id": "breadth-first-search",
+      "category": "computing",
+      "title": "BFS explores layer by layer",
+      "pattern": "hub",
+      "description": "Mark the starting vertex Queue adjacent vertices Expand the next distance layer Visit each reachable node once",
+      "entities": [
+        "Start vertex",
+        "Neighbor queue",
+        "Next layer",
+        "All reachable"
+      ],
+      "steps": [
+        "Mark the starting vertex",
+        "Queue adjacent vertices",
+        "Expand the next distance layer",
+        "Visit each reachable node once"
+      ],
+      "durationMs": 2700,
+      "file": "computing/breadth-first-search/scene.json"
+    },
+    {
+      "id": "depth-first-search",
+      "category": "computing",
+      "title": "DFS follows paths deeply",
+      "pattern": "tree",
+      "description": "Visit a starting vertex Follow one unvisited child Return when no child remains Explore another branch",
+      "entities": [
+        "Start vertex",
+        "Explore child",
+        "Backtrack",
+        "Next branch"
+      ],
+      "steps": [
+        "Visit a starting vertex",
+        "Follow one unvisited child",
+        "Return when no child remains",
+        "Explore another branch"
+      ],
+      "durationMs": 2700,
+      "file": "computing/depth-first-search/scene.json"
+    },
+    {
+      "id": "dijkstra",
+      "category": "computing",
+      "title": "Dijkstra relaxes shortest paths",
+      "pattern": "network",
+      "description": "Initialize the source distance Choose the cheapest frontier Relax outgoing edge distances Finalize the nearest vertex",
+      "entities": [
+        "Source 0",
+        "Frontier",
+        "Relax edge",
+        "Final distance"
+      ],
+      "steps": [
+        "Initialize the source distance",
+        "Choose the cheapest frontier",
+        "Relax outgoing edge distances",
+        "Finalize the nearest vertex"
+      ],
+      "durationMs": 2700,
+      "file": "computing/dijkstra/scene.json"
+    },
+    {
+      "id": "bellman-ford",
+      "category": "computing",
+      "title": "Bellman-Ford relaxes edges repeatedly",
+      "pattern": "cycle",
+      "description": "Set source distance to zero Relax every graph edge Repeat for V minus 1 passes Detect any improving negative cycle",
+      "entities": [
+        "Distance seed",
+        "All edges",
+        "Repeat passes",
+        "Cycle check"
+      ],
+      "steps": [
+        "Set source distance to zero",
+        "Relax every graph edge",
+        "Repeat for V minus 1 passes",
+        "Detect any improving negative cycle"
+      ],
+      "durationMs": 2700,
+      "file": "computing/bellman-ford/scene.json"
+    },
+    {
+      "id": "topological-sort",
+      "category": "computing",
+      "title": "Topological order respects dependencies",
+      "pattern": "branch",
+      "description": "Count incoming dependencies Take a node with no blockers Remove its outgoing edges Repeat to order the DAG",
+      "entities": [
+        "Task prerequisites",
+        "In-degree 0",
+        "Remove ready",
+        "Valid ordering"
+      ],
+      "steps": [
+        "Count incoming dependencies",
+        "Take a node with no blockers",
+        "Remove its outgoing edges",
+        "Repeat to order the DAG"
+      ],
+      "durationMs": 2700,
+      "file": "computing/topological-sort/scene.json"
+    },
+    {
+      "id": "union-find",
+      "category": "computing",
+      "title": "Union-find tracks connected components",
+      "pattern": "hub",
+      "description": "Start with separate parents Union two components Compress paths toward root Compare roots for connectivity",
+      "entities": [
+        "Singleton sets",
+        "Union operation",
+        "Shared root",
+        "Find query"
+      ],
+      "steps": [
+        "Start with separate parents",
+        "Union two components",
+        "Compress paths toward root",
+        "Compare roots for connectivity"
+      ],
+      "durationMs": 2700,
+      "file": "computing/union-find/scene.json"
+    },
+    {
+      "id": "minimum-spanning-tree",
+      "category": "computing",
+      "title": "MST connects nodes cheaply",
+      "pattern": "network",
+      "description": "Sort edges by weight Inspect the cheapest candidate Skip edges forming a cycle Accept edges until connected",
+      "entities": [
+        "Weighted edges",
+        "Candidate edge",
+        "No cycle",
+        "Total tree"
+      ],
+      "steps": [
+        "Sort edges by weight",
+        "Inspect the cheapest candidate",
+        "Skip edges forming a cycle",
+        "Accept edges until connected"
+      ],
+      "durationMs": 2700,
+      "file": "computing/minimum-spanning-tree/scene.json"
+    },
+    {
+      "id": "dynamic-programming",
+      "category": "computing",
+      "title": "DP reuses overlapping subproblems",
+      "pattern": "tree",
+      "description": "Expand the recurrence Notice duplicate subproblems Cache solved state values Build the larger answer",
+      "entities": [
+        "Big recurrence",
+        "Repeated states",
+        "Memo table",
+        "Final answer"
+      ],
+      "steps": [
+        "Expand the recurrence",
+        "Notice duplicate subproblems",
+        "Cache solved state values",
+        "Build the larger answer"
+      ],
+      "durationMs": 2700,
+      "file": "computing/dynamic-programming/scene.json"
+    },
+    {
+      "id": "knapsack",
+      "category": "computing",
+      "title": "Knapsack balances value and capacity",
+      "pattern": "chart",
+      "description": "List item weights and rewards Track remaining capacity Compare include and exclude Keep the best feasible value",
+      "entities": [
+        "Items",
+        "Weight limit",
+        "Candidate choice",
+        "Best value"
+      ],
+      "steps": [
+        "List item weights and rewards",
+        "Track remaining capacity",
+        "Compare include and exclude",
+        "Keep the best feasible value"
+      ],
+      "durationMs": 2700,
+      "file": "computing/knapsack/scene.json"
+    },
+    {
+      "id": "longest-common-subsequence",
+      "category": "computing",
+      "title": "LCS matches ordered characters",
+      "pattern": "grid",
+      "description": "Align both input sequences Compare characters at a cell Use neighboring scores Trace back a shared subsequence",
+      "entities": [
+        "First string",
+        "Second string",
+        "DP grid",
+        "Common sequence"
+      ],
+      "steps": [
+        "Align both input sequences",
+        "Compare characters at a cell",
+        "Use neighboring scores",
+        "Trace back a shared subsequence"
+      ],
+      "durationMs": 2700,
+      "file": "computing/longest-common-subsequence/scene.json"
+    },
+    {
+      "id": "edit-distance",
+      "category": "computing",
+      "title": "Edit distance counts minimal changes",
+      "pattern": "grid",
+      "description": "Take the two input strings Consider insertion and deletion Consider substitutions Choose minimum edit cost",
+      "entities": [
+        "Source word",
+        "Target word",
+        "Insert or delete",
+        "Minimum cost"
+      ],
+      "steps": [
+        "Take the two input strings",
+        "Consider insertion and deletion",
+        "Consider substitutions",
+        "Choose minimum edit cost"
+      ],
+      "durationMs": 2700,
+      "file": "computing/edit-distance/scene.json"
+    },
+    {
+      "id": "trie-prefix",
+      "category": "computing",
+      "title": "Tries share common prefixes",
+      "pattern": "tree",
+      "description": "Start at an empty root Reuse prefix edges Branch when characters differ Mark completed words",
+      "entities": [
+        "Root",
+        "Common prefix",
+        "Branch letters",
+        "Completed word"
+      ],
+      "steps": [
+        "Start at an empty root",
+        "Reuse prefix edges",
+        "Branch when characters differ",
+        "Mark completed words"
+      ],
+      "durationMs": 2700,
+      "file": "computing/trie-prefix/scene.json"
+    },
+    {
+      "id": "bitmasking",
+      "category": "computing",
+      "title": "Bitmasks represent subsets compactly",
+      "pattern": "stack",
+      "description": "Encode membership in bits Use AND to inspect a bit Use XOR to flip a bit One integer stores the subset",
+      "entities": [
+        "Set bits",
+        "Test bit",
+        "Toggle bit",
+        "Subset state"
+      ],
+      "steps": [
+        "Encode membership in bits",
+        "Use AND to inspect a bit",
+        "Use XOR to flip a bit",
+        "One integer stores the subset"
+      ],
+      "durationMs": 2700,
+      "file": "computing/bitmasking/scene.json"
+    },
+    {
+      "id": "binary-exponentiation",
+      "category": "computing",
+      "title": "Fast exponentiation squares repeatedly",
+      "pattern": "ladder",
+      "description": "Write exponent in binary Square the current power Multiply for each one-bit Finish in logarithmic steps",
+      "entities": [
+        "Base",
+        "Square base",
+        "Odd exponent",
+        "Result"
+      ],
+      "steps": [
+        "Write exponent in binary",
+        "Square the current power",
+        "Multiply for each one-bit",
+        "Finish in logarithmic steps"
+      ],
+      "durationMs": 2700,
+      "file": "computing/binary-exponentiation/scene.json"
+    },
+    {
+      "id": "euclid-gcd",
+      "category": "computing",
+      "title": "Euclid finds the greatest common divisor",
+      "pattern": "cycle",
+      "description": "Start with two integers Compute their remainder Replace the larger pair Last nonzero divisor is GCD",
+      "entities": [
+        "Pair a,b",
+        "Remainder a mod b",
+        "Swap inputs",
+        "Zero remainder"
+      ],
+      "steps": [
+        "Start with two integers",
+        "Compute their remainder",
+        "Replace the larger pair",
+        "Last nonzero divisor is GCD"
+      ],
+      "durationMs": 2700,
+      "file": "computing/euclid-gcd/scene.json"
+    },
+    {
+      "id": "sieve-primes",
+      "category": "computing",
+      "title": "Sieve strikes multiples",
+      "pattern": "grid",
+      "description": "List candidate integers Keep the smallest unmarked prime Mark its multiples composite Unmarked numbers remain prime",
+      "entities": [
+        "Number grid",
+        "Start prime",
+        "Cross multiples",
+        "Remaining primes"
+      ],
+      "steps": [
+        "List candidate integers",
+        "Keep the smallest unmarked prime",
+        "Mark its multiples composite",
+        "Unmarked numbers remain prime"
+      ],
+      "durationMs": 2700,
+      "file": "computing/sieve-primes/scene.json"
+    },
+    {
+      "id": "recursion-call-stack",
+      "category": "computing",
+      "title": "Recursion uses nested stack frames",
+      "pattern": "stack",
+      "description": "Enter the first function call Push the smaller subproblem Stop at a base condition Return values while unwinding",
+      "entities": [
+        "Call n=3",
+        "Call n=2",
+        "Base case",
+        "Unwind result"
+      ],
+      "steps": [
+        "Enter the first function call",
+        "Push the smaller subproblem",
+        "Stop at a base condition",
+        "Return values while unwinding"
+      ],
+      "durationMs": 2700,
+      "file": "computing/recursion-call-stack/scene.json"
+    },
+    {
+      "id": "event-loop",
+      "category": "computing",
+      "title": "JavaScript event loop schedules tasks",
+      "pattern": "cycle",
+      "description": "Run synchronous code first Queue completed async callbacks Drain pending microtasks Process the next event-loop task",
+      "entities": [
+        "Call stack",
+        "Task queue",
+        "Microtasks",
+        "Next turn"
+      ],
+      "steps": [
+        "Run synchronous code first",
+        "Queue completed async callbacks",
+        "Drain pending microtasks",
+        "Process the next event-loop task"
+      ],
+      "durationMs": 2700,
+      "file": "computing/event-loop/scene.json"
+    },
+    {
+      "id": "promise-chain",
+      "category": "computing",
+      "title": "Promises propagate results",
+      "pattern": "pipeline",
+      "description": "Start asynchronous work Settle the pending promise Transform in the next handler Propagate failures to catch",
+      "entities": [
+        "Async request",
+        "Resolve",
+        "Then handler",
+        "Error branch"
+      ],
+      "steps": [
+        "Start asynchronous work",
+        "Settle the pending promise",
+        "Transform in the next handler",
+        "Propagate failures to catch"
+      ],
+      "durationMs": 2700,
+      "file": "computing/promise-chain/scene.json"
+    },
+    {
+      "id": "garbage-collection",
+      "category": "computing",
+      "title": "Tracing GC reclaims unreachable memory",
+      "pattern": "branch",
+      "description": "Trace references from roots Mark every reachable object Find the unmarked allocation Return its memory to the heap",
+      "entities": [
+        "Root references",
+        "Reachable objects",
+        "Unreachable object",
+        "Reclaim"
+      ],
+      "steps": [
+        "Trace references from roots",
+        "Mark every reachable object",
+        "Find the unmarked allocation",
+        "Return its memory to the heap"
+      ],
+      "durationMs": 2700,
+      "file": "computing/garbage-collection/scene.json"
+    },
+    {
+      "id": "compiler-pipeline",
+      "category": "computing",
+      "title": "A compiler transforms source into output",
+      "pattern": "pipeline",
+      "description": "Lex source into tokens Parse syntax and meaning Optimize an intermediate form Emit machine instructions",
+      "entities": [
+        "Source text",
+        "Tokens and AST",
+        "Intermediate IR",
+        "Machine code"
+      ],
+      "steps": [
+        "Lex source into tokens",
+        "Parse syntax and meaning",
+        "Optimize an intermediate form",
+        "Emit machine instructions"
+      ],
+      "durationMs": 2700,
+      "file": "computing/compiler-pipeline/scene.json"
+    },
+    {
+      "id": "jit-compiler",
+      "category": "computing",
+      "title": "JIT compiles frequently used paths",
+      "pattern": "cycle",
+      "description": "Execute code initially Measure frequently used functions Compile optimized machine code Reuse compiled paths on future calls",
+      "entities": [
+        "Interpreter",
+        "Hotspot counter",
+        "Compile hot code",
+        "Optimized run"
+      ],
+      "steps": [
+        "Execute code initially",
+        "Measure frequently used functions",
+        "Compile optimized machine code",
+        "Reuse compiled paths on future calls"
+      ],
+      "durationMs": 2700,
+      "file": "computing/jit-compiler/scene.json"
+    },
+    {
+      "id": "virtual-memory",
+      "category": "computing",
+      "title": "Virtual memory translates addresses",
+      "pattern": "layers",
+      "description": "Issue a virtual address Consult the mapping table Locate the physical memory page Fault and load when absent",
+      "entities": [
+        "Process VA",
+        "Page table",
+        "Physical frame",
+        "Disk fallback"
+      ],
+      "steps": [
+        "Issue a virtual address",
+        "Consult the mapping table",
+        "Locate the physical memory page",
+        "Fault and load when absent"
+      ],
+      "durationMs": 2700,
+      "file": "computing/virtual-memory/scene.json"
+    },
+    {
+      "id": "mutex-lock",
+      "category": "computing",
+      "title": "A mutex protects a shared resource",
+      "pattern": "decision",
+      "description": "Thread A requests the mutex A becomes the exclusive owner Modify shared state safely B proceeds after A unlocks",
+      "entities": [
+        "Thread A",
+        "Lock ownership",
+        "Critical section",
+        "Thread B waits"
+      ],
+      "steps": [
+        "Thread A requests the mutex",
+        "A becomes the exclusive owner",
+        "Modify shared state safely",
+        "B proceeds after A unlocks"
+      ],
+      "durationMs": 2700,
+      "file": "computing/mutex-lock/scene.json"
+    },
+    {
+      "id": "deadlock",
+      "category": "computing",
+      "title": "Deadlock forms a circular wait",
+      "pattern": "cycle",
+      "description": "A owns the first resource A waits for the second B already owns the second Both block without prevention",
+      "entities": [
+        "Task A holds X",
+        "Task A wants Y",
+        "Task B holds Y",
+        "Task B wants X"
+      ],
+      "steps": [
+        "A owns the first resource",
+        "A waits for the second",
+        "B already owns the second",
+        "Both block without prevention"
+      ],
+      "durationMs": 2700,
+      "file": "computing/deadlock/scene.json"
+    },
+    {
+      "id": "producer-consumer",
+      "category": "computing",
+      "title": "Producer and consumer share a bounded buffer",
+      "pattern": "pipeline",
+      "description": "Produce a new event Append it to the buffer Consumer removes an event Slow consumption causes backpressure",
+      "entities": [
+        "Producer",
+        "Queue buffer",
+        "Consumer",
+        "Backpressure"
+      ],
+      "steps": [
+        "Produce a new event",
+        "Append it to the buffer",
+        "Consumer removes an event",
+        "Slow consumption causes backpressure"
+      ],
+      "durationMs": 2700,
+      "file": "computing/producer-consumer/scene.json"
+    },
+    {
+      "id": "rate-limiting",
+      "category": "computing",
+      "title": "Token bucket limits request bursts",
+      "pattern": "hub",
+      "description": "Refill tokens at a fixed rate Track the available budget Charge a request token Reject when no token remains",
+      "entities": [
+        "Token refill",
+        "Bucket balance",
+        "Request arrives",
+        "Permit or deny"
+      ],
+      "steps": [
+        "Refill tokens at a fixed rate",
+        "Track the available budget",
+        "Charge a request token",
+        "Reject when no token remains"
+      ],
+      "durationMs": 2700,
+      "file": "computing/rate-limiting/scene.json"
+    },
+    {
+      "id": "cache-invalidation",
+      "category": "computing",
+      "title": "Cache invalidation handles stale data",
+      "pattern": "cycle",
+      "description": "Read authoritative source data Serve subsequent reads from cache A write changes the source Evict or refresh stale entries",
+      "entities": [
+        "Source DB",
+        "Cached copy",
+        "Write update",
+        "Invalidate cache"
+      ],
+      "steps": [
+        "Read authoritative source data",
+        "Serve subsequent reads from cache",
+        "A write changes the source",
+        "Evict or refresh stale entries"
+      ],
+      "durationMs": 2700,
+      "file": "computing/cache-invalidation/scene.json"
+    },
+    {
+      "id": "load-balancing",
+      "category": "computing",
+      "title": "Load balancing distributes incoming traffic",
+      "pattern": "hub",
+      "description": "Accept incoming requests Select a healthy destination Forward some traffic to A Forward remaining traffic to B",
+      "entities": [
+        "Clients",
+        "Load balancer",
+        "Service A",
+        "Service B"
+      ],
+      "steps": [
+        "Accept incoming requests",
+        "Select a healthy destination",
+        "Forward some traffic to A",
+        "Forward remaining traffic to B"
+      ],
+      "durationMs": 2700,
+      "file": "computing/load-balancing/scene.json"
+    },
+    {
+      "id": "tcp-handshake",
+      "category": "computing",
+      "title": "TCP handshake establishes a connection",
+      "pattern": "timeline",
+      "description": "Client requests synchronization Server acknowledges and responds Client acknowledges reply Both sides track the connection",
+      "entities": [
+        "SYN client",
+        "SYN ACK server",
+        "ACK client",
+        "Connected"
+      ],
+      "steps": [
+        "Client requests synchronization",
+        "Server acknowledges and responds",
+        "Client acknowledges reply",
+        "Both sides track the connection"
+      ],
+      "durationMs": 2700,
+      "file": "computing/tcp-handshake/scene.json"
+    },
+    {
+      "id": "dns-resolution",
+      "category": "computing",
+      "title": "DNS maps domain names to addresses",
+      "pattern": "pipeline",
+      "description": "A browser asks for a domain Resolver checks cached records Query authoritative name servers Return the address to the client",
+      "entities": [
+        "Browser",
+        "Resolver",
+        "Authoritative DNS",
+        "IP response"
+      ],
+      "steps": [
+        "A browser asks for a domain",
+        "Resolver checks cached records",
+        "Query authoritative name servers",
+        "Return the address to the client"
+      ],
+      "durationMs": 2700,
+      "file": "computing/dns-resolution/scene.json"
+    },
+    {
+      "id": "tls-handshake",
+      "category": "computing",
+      "title": "TLS authenticates and derives encryption keys",
+      "pattern": "pipeline",
+      "description": "Negotiate supported parameters Verify the server certificate Derive shared traffic secrets Encrypt application messages",
+      "entities": [
+        "Client hello",
+        "Server certificate",
+        "Key agreement",
+        "Encrypted data"
+      ],
+      "steps": [
+        "Negotiate supported parameters",
+        "Verify the server certificate",
+        "Derive shared traffic secrets",
+        "Encrypt application messages"
+      ],
+      "durationMs": 2700,
+      "file": "computing/tls-handshake/scene.json"
+    },
+    {
+      "id": "fractions-addition",
+      "category": "science",
+      "title": "Adding fractions needs a common denominator",
+      "pattern": "equation",
+      "description": "Represent each portion Convert to equal denominator Combine equal-sized parts Simplify the final fraction",
+      "entities": [
+        "One half",
+        "One quarter",
+        "Two quarters",
+        "Three quarters"
+      ],
+      "steps": [
+        "Represent each portion",
+        "Convert to equal denominator",
+        "Combine equal-sized parts",
+        "Simplify the final fraction"
+      ],
+      "durationMs": 2700,
+      "file": "science/fractions-addition/scene.json"
+    },
+    {
+      "id": "pythagorean-theorem",
+      "category": "science",
+      "title": "The Pythagorean theorem links right-triangle sides",
+      "pattern": "triangle",
+      "description": "Draw a right angle Measure perpendicular legs Find the diagonal side Relate squares with a²+b²=c²",
+      "entities": [
+        "Leg a",
+        "Leg b",
+        "Hypotenuse c",
+        "a² plus b²"
+      ],
+      "steps": [
+        "Draw a right angle",
+        "Measure perpendicular legs",
+        "Find the diagonal side",
+        "Relate squares with a²+b²=c²"
+      ],
+      "durationMs": 2700,
+      "file": "science/pythagorean-theorem/scene.json"
+    },
+    {
+      "id": "slope-intercept",
+      "category": "science",
+      "title": "Slope controls line steepness",
+      "pattern": "chart",
+      "description": "Start at intercept b Move right one unit Rise by slope m Repeat to trace the line",
+      "entities": [
+        "y = mx + b",
+        "Starting point",
+        "Rise over run",
+        "Line direction"
+      ],
+      "steps": [
+        "Start at intercept b",
+        "Move right one unit",
+        "Rise by slope m",
+        "Repeat to trace the line"
+      ],
+      "durationMs": 2700,
+      "file": "science/slope-intercept/scene.json"
+    },
+    {
+      "id": "derivative-tangent",
+      "category": "science",
+      "title": "A derivative measures local rate of change",
+      "pattern": "chart",
+      "description": "Pick a point on a curve Measure rise over a finite interval Shrink the interval toward zero The limiting slope is the derivative",
+      "entities": [
+        "Curved function",
+        "Nearby points",
+        "Secant slope",
+        "Tangent slope"
+      ],
+      "steps": [
+        "Pick a point on a curve",
+        "Measure rise over a finite interval",
+        "Shrink the interval toward zero",
+        "The limiting slope is the derivative"
+      ],
+      "durationMs": 2700,
+      "file": "science/derivative-tangent/scene.json"
+    },
+    {
+      "id": "integration-area",
+      "category": "science",
+      "title": "Integration accumulates tiny contributions",
+      "pattern": "chart",
+      "description": "Partition an interval Approximate each strip area Add the strip contributions Refine widths toward zero",
+      "entities": [
+        "Curve",
+        "Thin rectangles",
+        "Sum areas",
+        "Exact integral"
+      ],
+      "steps": [
+        "Partition an interval",
+        "Approximate each strip area",
+        "Add the strip contributions",
+        "Refine widths toward zero"
+      ],
+      "durationMs": 2700,
+      "file": "science/integration-area/scene.json"
+    },
+    {
+      "id": "matrix-multiply",
+      "category": "science",
+      "title": "Matrix multiplication combines row-column products",
+      "pattern": "grid",
+      "description": "Select the output row Select the matching column Multiply aligned entries Sum to make one output cell",
+      "entities": [
+        "Row from A",
+        "Column from B",
+        "Multiply pairs",
+        "Sum dot product"
+      ],
+      "steps": [
+        "Select the output row",
+        "Select the matching column",
+        "Multiply aligned entries",
+        "Sum to make one output cell"
+      ],
+      "durationMs": 2700,
+      "file": "science/matrix-multiply/scene.json"
+    },
+    {
+      "id": "vector-addition",
+      "category": "science",
+      "title": "Vector addition combines displacements",
+      "pattern": "triangle",
+      "description": "Draw the first displacement Attach the second to its tip Trace origin to final tip That arrow is the resultant vector",
+      "entities": [
+        "First vector",
+        "Second vector",
+        "Head to tail",
+        "Resultant"
+      ],
+      "steps": [
+        "Draw the first displacement",
+        "Attach the second to its tip",
+        "Trace origin to final tip",
+        "That arrow is the resultant vector"
+      ],
+      "durationMs": 2700,
+      "file": "science/vector-addition/scene.json"
+    },
+    {
+      "id": "dot-product",
+      "category": "science",
+      "title": "The dot product measures alignment",
+      "pattern": "compare",
+      "description": "Place vectors at a common origin Measure their angle Multiply magnitudes and cosine Positive means aligned directions",
+      "entities": [
+        "Vector A",
+        "Vector B",
+        "Angle theta",
+        "Scalar result"
+      ],
+      "steps": [
+        "Place vectors at a common origin",
+        "Measure their angle",
+        "Multiply magnitudes and cosine",
+        "Positive means aligned directions"
+      ],
+      "durationMs": 2700,
+      "file": "science/dot-product/scene.json"
+    },
+    {
+      "id": "probability-tree",
+      "category": "science",
+      "title": "Probability trees multiply branch chances",
+      "pattern": "tree",
+      "description": "Begin before any outcome Split into possible branches Assign each conditional chance Multiply probabilities along a path",
+      "entities": [
+        "Initial choice",
+        "Branch A",
+        "Branch B",
+        "Leaf outcomes"
+      ],
+      "steps": [
+        "Begin before any outcome",
+        "Split into possible branches",
+        "Assign each conditional chance",
+        "Multiply probabilities along a path"
+      ],
+      "durationMs": 2700,
+      "file": "science/probability-tree/scene.json"
+    },
+    {
+      "id": "bayes-rule",
+      "category": "science",
+      "title": "Bayes rule updates beliefs from evidence",
+      "pattern": "pipeline",
+      "description": "Start with prior probability Score how likely evidence is Normalize across possibilities Update the posterior belief",
+      "entities": [
+        "Prior belief",
+        "Likelihood",
+        "Evidence",
+        "Posterior belief"
+      ],
+      "steps": [
+        "Start with prior probability",
+        "Score how likely evidence is",
+        "Normalize across possibilities",
+        "Update the posterior belief"
+      ],
+      "durationMs": 2700,
+      "file": "science/bayes-rule/scene.json"
+    },
+    {
+      "id": "normal-distribution",
+      "category": "science",
+      "title": "A normal distribution clusters near its mean",
+      "pattern": "chart",
+      "description": "Locate the average value Most samples are near it Farther ranges have fewer samples Extreme tails are uncommon",
+      "entities": [
+        "Mean center",
+        "One sigma",
+        "Two sigma",
+        "Small tails"
+      ],
+      "steps": [
+        "Locate the average value",
+        "Most samples are near it",
+        "Farther ranges have fewer samples",
+        "Extreme tails are uncommon"
+      ],
+      "durationMs": 2700,
+      "file": "science/normal-distribution/scene.json"
+    },
+    {
+      "id": "sampling-bias",
+      "category": "science",
+      "title": "Sampling bias distorts an estimate",
+      "pattern": "compare",
+      "description": "Identify the intended population Notice who can be sampled Compare sample representation Avoid unsupported generalization",
+      "entities": [
+        "Full population",
+        "Biased selection",
+        "Observed sample",
+        "Wrong inference"
+      ],
+      "steps": [
+        "Identify the intended population",
+        "Notice who can be sampled",
+        "Compare sample representation",
+        "Avoid unsupported generalization"
+      ],
+      "durationMs": 2700,
+      "file": "science/sampling-bias/scene.json"
+    },
+    {
+      "id": "gradient-descent",
+      "category": "science",
+      "title": "Gradient descent minimizes a loss function",
+      "pattern": "ladder",
+      "description": "Evaluate the current loss Compute local derivatives Take a small downhill step Repeat toward lower loss",
+      "entities": [
+        "Current parameters",
+        "Compute gradient",
+        "Update opposite",
+        "Lower loss"
+      ],
+      "steps": [
+        "Evaluate the current loss",
+        "Compute local derivatives",
+        "Take a small downhill step",
+        "Repeat toward lower loss"
+      ],
+      "durationMs": 2700,
+      "file": "science/gradient-descent/scene.json"
+    },
+    {
+      "id": "linear-regression",
+      "category": "science",
+      "title": "Linear regression fits a trend to points",
+      "pattern": "chart",
+      "description": "Plot observed pairs Propose a straight-line model Measure vertical residuals Minimize squared residuals",
+      "entities": [
+        "Scatter points",
+        "Candidate line",
+        "Residual errors",
+        "Best fit"
+      ],
+      "steps": [
+        "Plot observed pairs",
+        "Propose a straight-line model",
+        "Measure vertical residuals",
+        "Minimize squared residuals"
+      ],
+      "durationMs": 2700,
+      "file": "science/linear-regression/scene.json"
+    },
+    {
+      "id": "neural-network",
+      "category": "science",
+      "title": "Neural networks transform features through layers",
+      "pattern": "layers",
+      "description": "Provide numeric features Combine weighted signals Apply nonlinear activations Generate an output prediction",
+      "entities": [
+        "Input features",
+        "Hidden units",
+        "Activation",
+        "Predicted output"
+      ],
+      "steps": [
+        "Provide numeric features",
+        "Combine weighted signals",
+        "Apply nonlinear activations",
+        "Generate an output prediction"
+      ],
+      "durationMs": 2700,
+      "file": "science/neural-network/scene.json"
+    },
+    {
+      "id": "backpropagation",
+      "category": "science",
+      "title": "Backpropagation sends error gradients backward",
+      "pattern": "cycle",
+      "description": "Run the forward network Compare prediction to target Propagate gradient backward Adjust trainable weights",
+      "entities": [
+        "Forward output",
+        "Compute loss",
+        "Chain rule",
+        "Update weights"
+      ],
+      "steps": [
+        "Run the forward network",
+        "Compare prediction to target",
+        "Propagate gradient backward",
+        "Adjust trainable weights"
+      ],
+      "durationMs": 2700,
+      "file": "science/backpropagation/scene.json"
+    },
+    {
+      "id": "fourier-transform",
+      "category": "science",
+      "title": "Fourier analysis decomposes a signal into frequencies",
+      "pattern": "layers",
+      "description": "Observe a changing signal Test sinusoidal components Measure their strengths Represent signal in frequency space",
+      "entities": [
+        "Time waveform",
+        "Frequency components",
+        "Phase and amplitude",
+        "Spectrum"
+      ],
+      "steps": [
+        "Observe a changing signal",
+        "Test sinusoidal components",
+        "Measure their strengths",
+        "Represent signal in frequency space"
+      ],
+      "durationMs": 2700,
+      "file": "science/fourier-transform/scene.json"
+    },
+    {
+      "id": "binary-entropy",
+      "category": "science",
+      "title": "Entropy quantifies uncertainty",
+      "pattern": "compare",
+      "description": "A certain event has no uncertainty Bias reduces unpredictability A fair coin has two equal outcomes Its entropy reaches one bit",
+      "entities": [
+        "Certain outcome",
+        "Biased coin",
+        "Fair coin",
+        "Information bits"
+      ],
+      "steps": [
+        "A certain event has no uncertainty",
+        "Bias reduces unpredictability",
+        "A fair coin has two equal outcomes",
+        "Its entropy reaches one bit"
+      ],
+      "durationMs": 2700,
+      "file": "science/binary-entropy/scene.json"
+    },
+    {
+      "id": "chemical-reaction",
+      "category": "science",
+      "title": "Chemical reactions rearrange atoms",
+      "pattern": "pipeline",
+      "description": "Begin with reactant molecules Particles collide with enough energy Old bonds rearrange Conserve atoms in products",
+      "entities": [
+        "Reactant bonds",
+        "Collisions",
+        "Bond breaking",
+        "Products form"
+      ],
+      "steps": [
+        "Begin with reactant molecules",
+        "Particles collide with enough energy",
+        "Old bonds rearrange",
+        "Conserve atoms in products"
+      ],
+      "durationMs": 2700,
+      "file": "science/chemical-reaction/scene.json"
+    },
+    {
+      "id": "states-of-matter",
+      "category": "science",
+      "title": "Heating changes particle motion and arrangement",
+      "pattern": "ladder",
+      "description": "Solid particles vibrate in place Energy loosens the structure Liquid particles flow past one another Gas particles spread throughout space",
+      "entities": [
+        "Solid",
+        "Melting",
+        "Liquid",
+        "Gas"
+      ],
+      "steps": [
+        "Solid particles vibrate in place",
+        "Energy loosens the structure",
+        "Liquid particles flow past one another",
+        "Gas particles spread throughout space"
+      ],
+      "durationMs": 2700,
+      "file": "science/states-of-matter/scene.json"
+    },
+    {
+      "id": "water-cycle",
+      "category": "science",
+      "title": "Water cycles between oceans land and atmosphere",
+      "pattern": "cycle",
+      "description": "Sunlight lifts water vapor Cooling forms cloud droplets Water falls as rain or snow Runoff returns water downstream",
+      "entities": [
+        "Evaporation",
+        "Condensation",
+        "Precipitation",
+        "Runoff"
+      ],
+      "steps": [
+        "Sunlight lifts water vapor",
+        "Cooling forms cloud droplets",
+        "Water falls as rain or snow",
+        "Runoff returns water downstream"
+      ],
+      "durationMs": 2700,
+      "file": "science/water-cycle/scene.json"
+    },
+    {
+      "id": "photosynthesis",
+      "category": "science",
+      "title": "Photosynthesis converts light to chemical energy",
+      "pattern": "pipeline",
+      "description": "Leaves absorb sunlight Roots supply water and air supplies CO₂ Chloroplasts transform captured energy Sugars store energy and oxygen is released",
+      "entities": [
+        "Sunlight",
+        "Water and CO₂",
+        "Chloroplast",
+        "Glucose and O₂"
+      ],
+      "steps": [
+        "Leaves absorb sunlight",
+        "Roots supply water and air supplies CO₂",
+        "Chloroplasts transform captured energy",
+        "Sugars store energy and oxygen is released"
+      ],
+      "durationMs": 2700,
+      "file": "science/photosynthesis/scene.json"
+    },
+    {
+      "id": "cellular-respiration",
+      "category": "science",
+      "title": "Cells release usable energy from glucose",
+      "pattern": "pipeline",
+      "description": "Start with glucose fuel Split molecules in glycolysis Extract energy through mitochondrial pathways Store usable energy in ATP",
+      "entities": [
+        "Glucose",
+        "Glycolysis",
+        "Mitochondria",
+        "ATP output"
+      ],
+      "steps": [
+        "Start with glucose fuel",
+        "Split molecules in glycolysis",
+        "Extract energy through mitochondrial pathways",
+        "Store usable energy in ATP"
+      ],
+      "durationMs": 2700,
+      "file": "science/cellular-respiration/scene.json"
+    },
+    {
+      "id": "dna-replication",
+      "category": "science",
+      "title": "DNA replication copies complementary strands",
+      "pattern": "branch",
+      "description": "Separate original strands Expose complementary bases Match A with T and C with G Build two double-stranded molecules",
+      "entities": [
+        "DNA double helix",
+        "Unzip strands",
+        "Pair bases",
+        "Two DNA copies"
+      ],
+      "steps": [
+        "Separate original strands",
+        "Expose complementary bases",
+        "Match A with T and C with G",
+        "Build two double-stranded molecules"
+      ],
+      "durationMs": 2700,
+      "file": "science/dna-replication/scene.json"
+    },
+    {
+      "id": "protein-synthesis",
+      "category": "science",
+      "title": "Protein synthesis reads DNA into proteins",
+      "pattern": "pipeline",
+      "description": "Read a gene for transcription Build an mRNA copy Ribosome reads codons Link amino acids into a protein",
+      "entities": [
+        "DNA gene",
+        "mRNA transcript",
+        "Ribosome",
+        "Protein chain"
+      ],
+      "steps": [
+        "Read a gene for transcription",
+        "Build an mRNA copy",
+        "Ribosome reads codons",
+        "Link amino acids into a protein"
+      ],
+      "durationMs": 2700,
+      "file": "science/protein-synthesis/scene.json"
+    },
+    {
+      "id": "mitosis",
+      "category": "science",
+      "title": "Mitosis divides one cell into two",
+      "pattern": "sequence",
+      "description": "Duplicate chromosomes beforehand Align copies at cell equator Move sister chromatids apart Divide into daughter cells",
+      "entities": [
+        "Duplicated DNA",
+        "Chromosome alignment",
+        "Chromatid separation",
+        "Two cells"
+      ],
+      "steps": [
+        "Duplicate chromosomes beforehand",
+        "Align copies at cell equator",
+        "Move sister chromatids apart",
+        "Divide into daughter cells"
+      ],
+      "durationMs": 2700,
+      "file": "science/mitosis/scene.json"
+    },
+    {
+      "id": "immune-response",
+      "category": "science",
+      "title": "Adaptive immunity learns to recognize antigens",
+      "pattern": "pipeline",
+      "description": "An invader carries foreign markers Immune cells present antigen fragments Specific lymphocytes activate Memory cells support later responses",
+      "entities": [
+        "Pathogen antigen",
+        "Antigen display",
+        "T/B activation",
+        "Memory cells"
+      ],
+      "steps": [
+        "An invader carries foreign markers",
+        "Immune cells present antigen fragments",
+        "Specific lymphocytes activate",
+        "Memory cells support later responses"
+      ],
+      "durationMs": 2700,
+      "file": "science/immune-response/scene.json"
+    },
+    {
+      "id": "neuron-synapse",
+      "category": "science",
+      "title": "Neurons communicate across synapses",
+      "pattern": "pipeline",
+      "description": "Electrical spike travels down axon Terminal releases transmitter molecules Molecules cross the synaptic gap Receptors change the next cell",
+      "entities": [
+        "Action potential",
+        "Axon terminal",
+        "Neurotransmitter",
+        "Next neuron"
+      ],
+      "steps": [
+        "Electrical spike travels down axon",
+        "Terminal releases transmitter molecules",
+        "Molecules cross the synaptic gap",
+        "Receptors change the next cell"
+      ],
+      "durationMs": 2700,
+      "file": "science/neuron-synapse/scene.json"
+    },
+    {
+      "id": "ecosystem-food-web",
+      "category": "science",
+      "title": "Food webs move energy through ecosystems",
+      "pattern": "network",
+      "description": "Plants capture sunlight Herbivores eat producers Predators consume other organisms Decomposers recycle nutrients",
+      "entities": [
+        "Plants",
+        "Herbivores",
+        "Carnivores",
+        "Decomposers"
+      ],
+      "steps": [
+        "Plants capture sunlight",
+        "Herbivores eat producers",
+        "Predators consume other organisms",
+        "Decomposers recycle nutrients"
+      ],
+      "durationMs": 2700,
+      "file": "science/ecosystem-food-web/scene.json"
+    },
+    {
+      "id": "natural-selection",
+      "category": "science",
+      "title": "Natural selection changes trait frequencies",
+      "pattern": "cycle",
+      "description": "Individuals vary in traits Conditions favor some variants Survivors reproduce at different rates Offspring inherit successful variants",
+      "entities": [
+        "Variation",
+        "Environmental pressure",
+        "Differential survival",
+        "Inheritance"
+      ],
+      "steps": [
+        "Individuals vary in traits",
+        "Conditions favor some variants",
+        "Survivors reproduce at different rates",
+        "Offspring inherit successful variants"
+      ],
+      "durationMs": 2700,
+      "file": "science/natural-selection/scene.json"
+    },
+    {
+      "id": "plate-tectonics",
+      "category": "science",
+      "title": "Plate tectonics reshapes Earth surfaces",
+      "pattern": "compare",
+      "description": "Lithosphere moves over geological time Plate boundaries interact A denser plate may sink Compression uplifts crust",
+      "entities": [
+        "Moving plates",
+        "Convergent edge",
+        "Subduction",
+        "Mountain belt"
+      ],
+      "steps": [
+        "Lithosphere moves over geological time",
+        "Plate boundaries interact",
+        "A denser plate may sink",
+        "Compression uplifts crust"
+      ],
+      "durationMs": 2700,
+      "file": "science/plate-tectonics/scene.json"
+    },
+    {
+      "id": "earthquakes",
+      "category": "science",
+      "title": "Earthquakes release stored fault stress",
+      "pattern": "sequence",
+      "description": "Friction holds fault surfaces Plate motion loads elastic strain Fault suddenly slips Energy radiates as seismic waves",
+      "entities": [
+        "Locked fault",
+        "Stress builds",
+        "Sudden slip",
+        "Seismic waves"
+      ],
+      "steps": [
+        "Friction holds fault surfaces",
+        "Plate motion loads elastic strain",
+        "Fault suddenly slips",
+        "Energy radiates as seismic waves"
+      ],
+      "durationMs": 2700,
+      "file": "science/earthquakes/scene.json"
+    },
+    {
+      "id": "volcano-eruption",
+      "category": "science",
+      "title": "Magma pressure drives volcanic eruptions",
+      "pattern": "pipeline",
+      "description": "Rock melts at depth Dissolved gases increase pressure Magma rises through a vent Lava and ash reach the surface",
+      "entities": [
+        "Magma chamber",
+        "Gas pressure",
+        "Vent ascent",
+        "Eruption products"
+      ],
+      "steps": [
+        "Rock melts at depth",
+        "Dissolved gases increase pressure",
+        "Magma rises through a vent",
+        "Lava and ash reach the surface"
+      ],
+      "durationMs": 2700,
+      "file": "science/volcano-eruption/scene.json"
+    },
+    {
+      "id": "solar-system-orbits",
+      "category": "science",
+      "title": "Planets orbit because gravity bends motion",
+      "pattern": "orbit",
+      "description": "Gravity pulls toward the Sun Tangential motion prevents straight fall The path curves continuously Balance creates an orbit",
+      "entities": [
+        "Sun gravity",
+        "Orbital velocity",
+        "Curved trajectory",
+        "Stable orbit"
+      ],
+      "steps": [
+        "Gravity pulls toward the Sun",
+        "Tangential motion prevents straight fall",
+        "The path curves continuously",
+        "Balance creates an orbit"
+      ],
+      "durationMs": 2700,
+      "file": "science/solar-system-orbits/scene.json"
+    },
+    {
+      "id": "moon-phases",
+      "category": "science",
+      "title": "Moon phases depend on viewing geometry",
+      "pattern": "cycle",
+      "description": "Moon aligns near the Sun in our sky We see half the lit hemisphere Earth-facing side appears fully bright The visible lit portion shrinks",
+      "entities": [
+        "New moon",
+        "First quarter",
+        "Full moon",
+        "Last quarter"
+      ],
+      "steps": [
+        "Moon aligns near the Sun in our sky",
+        "We see half the lit hemisphere",
+        "Earth-facing side appears fully bright",
+        "The visible lit portion shrinks"
+      ],
+      "durationMs": 2700,
+      "file": "science/moon-phases/scene.json"
+    },
+    {
+      "id": "seasons-earth",
+      "category": "science",
+      "title": "Seasons follow axial tilt not orbital distance",
+      "pattern": "orbit",
+      "description": "Earth axis keeps its tilt in space Northern hemisphere faces more sunlight Both hemispheres receive near-equal daylight Northern hemisphere tilts away",
+      "entities": [
+        "Tilted axis",
+        "June solstice",
+        "September equinox",
+        "December solstice"
+      ],
+      "steps": [
+        "Earth axis keeps its tilt in space",
+        "Northern hemisphere faces more sunlight",
+        "Both hemispheres receive near-equal daylight",
+        "Northern hemisphere tilts away"
+      ],
+      "durationMs": 2700,
+      "file": "science/seasons-earth/scene.json"
+    },
+    {
+      "id": "star-lifecycle",
+      "category": "science",
+      "title": "A star evolves as fuel and mass change",
+      "pattern": "branch",
+      "description": "Gravity collapses a gas cloud Hydrogen fusion sustains the star Core fuel changes and outer layers expand Mass determines the final remnant",
+      "entities": [
+        "Gas cloud",
+        "Main sequence",
+        "Red giant",
+        "Remnant"
+      ],
+      "steps": [
+        "Gravity collapses a gas cloud",
+        "Hydrogen fusion sustains the star",
+        "Core fuel changes and outer layers expand",
+        "Mass determines the final remnant"
+      ],
+      "durationMs": 2700,
+      "file": "science/star-lifecycle/scene.json"
+    },
+    {
+      "id": "black-hole-accretion",
+      "category": "science",
+      "title": "Matter spirals into a compact object",
+      "pattern": "orbit",
+      "description": "Gas carries angular momentum Friction transfers energy through disk Inner material becomes very hot Beyond the horizon light cannot escape",
+      "entities": [
+        "Orbiting gas",
+        "Accretion disk",
+        "Hot inner flow",
+        "Event horizon"
+      ],
+      "steps": [
+        "Gas carries angular momentum",
+        "Friction transfers energy through disk",
+        "Inner material becomes very hot",
+        "Beyond the horizon light cannot escape"
+      ],
+      "durationMs": 2700,
+      "file": "science/black-hole-accretion/scene.json"
+    },
+    {
+      "id": "electromagnetic-spectrum",
+      "category": "science",
+      "title": "EM waves span a range of frequencies",
+      "pattern": "timeline",
+      "description": "Long wavelengths have lower frequency Visible occupies a narrow band Higher frequencies carry more photon energy X-rays lie beyond ultraviolet",
+      "entities": [
+        "Radio waves",
+        "Visible light",
+        "Ultraviolet",
+        "X-rays"
+      ],
+      "steps": [
+        "Long wavelengths have lower frequency",
+        "Visible occupies a narrow band",
+        "Higher frequencies carry more photon energy",
+        "X-rays lie beyond ultraviolet"
+      ],
+      "durationMs": 2700,
+      "file": "science/electromagnetic-spectrum/scene.json"
+    },
+    {
+      "id": "electric-circuit",
+      "category": "science",
+      "title": "A closed circuit permits electric current",
+      "pattern": "cycle",
+      "description": "The battery maintains potential difference Conductors provide a closed route The load converts electrical energy Charge circulates through the circuit",
+      "entities": [
+        "Battery voltage",
+        "Wire conductor",
+        "Lamp load",
+        "Return path"
+      ],
+      "steps": [
+        "The battery maintains potential difference",
+        "Conductors provide a closed route",
+        "The load converts electrical energy",
+        "Charge circulates through the circuit"
+      ],
+      "durationMs": 2700,
+      "file": "science/electric-circuit/scene.json"
+    },
+    {
+      "id": "ohms-law",
+      "category": "science",
+      "title": "Ohm's law links voltage current and resistance",
+      "pattern": "equation",
+      "description": "Apply a potential difference Material opposes current Observe the resulting flow Current equals voltage divided by resistance",
+      "entities": [
+        "Voltage V",
+        "Resistance R",
+        "Current I",
+        "I equals V/R"
+      ],
+      "steps": [
+        "Apply a potential difference",
+        "Material opposes current",
+        "Observe the resulting flow",
+        "Current equals voltage divided by resistance"
+      ],
+      "durationMs": 2700,
+      "file": "science/ohms-law/scene.json"
+    },
+    {
+      "id": "capacitor-charge",
+      "category": "science",
+      "title": "A capacitor stores energy in an electric field",
+      "pattern": "ladder",
+      "description": "Start with little charge separation Current deposits opposite plate charges Voltage grows across the gap Energy resides in the electric field",
+      "entities": [
+        "Discharged plates",
+        "Charging current",
+        "Electric field",
+        "Stored energy"
+      ],
+      "steps": [
+        "Start with little charge separation",
+        "Current deposits opposite plate charges",
+        "Voltage grows across the gap",
+        "Energy resides in the electric field"
+      ],
+      "durationMs": 2700,
+      "file": "science/capacitor-charge/scene.json"
+    },
+    {
+      "id": "induction",
+      "category": "science",
+      "title": "Changing magnetic flux induces voltage",
+      "pattern": "cycle",
+      "description": "Move magnetic field relative to a coil Flux through the loop changes Voltage appears across the conductor Induced current opposes that change",
+      "entities": [
+        "Moving magnet",
+        "Flux change",
+        "Induced EMF",
+        "Opposing current"
+      ],
+      "steps": [
+        "Move magnetic field relative to a coil",
+        "Flux through the loop changes",
+        "Voltage appears across the conductor",
+        "Induced current opposes that change"
+      ],
+      "durationMs": 2700,
+      "file": "science/induction/scene.json"
+    },
+    {
+      "id": "newtons-laws",
+      "category": "science",
+      "title": "Newton's laws connect forces and motion",
+      "pattern": "pipeline",
+      "description": "Sum forces acting on an object Compare with its inertia Acceleration equals net force over mass Velocity changes over time",
+      "entities": [
+        "Net force",
+        "Object mass",
+        "Acceleration",
+        "Changed velocity"
+      ],
+      "steps": [
+        "Sum forces acting on an object",
+        "Compare with its inertia",
+        "Acceleration equals net force over mass",
+        "Velocity changes over time"
+      ],
+      "durationMs": 2700,
+      "file": "science/newtons-laws/scene.json"
+    },
+    {
+      "id": "projectile-motion",
+      "category": "science",
+      "title": "A projectile combines horizontal and vertical motion",
+      "pattern": "chart",
+      "description": "Launch with two velocity components Horizontal speed remains nearly constant Gravity accelerates downward Trajectory curves into a parabola",
+      "entities": [
+        "Initial velocity",
+        "Horizontal drift",
+        "Gravity pull",
+        "Parabolic path"
+      ],
+      "steps": [
+        "Launch with two velocity components",
+        "Horizontal speed remains nearly constant",
+        "Gravity accelerates downward",
+        "Trajectory curves into a parabola"
+      ],
+      "durationMs": 2700,
+      "file": "science/projectile-motion/scene.json"
+    },
+    {
+      "id": "pendulum",
+      "category": "science",
+      "title": "A pendulum exchanges energy as it swings",
+      "pattern": "cycle",
+      "description": "At the end of the swing height is greatest Gravity starts speeding up the bob At bottom speed is greatest Motion then slows as height increases",
+      "entities": [
+        "High position",
+        "Potential energy",
+        "Lowest point",
+        "Kinetic energy"
+      ],
+      "steps": [
+        "At the end of the swing height is greatest",
+        "Gravity starts speeding up the bob",
+        "At bottom speed is greatest",
+        "Motion then slows as height increases"
+      ],
+      "durationMs": 2700,
+      "file": "science/pendulum/scene.json"
+    },
+    {
+      "id": "heat-transfer",
+      "category": "science",
+      "title": "Heat moves by conduction convection and radiation",
+      "pattern": "branch",
+      "description": "Energy flows from hotter to colder Contact passes energy through materials Moving fluid carries thermal energy Electromagnetic waves carry heat without contact",
+      "entities": [
+        "Warm source",
+        "Conduction",
+        "Convection",
+        "Radiation"
+      ],
+      "steps": [
+        "Energy flows from hotter to colder",
+        "Contact passes energy through materials",
+        "Moving fluid carries thermal energy",
+        "Electromagnetic waves carry heat without contact"
+      ],
+      "durationMs": 2700,
+      "file": "science/heat-transfer/scene.json"
+    },
+    {
+      "id": "wave-interference",
+      "category": "science",
+      "title": "Overlapping waves add by superposition",
+      "pattern": "compare",
+      "description": "Observe the first oscillation Overlay the second oscillation Compare peaks and troughs Amplitudes add or cancel locally",
+      "entities": [
+        "Wave A",
+        "Wave B",
+        "Phase relation",
+        "Combined wave"
+      ],
+      "steps": [
+        "Observe the first oscillation",
+        "Overlay the second oscillation",
+        "Compare peaks and troughs",
+        "Amplitudes add or cancel locally"
+      ],
+      "durationMs": 2700,
+      "file": "science/wave-interference/scene.json"
+    },
+    {
+      "id": "lever-mechanics",
+      "category": "science",
+      "title": "A lever trades applied force for distance",
+      "pattern": "balance",
+      "description": "Choose a pivot point Apply effort at one distance Load acts at another distance Moments balance when forces times arms match",
+      "entities": [
+        "Fulcrum",
+        "Effort arm",
+        "Load arm",
+        "Torque balance"
+      ],
+      "steps": [
+        "Choose a pivot point",
+        "Apply effort at one distance",
+        "Load acts at another distance",
+        "Moments balance when forces times arms match"
+      ],
+      "durationMs": 2700,
+      "file": "science/lever-mechanics/scene.json"
+    },
+    {
+      "id": "feedback-control",
+      "category": "science",
+      "title": "A feedback controller corrects error",
+      "pattern": "cycle",
+      "description": "Choose a desired state Measure actual output Compute desired minus actual Adjust actuator to reduce error",
+      "entities": [
+        "Target setpoint",
+        "Sensor measurement",
+        "Error signal",
+        "Control action"
+      ],
+      "steps": [
+        "Choose a desired state",
+        "Measure actual output",
+        "Compute desired minus actual",
+        "Adjust actuator to reduce error"
+      ],
+      "durationMs": 2700,
+      "file": "science/feedback-control/scene.json"
+    },
+    {
+      "id": "online-checkout",
+      "category": "workflows",
+      "title": "Online checkout turns a cart into an order",
+      "pattern": "pipeline",
+      "description": "Customer reviews items in cart System calculates tax and shipping Gateway authorizes payment Store records the confirmed order",
+      "entities": [
+        "Shopping cart",
+        "Price total",
+        "Payment gateway",
+        "Order confirmation"
+      ],
+      "steps": [
+        "Customer reviews items in cart",
+        "System calculates tax and shipping",
+        "Gateway authorizes payment",
+        "Store records the confirmed order"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/online-checkout/scene.json"
+    },
+    {
+      "id": "payment-authorization",
+      "category": "workflows",
+      "title": "Card payments separate authorization from capture",
+      "pattern": "timeline",
+      "description": "Card details begin the payment Issuer approves available funds Merchant captures when ready Networks settle the transfer later",
+      "entities": [
+        "Customer card",
+        "Authorization hold",
+        "Merchant capture",
+        "Final settlement"
+      ],
+      "steps": [
+        "Card details begin the payment",
+        "Issuer approves available funds",
+        "Merchant captures when ready",
+        "Networks settle the transfer later"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/payment-authorization/scene.json"
+    },
+    {
+      "id": "refund-lifecycle",
+      "category": "workflows",
+      "title": "Refunds return money through several systems",
+      "pattern": "pipeline",
+      "description": "Customer asks for a refund Merchant applies its policy Processor sends a refund transaction Issuer posts the credit later",
+      "entities": [
+        "Refund request",
+        "Merchant approval",
+        "Processor reversal",
+        "Bank credit"
+      ],
+      "steps": [
+        "Customer asks for a refund",
+        "Merchant applies its policy",
+        "Processor sends a refund transaction",
+        "Issuer posts the credit later"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/refund-lifecycle/scene.json"
+    },
+    {
+      "id": "shipping-tracking",
+      "category": "workflows",
+      "title": "Parcel tracking follows distinct logistics milestones",
+      "pattern": "timeline",
+      "description": "Courier scans pickup event Parcel travels through sorting facility Local carrier loads final route Delivery proof closes the journey",
+      "entities": [
+        "Pickup",
+        "Sorting hub",
+        "Last-mile route",
+        "Delivered"
+      ],
+      "steps": [
+        "Courier scans pickup event",
+        "Parcel travels through sorting facility",
+        "Local carrier loads final route",
+        "Delivery proof closes the journey"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/shipping-tracking/scene.json"
+    },
+    {
+      "id": "warehouse-picking",
+      "category": "workflows",
+      "title": "Warehouse picking turns orders into packages",
+      "pattern": "pipeline",
+      "description": "New orders enter the queue Workers receive item locations Scans verify correct SKUs Items are packed for dispatch",
+      "entities": [
+        "Order queue",
+        "Pick list",
+        "Barcode scan",
+        "Packed box"
+      ],
+      "steps": [
+        "New orders enter the queue",
+        "Workers receive item locations",
+        "Scans verify correct SKUs",
+        "Items are packed for dispatch"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/warehouse-picking/scene.json"
+    },
+    {
+      "id": "inventory-reorder",
+      "category": "workflows",
+      "title": "Inventory replenishment prevents stockouts",
+      "pattern": "cycle",
+      "description": "Start with inventory on hand Demand gradually consumes stock Place order before running out Delivery restores available units",
+      "entities": [
+        "Available stock",
+        "Sales consumption",
+        "Reorder point",
+        "Supplier delivery"
+      ],
+      "steps": [
+        "Start with inventory on hand",
+        "Demand gradually consumes stock",
+        "Place order before running out",
+        "Delivery restores available units"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/inventory-reorder/scene.json"
+    },
+    {
+      "id": "supply-chain",
+      "category": "workflows",
+      "title": "Supply chains coordinate material to customer",
+      "pattern": "pipeline",
+      "description": "Suppliers provide materials Factory converts inputs to goods Warehouse aggregates shipments Customer receives final product",
+      "entities": [
+        "Raw materials",
+        "Factory",
+        "Distribution hub",
+        "Customer"
+      ],
+      "steps": [
+        "Suppliers provide materials",
+        "Factory converts inputs to goods",
+        "Warehouse aggregates shipments",
+        "Customer receives final product"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/supply-chain/scene.json"
+    },
+    {
+      "id": "demand-forecast",
+      "category": "workflows",
+      "title": "Forecasts connect observed demand to planning",
+      "pattern": "cycle",
+      "description": "Collect past transactions Account for trends and holidays Estimate upcoming demand Replan as new data arrives",
+      "entities": [
+        "Sales history",
+        "Seasonality",
+        "Forecast",
+        "Updated plan"
+      ],
+      "steps": [
+        "Collect past transactions",
+        "Account for trends and holidays",
+        "Estimate upcoming demand",
+        "Replan as new data arrives"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/demand-forecast/scene.json"
+    },
+    {
+      "id": "restaurant-kitchen",
+      "category": "workflows",
+      "title": "Restaurant orders flow through kitchen stations",
+      "pattern": "pipeline",
+      "description": "Server records the order Kitchen receives a ticket Cook prepares and checks meal Server delivers the finished plate",
+      "entities": [
+        "Guest order",
+        "Kitchen ticket",
+        "Prepare dish",
+        "Serve table"
+      ],
+      "steps": [
+        "Server records the order",
+        "Kitchen receives a ticket",
+        "Cook prepares and checks meal",
+        "Server delivers the finished plate"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/restaurant-kitchen/scene.json"
+    },
+    {
+      "id": "hospital-triage",
+      "category": "workflows",
+      "title": "Triage prioritizes patients by urgency",
+      "pattern": "branch",
+      "description": "Register an arriving patient Evaluate vital signs and symptoms Urgent cases get rapid care Stable cases enter the appropriate queue",
+      "entities": [
+        "Patient arrival",
+        "Initial assessment",
+        "High urgency",
+        "Routine queue"
+      ],
+      "steps": [
+        "Register an arriving patient",
+        "Evaluate vital signs and symptoms",
+        "Urgent cases get rapid care",
+        "Stable cases enter the appropriate queue"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/hospital-triage/scene.json"
+    },
+    {
+      "id": "appointment-booking",
+      "category": "workflows",
+      "title": "Appointment booking avoids double allocation",
+      "pattern": "decision",
+      "description": "Display free times from source of truth User picks a suitable slot Reserve the time atomically Confirm and send details",
+      "entities": [
+        "Available slots",
+        "User selection",
+        "Atomic hold",
+        "Confirmed booking"
+      ],
+      "steps": [
+        "Display free times from source of truth",
+        "User picks a suitable slot",
+        "Reserve the time atomically",
+        "Confirm and send details"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/appointment-booking/scene.json"
+    },
+    {
+      "id": "school-lesson",
+      "category": "workflows",
+      "title": "An effective lesson cycles through learning checks",
+      "pattern": "cycle",
+      "description": "Define what learners should understand Demonstrate a worked example Learners try a related problem Feedback guides another attempt",
+      "entities": [
+        "Learning objective",
+        "Explanation",
+        "Practice",
+        "Feedback"
+      ],
+      "steps": [
+        "Define what learners should understand",
+        "Demonstrate a worked example",
+        "Learners try a related problem",
+        "Feedback guides another attempt"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/school-lesson/scene.json"
+    },
+    {
+      "id": "scientific-method",
+      "category": "workflows",
+      "title": "The scientific method revises explanations with evidence",
+      "pattern": "cycle",
+      "description": "Notice a measurable pattern Propose a testable explanation Collect controlled evidence Update the model from results",
+      "entities": [
+        "Observation",
+        "Hypothesis",
+        "Experiment",
+        "Revise model"
+      ],
+      "steps": [
+        "Notice a measurable pattern",
+        "Propose a testable explanation",
+        "Collect controlled evidence",
+        "Update the model from results"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/scientific-method/scene.json"
+    },
+    {
+      "id": "design-thinking",
+      "category": "workflows",
+      "title": "Design thinking iterates from needs to solutions",
+      "pattern": "cycle",
+      "description": "Study the people and context Frame the real user problem Build a small candidate solution Test and refine based on evidence",
+      "entities": [
+        "Empathize",
+        "Define problem",
+        "Prototype",
+        "User test"
+      ],
+      "steps": [
+        "Study the people and context",
+        "Frame the real user problem",
+        "Build a small candidate solution",
+        "Test and refine based on evidence"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/design-thinking/scene.json"
+    },
+    {
+      "id": "product-discovery",
+      "category": "workflows",
+      "title": "Product discovery tests demand before building",
+      "pattern": "funnel",
+      "description": "Talk to relevant users Cluster repeated pains Specify a falsifiable assumption Test demand with a minimal prototype",
+      "entities": [
+        "User interviews",
+        "Problem patterns",
+        "Hypothesis",
+        "Prototype test"
+      ],
+      "steps": [
+        "Talk to relevant users",
+        "Cluster repeated pains",
+        "Specify a falsifiable assumption",
+        "Test demand with a minimal prototype"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/product-discovery/scene.json"
+    },
+    {
+      "id": "feature-flag-rollout",
+      "category": "workflows",
+      "title": "Feature flags enable controlled rollouts",
+      "pattern": "timeline",
+      "description": "Ship code with behavior gated Keep production feature inactive Enable for a small user cohort Expand after monitoring metrics",
+      "entities": [
+        "Code deployed",
+        "Flag disabled",
+        "Canary users",
+        "Wider rollout"
+      ],
+      "steps": [
+        "Ship code with behavior gated",
+        "Keep production feature inactive",
+        "Enable for a small user cohort",
+        "Expand after monitoring metrics"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/feature-flag-rollout/scene.json"
+    },
+    {
+      "id": "ab-test",
+      "category": "workflows",
+      "title": "A/B testing isolates treatment effects",
+      "pattern": "branch",
+      "description": "Choose an eligible population Randomize assignment Measure control outcomes Compare against treatment outcomes",
+      "entities": [
+        "Eligible users",
+        "Random assignment",
+        "Control A",
+        "Variant B"
+      ],
+      "steps": [
+        "Choose an eligible population",
+        "Randomize assignment",
+        "Measure control outcomes",
+        "Compare against treatment outcomes"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/ab-test/scene.json"
+    },
+    {
+      "id": "conversion-funnel",
+      "category": "workflows",
+      "title": "A purchase funnel reveals where users leave",
+      "pattern": "funnel",
+      "description": "Count arriving visitors Track product engagement Observe cart intent Measure completed purchases",
+      "entities": [
+        "Site visits",
+        "Product views",
+        "Add to cart",
+        "Purchases"
+      ],
+      "steps": [
+        "Count arriving visitors",
+        "Track product engagement",
+        "Observe cart intent",
+        "Measure completed purchases"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/conversion-funnel/scene.json"
+    },
+    {
+      "id": "customer-support",
+      "category": "workflows",
+      "title": "Support tickets move from report to resolution",
+      "pattern": "pipeline",
+      "description": "Customer reports an issue Route by category and urgency Agent investigates and responds Confirm the issue is resolved",
+      "entities": [
+        "Problem report",
+        "Classification",
+        "Agent response",
+        "Verified fix"
+      ],
+      "steps": [
+        "Customer reports an issue",
+        "Route by category and urgency",
+        "Agent investigates and responds",
+        "Confirm the issue is resolved"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/customer-support/scene.json"
+    },
+    {
+      "id": "incident-response",
+      "category": "workflows",
+      "title": "Operational incidents require coordinated recovery",
+      "pattern": "cycle",
+      "description": "Monitoring detects an abnormality Identify scope and severity Apply safe mitigation Analyze causes and prevention",
+      "entities": [
+        "Alert fires",
+        "Triage impact",
+        "Mitigation",
+        "Postmortem"
+      ],
+      "steps": [
+        "Monitoring detects an abnormality",
+        "Identify scope and severity",
+        "Apply safe mitigation",
+        "Analyze causes and prevention"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/incident-response/scene.json"
+    },
+    {
+      "id": "ci-cd-pipeline",
+      "category": "workflows",
+      "title": "CI/CD gates code on quality checks",
+      "pattern": "pipeline",
+      "description": "Developer commits a change Automation runs quality checks Create a versioned build artifact Deploy after required gates pass",
+      "entities": [
+        "Code commit",
+        "Build and tests",
+        "Artifact",
+        "Deployment"
+      ],
+      "steps": [
+        "Developer commits a change",
+        "Automation runs quality checks",
+        "Create a versioned build artifact",
+        "Deploy after required gates pass"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/ci-cd-pipeline/scene.json"
+    },
+    {
+      "id": "git-pull-request",
+      "category": "workflows",
+      "title": "Code reviews move changes toward main",
+      "pattern": "timeline",
+      "description": "Develop changes separately Propose integration via a PR Resolve review and CI feedback Merge verified code",
+      "entities": [
+        "Feature branch",
+        "Pull request",
+        "Review comments",
+        "Merge"
+      ],
+      "steps": [
+        "Develop changes separately",
+        "Propose integration via a PR",
+        "Resolve review and CI feedback",
+        "Merge verified code"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/git-pull-request/scene.json"
+    },
+    {
+      "id": "oauth-login",
+      "category": "workflows",
+      "title": "OAuth delegates access without sharing passwords",
+      "pattern": "pipeline",
+      "description": "User starts authorization Identity provider authenticates user User approves specific scopes App receives a scoped token",
+      "entities": [
+        "User login",
+        "Identity provider",
+        "Consent grant",
+        "Access token"
+      ],
+      "steps": [
+        "User starts authorization",
+        "Identity provider authenticates user",
+        "User approves specific scopes",
+        "App receives a scoped token"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/oauth-login/scene.json"
+    },
+    {
+      "id": "password-reset",
+      "category": "workflows",
+      "title": "Password reset uses expiring proof",
+      "pattern": "pipeline",
+      "description": "User requests account recovery Send a short-lived recovery token Validate token and account state Set a new password and revoke token",
+      "entities": [
+        "Reset request",
+        "One-time link",
+        "Token check",
+        "New secret"
+      ],
+      "steps": [
+        "User requests account recovery",
+        "Send a short-lived recovery token",
+        "Validate token and account state",
+        "Set a new password and revoke token"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/password-reset/scene.json"
+    },
+    {
+      "id": "two-factor-auth",
+      "category": "workflows",
+      "title": "Two-factor authentication adds an independent proof",
+      "pattern": "layers",
+      "description": "Enter memorized account secret Provide separate possession proof Server checks both factors Issue a bounded login session",
+      "entities": [
+        "Password",
+        "Second factor",
+        "Verification",
+        "Session"
+      ],
+      "steps": [
+        "Enter memorized account secret",
+        "Provide separate possession proof",
+        "Server checks both factors",
+        "Issue a bounded login session"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/two-factor-auth/scene.json"
+    },
+    {
+      "id": "email-delivery",
+      "category": "workflows",
+      "title": "Email moves through queue and receiving servers",
+      "pattern": "pipeline",
+      "description": "Author sends an email Sender server queues and relays it Recipient domain accepts the message Mailbox delivers it to the user",
+      "entities": [
+        "Compose message",
+        "Outbound SMTP",
+        "Recipient MX",
+        "Mailbox"
+      ],
+      "steps": [
+        "Author sends an email",
+        "Sender server queues and relays it",
+        "Recipient domain accepts the message",
+        "Mailbox delivers it to the user"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/email-delivery/scene.json"
+    },
+    {
+      "id": "push-notifications",
+      "category": "workflows",
+      "title": "Push notifications traverse app and platform",
+      "pattern": "pipeline",
+      "description": "Application detects a relevant event Queue a payload with push provider Platform delivers to target device App shows notification per policy",
+      "entities": [
+        "Server event",
+        "Push provider",
+        "Device service",
+        "App display"
+      ],
+      "steps": [
+        "Application detects a relevant event",
+        "Queue a payload with push provider",
+        "Platform delivers to target device",
+        "App shows notification per policy"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/push-notifications/scene.json"
+    },
+    {
+      "id": "video-streaming",
+      "category": "workflows",
+      "title": "Adaptive streaming switches video quality to conditions",
+      "pattern": "cycle",
+      "description": "Estimate current bandwidth Request a video segment Observe playback buffer level Choose a sustainable next quality",
+      "entities": [
+        "Network estimate",
+        "Segment request",
+        "Buffer health",
+        "Bitrate choice"
+      ],
+      "steps": [
+        "Estimate current bandwidth",
+        "Request a video segment",
+        "Observe playback buffer level",
+        "Choose a sustainable next quality"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/video-streaming/scene.json"
+    },
+    {
+      "id": "file-upload",
+      "category": "workflows",
+      "title": "Resumable uploads track confirmed chunks",
+      "pattern": "pipeline",
+      "description": "Select a source file Split into stable chunks Retry only missing parts Verify all bytes before finalizing",
+      "entities": [
+        "Choose file",
+        "Split chunks",
+        "Upload parts",
+        "Verify checksum"
+      ],
+      "steps": [
+        "Select a source file",
+        "Split into stable chunks",
+        "Retry only missing parts",
+        "Verify all bytes before finalizing"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/file-upload/scene.json"
+    },
+    {
+      "id": "pdf-redaction",
+      "category": "workflows",
+      "title": "True redaction removes sensitive document content",
+      "pattern": "pipeline",
+      "description": "Locate sensitive text or images Mark exact target regions Remove underlying content from output Search extracted text to confirm removal",
+      "entities": [
+        "Identify secret",
+        "Select region",
+        "Remove content",
+        "Verify output"
+      ],
+      "steps": [
+        "Locate sensitive text or images",
+        "Mark exact target regions",
+        "Remove underlying content from output",
+        "Search extracted text to confirm removal"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/pdf-redaction/scene.json"
+    },
+    {
+      "id": "document-signing",
+      "category": "workflows",
+      "title": "Digital signatures bind identity to document bytes",
+      "pattern": "pipeline",
+      "description": "Hash the immutable document Sign digest using private key Attach signature and certificate Recipient verifies bytes and trust",
+      "entities": [
+        "Document hash",
+        "Private-key sign",
+        "Signature file",
+        "Public-key verify"
+      ],
+      "steps": [
+        "Hash the immutable document",
+        "Sign digest using private key",
+        "Attach signature and certificate",
+        "Recipient verifies bytes and trust"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/document-signing/scene.json"
+    },
+    {
+      "id": "expense-approval",
+      "category": "workflows",
+      "title": "Expense workflows separate submission and approval",
+      "pattern": "decision",
+      "description": "Employee submits documented expense Validate against company policy Approver accepts or rejects Finance schedules reimbursement",
+      "entities": [
+        "Receipt submitted",
+        "Policy check",
+        "Manager approval",
+        "Reimbursement"
+      ],
+      "steps": [
+        "Employee submits documented expense",
+        "Validate against company policy",
+        "Approver accepts or rejects",
+        "Finance schedules reimbursement"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/expense-approval/scene.json"
+    },
+    {
+      "id": "invoice-payment",
+      "category": "workflows",
+      "title": "Invoice lifecycle tracks obligations to payment",
+      "pattern": "timeline",
+      "description": "Vendor issues invoice Buyer records its due date Bank transfer settles the amount Accountant matches transaction to invoice",
+      "entities": [
+        "Invoice issued",
+        "Due date",
+        "Payment initiated",
+        "Ledger reconciled"
+      ],
+      "steps": [
+        "Vendor issues invoice",
+        "Buyer records its due date",
+        "Bank transfer settles the amount",
+        "Accountant matches transaction to invoice"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/invoice-payment/scene.json"
+    },
+    {
+      "id": "double-entry-accounting",
+      "category": "workflows",
+      "title": "Every accounting entry balances debits and credits",
+      "pattern": "balance",
+      "description": "Identify an economic event Record the debit side Record equal total credits Verify journal stays balanced",
+      "entities": [
+        "Business transaction",
+        "Debit entry",
+        "Credit entry",
+        "Balanced books"
+      ],
+      "steps": [
+        "Identify an economic event",
+        "Record the debit side",
+        "Record equal total credits",
+        "Verify journal stays balanced"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/double-entry-accounting/scene.json"
+    },
+    {
+      "id": "compound-interest",
+      "category": "workflows",
+      "title": "Compound growth earns returns on earlier returns",
+      "pattern": "chart",
+      "description": "Start with original balance Interest increases the account Future interest includes prior gains Growth accelerates with time",
+      "entities": [
+        "Initial principal",
+        "Period one",
+        "Reinvested gain",
+        "Later balance"
+      ],
+      "steps": [
+        "Start with original balance",
+        "Interest increases the account",
+        "Future interest includes prior gains",
+        "Growth accelerates with time"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/compound-interest/scene.json"
+    },
+    {
+      "id": "loan-amortization",
+      "category": "workflows",
+      "title": "Loan payments shift from interest toward principal",
+      "pattern": "chart",
+      "description": "Calculate interest on outstanding debt Payment first covers accrued interest Remainder lowers principal Next period interest uses lower debt",
+      "entities": [
+        "Opening balance",
+        "Interest portion",
+        "Principal portion",
+        "Closing balance"
+      ],
+      "steps": [
+        "Calculate interest on outstanding debt",
+        "Payment first covers accrued interest",
+        "Remainder lowers principal",
+        "Next period interest uses lower debt"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/loan-amortization/scene.json"
+    },
+    {
+      "id": "insurance-risk-pooling",
+      "category": "workflows",
+      "title": "Risk pooling spreads uncertain losses",
+      "pattern": "hub",
+      "description": "Many people pay manageable premiums Insurer aggregates the pooled funds Only a portion suffer covered losses Pool funds eligible claims",
+      "entities": [
+        "Many contributors",
+        "Premium pool",
+        "Few claims",
+        "Claims funded"
+      ],
+      "steps": [
+        "Many people pay manageable premiums",
+        "Insurer aggregates the pooled funds",
+        "Only a portion suffer covered losses",
+        "Pool funds eligible claims"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/insurance-risk-pooling/scene.json"
+    },
+    {
+      "id": "budget-allocation",
+      "category": "workflows",
+      "title": "Budgets divide limited resources among priorities",
+      "pattern": "compare",
+      "description": "Record available monthly resources Reserve unavoidable obligations Allocate to future goals Cap optional expenditures",
+      "entities": [
+        "Income",
+        "Essentials",
+        "Savings",
+        "Discretionary"
+      ],
+      "steps": [
+        "Record available monthly resources",
+        "Reserve unavoidable obligations",
+        "Allocate to future goals",
+        "Cap optional expenditures"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/budget-allocation/scene.json"
+    },
+    {
+      "id": "job-application",
+      "category": "workflows",
+      "title": "Hiring funnels filter applications by evidence",
+      "pattern": "funnel",
+      "description": "Define required competencies Review candidate evidence Interview and evaluate skills Select and extend an offer",
+      "entities": [
+        "Role requirements",
+        "Applications",
+        "Interview",
+        "Offer"
+      ],
+      "steps": [
+        "Define required competencies",
+        "Review candidate evidence",
+        "Interview and evaluate skills",
+        "Select and extend an offer"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/job-application/scene.json"
+    },
+    {
+      "id": "remote-team-handoff",
+      "category": "workflows",
+      "title": "Async handoffs preserve context across time zones",
+      "pattern": "timeline",
+      "description": "Record what was completed Explain important decisions Make remaining blockers explicit Next teammate resumes with context",
+      "entities": [
+        "Work summary",
+        "Decision log",
+        "Open blockers",
+        "Next owner"
+      ],
+      "steps": [
+        "Record what was completed",
+        "Explain important decisions",
+        "Make remaining blockers explicit",
+        "Next teammate resumes with context"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/remote-team-handoff/scene.json"
+    },
+    {
+      "id": "agile-sprint",
+      "category": "workflows",
+      "title": "A sprint tests a small delivery hypothesis",
+      "pattern": "cycle",
+      "description": "Choose high-value work Estimate short-term capacity Implement and verify the increment Review feedback for next cycle",
+      "entities": [
+        "Prioritize backlog",
+        "Plan scope",
+        "Build increment",
+        "Review results"
+      ],
+      "steps": [
+        "Choose high-value work",
+        "Estimate short-term capacity",
+        "Implement and verify the increment",
+        "Review feedback for next cycle"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/agile-sprint/scene.json"
+    },
+    {
+      "id": "user-onboarding",
+      "category": "workflows",
+      "title": "Onboarding guides users to first value",
+      "pattern": "ladder",
+      "description": "Create the user account Guide one meaningful action Demonstrate the core value Encourage a useful return visit",
+      "entities": [
+        "Sign up",
+        "First action",
+        "Aha moment",
+        "Repeat usage"
+      ],
+      "steps": [
+        "Create the user account",
+        "Guide one meaningful action",
+        "Demonstrate the core value",
+        "Encourage a useful return visit"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/user-onboarding/scene.json"
+    },
+    {
+      "id": "api-request",
+      "category": "workflows",
+      "title": "An API request traverses validation and business logic",
+      "pattern": "pipeline",
+      "description": "Client sends a structured request Server checks identity and input Service performs allowed operation Respond with result and status",
+      "entities": [
+        "Client request",
+        "Auth and validation",
+        "Service logic",
+        "JSON response"
+      ],
+      "steps": [
+        "Client sends a structured request",
+        "Server checks identity and input",
+        "Service performs allowed operation",
+        "Respond with result and status"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/api-request/scene.json"
+    },
+    {
+      "id": "data-backup",
+      "category": "workflows",
+      "title": "Backups protect data through restore testing",
+      "pattern": "cycle",
+      "description": "Select critical data to protect Take a consistent snapshot Store isolated backup copies Regularly prove restoration succeeds",
+      "entities": [
+        "Source data",
+        "Snapshot",
+        "Offsite copy",
+        "Restore test"
+      ],
+      "steps": [
+        "Select critical data to protect",
+        "Take a consistent snapshot",
+        "Store isolated backup copies",
+        "Regularly prove restoration succeeds"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/data-backup/scene.json"
+    },
+    {
+      "id": "disaster-recovery",
+      "category": "workflows",
+      "title": "Recovery plans restore critical services in order",
+      "pattern": "ladder",
+      "description": "Identify a serious service outage Move traffic to surviving infrastructure Restore consistent data state Verify service before reopening",
+      "entities": [
+        "Outage detected",
+        "Failover",
+        "Restore data",
+        "Validate service"
+      ],
+      "steps": [
+        "Identify a serious service outage",
+        "Move traffic to surviving infrastructure",
+        "Restore consistent data state",
+        "Verify service before reopening"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/disaster-recovery/scene.json"
+    },
+    {
+      "id": "traffic-signals",
+      "category": "workflows",
+      "title": "Traffic signals coordinate conflicting road movements",
+      "pattern": "cycle",
+      "description": "Allow one traffic direction Warn drivers before switching Use clearance interval for safety Allow conflicting traffic afterward",
+      "entities": [
+        "North-south green",
+        "Yellow transition",
+        "All red",
+        "East-west green"
+      ],
+      "steps": [
+        "Allow one traffic direction",
+        "Warn drivers before switching",
+        "Use clearance interval for safety",
+        "Allow conflicting traffic afterward"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/traffic-signals/scene.json"
+    },
+    {
+      "id": "recycling-process",
+      "category": "workflows",
+      "title": "Recycling transforms sorted waste into new material",
+      "pattern": "pipeline",
+      "description": "Collect recyclable streams Separate incompatible materials Clean recovered feedstock Process it into reusable products",
+      "entities": [
+        "Collection",
+        "Sorting",
+        "Cleaning",
+        "Remanufacture"
+      ],
+      "steps": [
+        "Collect recyclable streams",
+        "Separate incompatible materials",
+        "Clean recovered feedstock",
+        "Process it into reusable products"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/recycling-process/scene.json"
+    },
+    {
+      "id": "solar-home",
+      "category": "workflows",
+      "title": "A home solar system routes energy through an inverter",
+      "pattern": "hub",
+      "description": "Photovoltaics turn light into DC Direct current flows to inverter Inverter supplies compatible AC Loads consume or export electricity",
+      "entities": [
+        "Solar panels",
+        "DC electricity",
+        "Inverter",
+        "Home or grid"
+      ],
+      "steps": [
+        "Photovoltaics turn light into DC",
+        "Direct current flows to inverter",
+        "Inverter supplies compatible AC",
+        "Loads consume or export electricity"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/solar-home/scene.json"
+    },
+    {
+      "id": "ev-charging",
+      "category": "workflows",
+      "title": "EV charging balances battery and grid constraints",
+      "pattern": "pipeline",
+      "description": "Grid supplies electrical power Charger negotiates available current Battery system monitors temperature Cells accept energy within safe limits",
+      "entities": [
+        "Grid supply",
+        "Charging station",
+        "Battery controller",
+        "Cell charging"
+      ],
+      "steps": [
+        "Grid supplies electrical power",
+        "Charger negotiates available current",
+        "Battery system monitors temperature",
+        "Cells accept energy within safe limits"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/ev-charging/scene.json"
+    },
+    {
+      "id": "smart-home-automation",
+      "category": "workflows",
+      "title": "Automation reacts to sensor events and conditions",
+      "pattern": "decision",
+      "description": "Motion sensor reports presence Controller checks time or light Enable the lamp when appropriate Switch it off after inactivity",
+      "entities": [
+        "Motion sensor",
+        "Condition check",
+        "Lamp on",
+        "Auto-off timer"
+      ],
+      "steps": [
+        "Motion sensor reports presence",
+        "Controller checks time or light",
+        "Enable the lamp when appropriate",
+        "Switch it off after inactivity"
+      ],
+      "durationMs": 2700,
+      "file": "workflows/smart-home-automation/scene.json"
+    }
+  ]
+}

@@ -1,0 +1,581 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 560,
+    "theme": "clean",
+    "background": "#f8fafc",
+    "seed": 51
+  },
+  "objects": [
+    {
+      "id": "heading",
+      "type": "text",
+      "text": "Adding fractions needs a common denominator",
+      "transform": {
+        "x": 500,
+        "y": 43,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 27,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "context",
+      "type": "text",
+      "text": "SCIENCE  /  EQUATION EXPLANATION",
+      "transform": {
+        "x": 500,
+        "y": 79,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 13,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "concept_0",
+      "transform": {
+        "x": 175,
+        "y": 275,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "One half",
+      "type": "rect",
+      "width": 174,
+      "height": 62,
+      "text": "One half"
+    },
+    {
+      "id": "stage_0",
+      "type": "text",
+      "text": "STEP 1/4   Represent each portion",
+      "description": "Represent each portion",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "concept_1",
+      "transform": {
+        "x": 390,
+        "y": 275,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "One quarter",
+      "type": "rect",
+      "width": 174,
+      "height": 62,
+      "text": "One quarter"
+    },
+    {
+      "id": "stage_1",
+      "type": "text",
+      "text": "STEP 2/4   Convert to equal denominator",
+      "description": "Convert to equal denominator",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "concept_2",
+      "transform": {
+        "x": 610,
+        "y": 275,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "Two quarters",
+      "type": "rect",
+      "width": 174,
+      "height": 62,
+      "text": "Two quarters"
+    },
+    {
+      "id": "stage_2",
+      "type": "text",
+      "text": "STEP 3/4   Combine equal-sized parts",
+      "description": "Combine equal-sized parts",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "concept_3",
+      "transform": {
+        "x": 825,
+        "y": 275,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "Three quarters",
+      "type": "rect",
+      "width": 174,
+      "height": 62,
+      "text": "Three quarters"
+    },
+    {
+      "id": "stage_3",
+      "type": "text",
+      "text": "STEP 4/4   Simplify the final fraction",
+      "description": "Simplify the final fraction",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "text": "Seek to any time  •  Every frame is deterministic",
+      "transform": {
+        "x": 500,
+        "y": 526,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 12,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "timeline_rule",
+      "type": "path",
+      "d": "M 0 0 L 710 0",
+      "drawProgress": 0,
+      "transform": {
+        "x": 145,
+        "y": 496,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#94a3b8",
+        "strokeWidth": 4
+      },
+      "visible": true,
+      "z": 1,
+      "description": "Drawn progress through the four explanation stages"
+    },
+    {
+      "id": "operator_0",
+      "type": "text",
+      "text": "→",
+      "transform": {
+        "x": 282.5,
+        "y": 276,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 26,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "operator_1",
+      "type": "text",
+      "text": "→",
+      "transform": {
+        "x": 500,
+        "y": 276,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 26,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "operator_2",
+      "type": "text",
+      "text": "=",
+      "transform": {
+        "x": 717.5,
+        "y": 276,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 26,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    }
+  ],
+  "timeline": [
+    {
+      "id": "advance_progress",
+      "type": "draw",
+      "target": "timeline_rule",
+      "start": 0,
+      "duration": 3200,
+      "easing": "linear",
+      "to": 1
+    },
+    {
+      "id": "highlight_0",
+      "type": "fill",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#bfdbfe"
+    },
+    {
+      "id": "expand_0",
+      "type": "scale",
+      "target": "concept_0",
+      "start": 400,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_0",
+      "type": "stroke",
+      "target": "concept_0",
+      "start": 160,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "show_stage_0",
+      "type": "visibility",
+      "target": "stage_0",
+      "start": 0,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "highlight_1",
+      "type": "fill",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#a7f3d0"
+    },
+    {
+      "id": "expand_1",
+      "type": "scale",
+      "target": "concept_1",
+      "start": 1300,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_1",
+      "type": "stroke",
+      "target": "concept_1",
+      "start": 1060,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "show_stage_1",
+      "type": "visibility",
+      "target": "stage_1",
+      "start": 900,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "hide_stage_0",
+      "type": "visibility",
+      "target": "stage_0",
+      "start": 900,
+      "duration": 0,
+      "visible": false
+    },
+    {
+      "id": "highlight_2",
+      "type": "fill",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#fde68a"
+    },
+    {
+      "id": "expand_2",
+      "type": "scale",
+      "target": "concept_2",
+      "start": 2200,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_2",
+      "type": "stroke",
+      "target": "concept_2",
+      "start": 1960,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "show_stage_2",
+      "type": "visibility",
+      "target": "stage_2",
+      "start": 1800,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "hide_stage_1",
+      "type": "visibility",
+      "target": "stage_1",
+      "start": 1800,
+      "duration": 0,
+      "visible": false
+    },
+    {
+      "id": "highlight_3",
+      "type": "fill",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#fecdd3"
+    },
+    {
+      "id": "expand_3",
+      "type": "scale",
+      "target": "concept_3",
+      "start": 3100,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_3",
+      "type": "stroke",
+      "target": "concept_3",
+      "start": 2860,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "show_stage_3",
+      "type": "visibility",
+      "target": "stage_3",
+      "start": 2700,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "hide_stage_2",
+      "type": "visibility",
+      "target": "stage_2",
+      "start": 2700,
+      "duration": 0,
+      "visible": false
+    }
+  ],
+  "markers": [
+    {
+      "id": "marker_0",
+      "label": "Step 1: One half",
+      "time": 0
+    },
+    {
+      "id": "marker_1",
+      "label": "Step 2: One quarter",
+      "time": 900
+    },
+    {
+      "id": "marker_2",
+      "label": "Step 3: Two quarters",
+      "time": 1800
+    },
+    {
+      "id": "marker_3",
+      "label": "Step 4: Three quarters",
+      "time": 2700
+    }
+  ]
+}
