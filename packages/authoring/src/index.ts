@@ -537,7 +537,7 @@ export class SceneBuilder {
   }
 
   /** Schedule actions at an absolute timeline time. */
-  at(time: number, ...actions: Pending[]): string[] {
+  atTime(time: number, ...actions: Pending[]): string[] {
     if (!Number.isFinite(time) || time < 0) throw new Error("Absolute timeline time must be a finite number >= 0.");
     let end = this.cursor;
     const ids: string[] = [];
@@ -553,7 +553,7 @@ export class SceneBuilder {
   after(delay: number, ...actions: Pending[]): string[] {
     if (!Number.isFinite(delay) || delay < 0) throw new Error("Relative delay must be a finite number >= 0.");
     const start = this.cursor + delay;
-    return this.at(start, ...actions);
+    return this.atTime(start, ...actions);
   }
 
   /** Start each action after a fixed offset while allowing overlap. */
@@ -751,16 +751,16 @@ export class SceneBuilder {
           hold = { type: "opacity", target: original.target, to: object.transform.opacity, duration: 0, easing: "linear", interrupt: true };
           break;
         case "fill":
-          hold = { type: "fill", target: original.target, to: object.style.fill, duration: 0, easing: "linear", interrupt: true };
+          hold = { type: "fill", target: original.target, to: object.style.fill ?? "none", duration: 0, easing: "linear", interrupt: true };
           break;
         case "stroke":
-          hold = { type: "stroke", target: original.target, to: object.style.stroke, duration: 0, easing: "linear", interrupt: true };
+          hold = { type: "stroke", target: original.target, to: object.style.stroke ?? "none", duration: 0, easing: "linear", interrupt: true };
           break;
         case "resize": {
           if (object.type === "rect" || object.type === "image") {
             hold = { type: "resize", target: original.target, to: { width: object.width, height: object.height }, duration: 0, easing: "linear", interrupt: true };
           } else if (object.type === "circle") {
-            hold = { type: "resize", target: original.target, to: { width: object.r * 2, height: object.r * 2 }, duration: 0, easing: "linear", interrupt: true };
+            hold = { type: "resize", target: original.target, to: { width: object.radius * 2, height: object.radius * 2 }, duration: 0, easing: "linear", interrupt: true };
           } else if (object.type === "ellipse") {
             hold = { type: "resize", target: original.target, to: { width: object.rx * 2, height: object.ry * 2 }, duration: 0, easing: "linear", interrupt: true };
           }
