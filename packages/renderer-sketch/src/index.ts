@@ -1,6 +1,7 @@
 import {
   anchorPoint,
   evaluate,
+  routeConnector,
   worldMatrix,
   type ConnectorObject,
   type DrawableObject,
@@ -258,13 +259,26 @@ function renderPath(
 function connectorBasePath(
   connector: ConnectorObject,
   objects: ReadonlyMap<string, DrawableObject>,
-): { d: string; from: { x: number; y: number }; to: { x: number; y: number } } | null {
+): { d: string; from: { x: number; y: number }; to: { x: number; y: number }; points?: { x: number; y: number }[] } | null {
   const fromObject = objects.get(connector.from.objectId);
   const toObject = objects.get(connector.to.objectId);
   if (!fromObject || !toObject) return null;
 
   const from = anchorPoint(fromObject, connector.from.anchor, objects);
   const to = anchorPoint(toObject, connector.to.anchor, objects);
+
+  if (connector.kind === "routed") {
+    const routed = routeConnector(connector, objects);
+    if (routed.length < 2) return null;
+    return {
+      from,
+      to,
+      points: routed,
+      d: routed.map((point, index) =>
+        `${index === 0 ? "M" : "L"} ${formatNumber(point.x)} ${formatNumber(point.y)}`
+      ).join(" "),
+    };
+  }
 
   if (connector.kind === "curve") {
     const midX = (from.x + to.x) / 2;
@@ -280,6 +294,7 @@ function connectorBasePath(
     return {
       from,
       to,
+      points: [from, { x: midX, y: from.y }, { x: midX, y: to.y }, to],
       d: `M ${formatNumber(from.x)} ${formatNumber(from.y)} L ${formatNumber(midX)} ${formatNumber(from.y)} L ${formatNumber(midX)} ${formatNumber(to.y)} L ${formatNumber(to.x)} ${formatNumber(to.y)}`,
     };
   }
@@ -326,16 +341,10 @@ function renderConnector(
   if (strokeColor(connector.style) !== "none" && strokeWidth(connector.style) > 0) {
     if (connector.kind === "curve") {
       overdraw = renderCurveOverdraw(connector, base.from, base.to, seed);
-    } else if (connector.kind === "orthogonal") {
-      const midX = (base.from.x + base.to.x) / 2;
+    } else if (connector.kind === "orthogonal" || connector.kind === "routed") {
       overdraw = renderSketchPaths(
         sketchPolyline(
-          [
-            base.from,
-            { x: midX, y: base.from.y },
-            { x: midX, y: base.to.y },
-            base.to,
-          ],
+          base.points ?? [base.from, base.to],
           sketchContext(seed, connector.id),
           { key: "connector" },
         ),
