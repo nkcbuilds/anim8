@@ -8,6 +8,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@anim8/a11y": [
+        "../a11y/src/index.ts"
+      ],
       "@anim8/core": [
         "../core/src/index.ts"
       ],
