@@ -177,6 +177,20 @@ export class NodeHandle {
   onHover(...actions: StateAction[]): void {
     this.owner.interaction({ type: "hover", target: this.id }, actions);
   }
+  reparent(parent: NodeHandle | null, options: { preserveWorld?: boolean } = {}): PendingAction {
+    return {
+      type: "reparent",
+      target: this.id,
+      parentId: parent?.id ?? null,
+      duration: 0,
+      easing: "linear",
+      ...(options.preserveWorld === false ? { preserveWorld: false } : {}),
+    };
+  }
+  reorder(to: number): PendingAction {
+    if (!Number.isInteger(to)) throw new Error("z-order must be an integer.");
+    return { type: "zOrder", target: this.id, to, duration: 0, easing: "linear" };
+  }
 }
 
 export class SceneBuilder {
@@ -663,6 +677,8 @@ export class SceneBuilder {
       case "draw": return ["drawProgress"];
       case "morph": return ["d"];
       case "visibility": return ["visible"];
+      case "reparent": return ["parentId"];
+      case "zOrder": return ["z"];
       case "camera": return [
         ...(action.to.x !== undefined ? ["camera.x"] : []),
         ...(action.to.y !== undefined ? ["camera.y"] : []),
@@ -785,6 +801,21 @@ export class SceneBuilder {
     const id = this.scheduleAt(at, hold);
     this.cursor = Math.max(this.cursor, at);
     return id;
+  }
+
+  /** Compile grouping into deterministic reparent actions. The destination group must already exist. */
+  groupInto(group: NodeHandle, ...children: NodeHandle[]): PendingAction[] {
+    return children.map(child => child.reparent(group));
+  }
+
+  /** Compile ungrouping/moving to the scene root into deterministic reparent actions. */
+  ungroup(...children: NodeHandle[]): PendingAction[] {
+    return children.map(child => child.reparent(null));
+  }
+
+  /** Compile moving an object between existing containers; null means scene root. */
+  moveBetweenContainers(child: NodeHandle, parent: NodeHandle | null): PendingAction {
+    return child.reparent(parent);
   }
 
   step(label: string, build: () => void): void {
