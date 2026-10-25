@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Anim8 · Teaching Scene Catalog</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#ecf1f8;background:#0c111b}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh}
+    button,input,select{font:inherit}
+    button,a{outline-offset:3px}
+    .shell{display:grid;grid-template-columns:312px minmax(0,1fr);min-height:100vh}
+    .sidebar{height:100vh;position:sticky;top:0;overflow:hidden;display:flex;flex-direction:column;border-right:1px solid #263042;background:#101725}
+    .brand{padding:24px 22px 20px;border-bottom:1px solid #263042}
+    .brand h1{font-weight:800;letter-spacing:-.06em;font-size:30px;margin:0}
+    .brand h1 span{color:#87b2ff}
+    .eyebrow{font-size:11px;font-weight:750;letter-spacing:.15em;text-transform:uppercase;color:#9cacc6}
+    .brand p{font-size:13px;color:#a9b6cc;line-height:1.5;margin:8px 0 0}
+    .search{padding:17px 15px;display:grid;gap:10px;border-bottom:1px solid #263042}
+    input[type=search],select{width:100%;color:#fff;background:#1b2638;border:1px solid #344156;border-radius:9px;padding:11px 12px;min-height:43px}
+    .stats{font-size:12px;color:#a3b1c5;display:flex;justify-content:space-between;gap:10px}
+    #list{flex:1;overflow:auto;padding:8px 8px 30px}
+    .example{width:100%;text-align:left;display:block;cursor:pointer;padding:11px 12px;border:1px solid transparent;border-radius:9px;background:transparent;color:#eef3fa;margin:2px 0}
+    .example:hover{background:#202b3d}
+    .example[aria-current=true]{background:#263958;border-color:#5677b2}
+    .example strong{display:block;font-size:13px;font-weight:630;line-height:1.35}
+    .example small{display:block;color:#a9bbd4;margin-top:5px;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+    .main{padding:30px max(28px,4vw) 55px;min-width:0}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .pill{color:#a8c3f3;background:#1d3153;border:1px solid #304d7c;padding:7px 11px;border-radius:100px;font-size:12px;font-weight:700}
+    .actions{display:flex;gap:8px}
+    a.action,button.action{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;color:#edf2fb;background:#1e293b;border:1px solid #3a4760;border-radius:9px;text-decoration:none;cursor:pointer;font-size:13px;font-weight:650}
+    a.action:hover,button.action:hover{border-color:#7ca5e7}
+    #title{font-size:clamp(23px,3.2vw,38px);letter-spacing:-.04em;margin:18px 0 8px;line-height:1.14}
+    #summary{color:#a9b7cb;max-width:1000px;margin:0 0 20px;font-size:14px;line-height:1.65}
+    .canvas{background:#fff;overflow:hidden;border-radius:13px;border:1px solid #6d7c93;box-shadow:0 22px 80px #02071280;line-height:0}
+    .canvas img{display:block;width:100%;height:auto;aspect-ratio:1000/560}
+    .player{display:flex;align-items:center;gap:16px;margin-top:22px;background:#141e2e;border:1px solid #2e3c50;border-radius:12px;padding:14px 16px}
+    button.play{background:#83aeff;border:0;color:#10203b;padding:10px 20px;min-width:86px;border-radius:9px;font-weight:800;cursor:pointer}
+    input[type=range]{flex:1;accent-color:#83aeff;min-width:60px;cursor:pointer}
+    #time{font-variant-numeric:tabular-nums;color:#d9e6f9;font-size:13px;min-width:66px;text-align:right}
+    h3{margin:26px 0 13px;font-size:15px;letter-spacing:.01em}
+    #steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+    .step{border:1px solid #37445c;background:#162235;color:#e0e8f5;text-align:left;cursor:pointer;border-radius:10px;padding:13px;min-height:120px}
+    .step[aria-pressed=true]{background:#1f375b;border-color:#7caaed}
+    .step small{display:block;margin-bottom:9px;color:#91acdb;font-size:11px;font-weight:750;letter-spacing:.07em}
+    .step span{font-size:13px;line-height:1.45}
+    footer{font-size:12px;color:#8796ae;margin-top:32px;line-height:1.6}
+    kbd{border:1px solid #48556a;padding:2px 5px;border-radius:4px;background:#1a2537}
+    #error{display:none;border:1px solid #bc5860;background:#47262e;padding:12px;border-radius:9px;color:#ffd5d9;margin-bottom:14px}
+    @media(max-width:940px){.shell{grid-template-columns:240px minmax(0,1fr)}.sidebar{width:240px}.main{padding:25px 22px}.step{min-height:140px}}
+    @media(max-width:720px){.shell{display:flex;flex-direction:column}.sidebar{position:relative;width:auto;height:290px;border-right:0;border-bottom:1px solid #263042}.brand{padding:13px 18px}.brand p{display:none}.brand h1{font-size:24px}.search{padding:11px;grid-template-columns:1fr 1fr}.search .stats{grid-column:span 2}.main{padding:20px 14px}.topline{gap:10px}.actions{flex-wrap:wrap}.player{gap:8px;padding:10px}.step{min-height:105px}#steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <header class="brand"><div class="eyebrow">Deterministic · model-first</div><h1>Anim<span>8</span></h1><p>150 explainers. Seek any frame, inspect the source, or download the portable scene JSON.</p></header>
+      <div class="search">
+        <input id="search" type="search" placeholder="Search examples…" aria-label="Search examples">
+        <select id="category" aria-label="Filter category"><option value="">All categories</option><option value="computing">Computing</option><option value="science">Math & science</option><option value="workflows">Workflows</option></select>
+        <div class="stats"><span id="counter">Loading…</span><span>Scene format 1.0</span></div>
+      </div>
+      <nav id="list" aria-label="Examples"></nav>
+    </aside>
+    <main class="main">
+      <div class="topline"><span id="category-pill" class="pill">Computing</span><div class="actions"><button class="action" id="prev" type="button" aria-label="Previous example">← Previous</button><button class="action" id="next" type="button" aria-label="Next example">Next →</button><a class="action" id="source" download>↓ Scene JSON</a></div></div>
+      <h2 id="title">Loading the catalog…</h2>
+      <p id="summary">Select an example to explore its diagram, seek through its timeline, and inspect each teaching step.</p>
+      <p id="error" role="alert"></p>
+      <div class="canvas"><img id="preview" width="1000" height="560" alt="Animation frame for selected example"></div>
+      <div class="player" role="group" aria-label="Animation controls">
+        <button class="play" id="play" type="button">Play</button>
+        <input id="seek" type="range" min="0" max="3200" step="10" value="0" aria-label="Seek animation time">
+        <output id="time">0.00s</output>
+      </div>
+      <h3>Four-step explanation</h3>
+      <div id="steps" aria-label="Explanation steps"></div>
+      <footer>The SVG is rendered from the validated Anim8 scene document at your selected timestamp, not a prerecorded image. The evaluator is independent of prior frames. <kbd>←</kbd> and <kbd>→</kbd> switch examples when the search field is not focused.</footer>
+    </main>
+  </div>
+  <script type="module">
+    const els=Object.fromEntries(["search","category","counter","list","category-pill","title","summary","error","preview","prev","next","source","seek","time","play","steps"].map(k=>[k,document.getElementById(k)]));
+    let entries=[],filtered=[],active=null,time=0,playing=false,raf=0,lastNow=0;
+    const groups={computing:"Computing",science:"Math & science",workflows:"Workflows"};
+    const urlId=new URL(location.href).searchParams.get("example");
+    function halt(){playing=false;cancelAnimationFrame(raf);els.play.textContent="Play";}
+    function showTime(t){
+      time=Math.max(0,Math.min(3200,Math.round(t)));
+      els.seek.value=time;els.time.textContent=(time/1000).toFixed(2)+"s";
+      if(active)els.preview.src="/api/render?id="+encodeURIComponent(active.id)+"&t="+time;
+      [...els.steps.children].forEach((el,i)=>el.setAttribute("aria-pressed",String(Math.min(3,Math.floor(time/900))===i)));
+    }
+    function renderList(){
+      const query=els.search.value.trim().toLowerCase(),cat=els.category.value;
+      filtered=entries.filter(e=>(!cat||e.category===cat)&&(!query||[e.id,e.title,e.description,e.pattern].join(" ").toLowerCase().includes(query)));
+      els.counter.textContent=filtered.length+" of "+entries.length+" examples";
+      els.list.replaceChildren();
+      const frag=document.createDocumentFragment();
+      for(const e of filtered){
+        const b=document.createElement("button");
+        b.type="button";b.className="example";b.setAttribute("aria-current",String(e.id===active?.id));
+        const t=document.createElement("strong");t.textContent=e.title;
+        const tag=document.createElement("small");tag.textContent=groups[e.category]+" · "+e.pattern;
+        b.append(t,tag);b.onclick=()=>select(e.id);frag.append(b);
+      }
+      els.list.append(frag);
+    }
+    function select(id){
+      const e=entries.find(x=>x.id===id);if(!e)return;
+      halt();active=e;showTime(0);
+      history.replaceState(null,"",location.pathname+"?example="+encodeURIComponent(e.id));
+      els.title.textContent=e.title;els.summary.textContent=e.description;
+      els["category-pill"].textContent=groups[e.category]+" · "+e.pattern;
+      els.source.href="/api/source?id="+encodeURIComponent(e.id);
+      els.preview.alt="Anim8 diagram teaching: "+e.title;
+      els.steps.replaceChildren();
+      e.steps.forEach((s,i)=>{
+        const b=document.createElement("button");b.className="step";b.type="button";
+        const small=document.createElement("small");small.textContent="STEP "+(i+1);
+        const msg=document.createElement("span");msg.textContent=s;b.append(small,msg);
+        b.onclick=()=>{halt();showTime(i*900)};els.steps.append(b);
+      });
+      showTime(0);renderList();
+    }
+    function change(delta){
+      if(!filtered.length)return;
+      let index=filtered.findIndex(e=>e.id===active?.id);
+      index=Math.max(0,Math.min(filtered.length-1,index+delta));
+      select(filtered[index].id);
+    }
+    function tick(now){
+      if(!playing)return;
+      const dt=Math.max(0,Math.min(100,now-lastNow));
+      lastNow=now;showTime(time+dt);
+      if(time>=3200)halt();else raf=requestAnimationFrame(tick);
+    }
+    els.play.onclick=()=>{
+      if(playing){halt();return}
+      if(time>=3200)showTime(0);
+      playing=true;els.play.textContent="Pause";lastNow=performance.now();raf=requestAnimationFrame(tick);
+    };
+    els.seek.oninput=()=>{halt();showTime(Number(els.seek.value))};
+    els.search.oninput=renderList;els.category.onchange=renderList;
+    els.prev.onclick=()=>change(-1);els.next.onclick=()=>change(1);
+    window.addEventListener("keydown",event=>{
+      if(event.target instanceof HTMLInputElement||event.target instanceof HTMLSelectElement)return;
+      if(event.key==="ArrowLeft")change(-1);
+      if(event.key==="ArrowRight")change(1);
+    });
+    els.preview.onerror=()=>{els.error.textContent="Unable to render this scene. See server diagnostics.";els.error.style.display="block"};
+    els.preview.onload=()=>{els.error.style.display="none"};
+    try{
+      const response=await fetch("/api/catalog");if(!response.ok)throw new Error("Catalog API unavailable");
+      entries=(await response.json()).examples;
+      if(!entries.length)throw new Error("No examples");
+      select(entries.some(e=>e.id===urlId)?urlId:entries[0].id);
+    }catch(error){els.title.textContent="Catalog unavailable";els.error.textContent=String(error);els.error.style.display="block"}
+  </script>
+</body>
+</html>

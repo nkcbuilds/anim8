@@ -1,0 +1,648 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 560,
+    "theme": "clean",
+    "background": "#f8fafc",
+    "seed": 95
+  },
+  "objects": [
+    {
+      "id": "heading",
+      "type": "text",
+      "text": "A projectile combines horizontal and vertical motion",
+      "transform": {
+        "x": 500,
+        "y": 43,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 23,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "context",
+      "type": "text",
+      "text": "SCIENCE  /  CHART EXPLANATION",
+      "transform": {
+        "x": 500,
+        "y": 79,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 13,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "concept_0",
+      "transform": {
+        "x": 185,
+        "y": 323,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "Initial velocity",
+      "type": "rect",
+      "width": 132,
+      "height": 94
+    },
+    {
+      "id": "bar_label_0",
+      "type": "text",
+      "text": "Initial velocity",
+      "transform": {
+        "x": 185,
+        "y": 394,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 12,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "stage_0",
+      "type": "text",
+      "text": "STEP 1/4   Launch with two velocity components",
+      "description": "Launch with two velocity components",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "concept_1",
+      "transform": {
+        "x": 395,
+        "y": 300,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "Horizontal drift",
+      "type": "rect",
+      "width": 132,
+      "height": 140
+    },
+    {
+      "id": "bar_label_1",
+      "type": "text",
+      "text": "Horizontal drift",
+      "transform": {
+        "x": 395,
+        "y": 394,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 12,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "stage_1",
+      "type": "text",
+      "text": "STEP 2/4   Horizontal speed remains nearly constant",
+      "description": "Horizontal speed remains nearly constant",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "concept_2",
+      "transform": {
+        "x": 605,
+        "y": 277,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "Gravity pull",
+      "type": "rect",
+      "width": 132,
+      "height": 186
+    },
+    {
+      "id": "bar_label_2",
+      "type": "text",
+      "text": "Gravity pull",
+      "transform": {
+        "x": 605,
+        "y": 394,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 12,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "stage_2",
+      "type": "text",
+      "text": "STEP 3/4   Gravity accelerates downward",
+      "description": "Gravity accelerates downward",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "concept_3",
+      "transform": {
+        "x": 815,
+        "y": 306,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#334155",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 14,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 3,
+      "description": "Parabolic path",
+      "type": "rect",
+      "width": 132,
+      "height": 128
+    },
+    {
+      "id": "bar_label_3",
+      "type": "text",
+      "text": "Parabolic path",
+      "transform": {
+        "x": 815,
+        "y": 394,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 12,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "stage_3",
+      "type": "text",
+      "text": "STEP 4/4   Trajectory curves into a parabola",
+      "description": "Trajectory curves into a parabola",
+      "transform": {
+        "x": 500,
+        "y": 467,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 16,
+        "radius": 12
+      },
+      "visible": false,
+      "z": 10
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "text": "Seek to any time  •  Every frame is deterministic",
+      "transform": {
+        "x": 500,
+        "y": 526,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 12,
+        "radius": 12
+      },
+      "visible": true,
+      "z": 10
+    },
+    {
+      "id": "timeline_rule",
+      "type": "path",
+      "d": "M 0 0 L 710 0",
+      "drawProgress": 0,
+      "transform": {
+        "x": 145,
+        "y": 496,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#94a3b8",
+        "strokeWidth": 4
+      },
+      "visible": true,
+      "z": 1,
+      "description": "Drawn progress through the four explanation stages"
+    }
+  ],
+  "timeline": [
+    {
+      "id": "advance_progress",
+      "type": "draw",
+      "target": "timeline_rule",
+      "start": 0,
+      "duration": 3200,
+      "easing": "linear",
+      "to": 1
+    },
+    {
+      "id": "highlight_0",
+      "type": "fill",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#bfdbfe"
+    },
+    {
+      "id": "expand_0",
+      "type": "scale",
+      "target": "concept_0",
+      "start": 400,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_0",
+      "type": "stroke",
+      "target": "concept_0",
+      "start": 160,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "bar_growth_0",
+      "type": "resize",
+      "target": "concept_0",
+      "start": 210,
+      "duration": 290,
+      "easing": "easeOut",
+      "to": {
+        "width": 132,
+        "height": 122
+      }
+    },
+    {
+      "id": "show_stage_0",
+      "type": "visibility",
+      "target": "stage_0",
+      "start": 0,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "highlight_1",
+      "type": "fill",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#a7f3d0"
+    },
+    {
+      "id": "expand_1",
+      "type": "scale",
+      "target": "concept_1",
+      "start": 1300,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_1",
+      "type": "stroke",
+      "target": "concept_1",
+      "start": 1060,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "bar_growth_1",
+      "type": "resize",
+      "target": "concept_1",
+      "start": 1110,
+      "duration": 290,
+      "easing": "easeOut",
+      "to": {
+        "width": 132,
+        "height": 168
+      }
+    },
+    {
+      "id": "show_stage_1",
+      "type": "visibility",
+      "target": "stage_1",
+      "start": 900,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "hide_stage_0",
+      "type": "visibility",
+      "target": "stage_0",
+      "start": 900,
+      "duration": 0,
+      "visible": false
+    },
+    {
+      "id": "highlight_2",
+      "type": "fill",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#fde68a"
+    },
+    {
+      "id": "expand_2",
+      "type": "scale",
+      "target": "concept_2",
+      "start": 2200,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_2",
+      "type": "stroke",
+      "target": "concept_2",
+      "start": 1960,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "bar_growth_2",
+      "type": "resize",
+      "target": "concept_2",
+      "start": 2010,
+      "duration": 290,
+      "easing": "easeOut",
+      "to": {
+        "width": 132,
+        "height": 214
+      }
+    },
+    {
+      "id": "show_stage_2",
+      "type": "visibility",
+      "target": "stage_2",
+      "start": 1800,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "hide_stage_1",
+      "type": "visibility",
+      "target": "stage_1",
+      "start": 1800,
+      "duration": 0,
+      "visible": false
+    },
+    {
+      "id": "highlight_3",
+      "type": "fill",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#fecdd3"
+    },
+    {
+      "id": "expand_3",
+      "type": "scale",
+      "target": "concept_3",
+      "start": 3100,
+      "duration": 230,
+      "easing": "easeOut",
+      "to": {
+        "x": 1.07,
+        "y": 1.07
+      }
+    },
+    {
+      "id": "border_3",
+      "type": "stroke",
+      "target": "concept_3",
+      "start": 2860,
+      "duration": 330,
+      "easing": "easeInOut",
+      "to": "#2563eb"
+    },
+    {
+      "id": "bar_growth_3",
+      "type": "resize",
+      "target": "concept_3",
+      "start": 2910,
+      "duration": 290,
+      "easing": "easeOut",
+      "to": {
+        "width": 132,
+        "height": 156
+      }
+    },
+    {
+      "id": "show_stage_3",
+      "type": "visibility",
+      "target": "stage_3",
+      "start": 2700,
+      "duration": 0,
+      "visible": true
+    },
+    {
+      "id": "hide_stage_2",
+      "type": "visibility",
+      "target": "stage_2",
+      "start": 2700,
+      "duration": 0,
+      "visible": false
+    }
+  ],
+  "markers": [
+    {
+      "id": "marker_0",
+      "label": "Step 1: Initial velocity",
+      "time": 0
+    },
+    {
+      "id": "marker_1",
+      "label": "Step 2: Horizontal drift",
+      "time": 900
+    },
+    {
+      "id": "marker_2",
+      "label": "Step 3: Gravity pull",
+      "time": 1800
+    },
+    {
+      "id": "marker_3",
+      "label": "Step 4: Parabolic path",
+      "time": 2700
+    }
+  ]
+}
