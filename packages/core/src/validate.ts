@@ -28,6 +28,7 @@ const props = (action: Action): string[] => {
       ...(action.to.zoom !== undefined ? ["camera.zoom"] : []),
     ];
   }
+  return [];
 };
 
 function validateStateActionAtPath(
