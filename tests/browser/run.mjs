@@ -5,7 +5,7 @@ import { createReadStream, existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { dirname, extname, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const browserRoot = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(browserRoot, "../..");
@@ -34,8 +34,10 @@ function runBuilds() {
 
   const args = [
     "--filter", "@anim8/core",
+    "--filter", "@anim8/a11y",
     "--filter", "@anim8/renderer-svg",
     "--filter", "@anim8/player",
+    "--filter", "@anim8/react",
     "build",
   ];
 
@@ -72,8 +74,10 @@ function runBuilds() {
 function assertBuiltOutputs() {
   for (const relative of [
     "packages/core/dist/index.js",
+    "packages/a11y/dist/index.js",
     "packages/renderer-svg/dist/index.js",
     "packages/player/dist/index.js",
+    "packages/react/dist/index.js",
   ]) {
     assert.ok(
       existsSync(resolve(repoRoot, relative)),
@@ -91,6 +95,47 @@ const MIME = new Map([
   [".svg", "image/svg+xml"],
   [".png", "image/png"],
 ]);
+
+async function prepareReactHydrationFixture() {
+  const tempDir = resolve(browserRoot, ".tmp");
+  await mkdir(tempDir, { recursive: true });
+
+  const [{ build }, React, serverRenderer, reactModule, sceneModule] = await Promise.all([
+    import("esbuild"),
+    import("react"),
+    import("react-dom/server"),
+    import(pathToFileURL(resolve(repoRoot, "packages/react/dist/index.js")).href),
+    import(pathToFileURL(resolve(browserRoot, "react-hydration-scene.mjs")).href),
+  ]);
+
+  const element = React.createElement(reactModule.Anim8Player, {
+    scene: sceneModule.hydrationScene,
+    initialTime: 250,
+  });
+  const markup = serverRenderer.renderToStaticMarkup(element);
+
+  await build({
+    entryPoints: [resolve(browserRoot, "react-hydration-entry.mjs")],
+    bundle: true,
+    platform: "browser",
+    format: "esm",
+    target: "es2022",
+    outfile: resolve(tempDir, "react-hydration.js"),
+    logLevel: "silent",
+  });
+
+  await writeFile(
+    resolve(tempDir, "react-hydration.html"),
+    `<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Anim8 React hydration</title></head>
+<body>
+  <div id="react-hydration-root">${markup}</div>
+  <script type="module" src="/tests/browser/.tmp/react-hydration.js"></script>
+</body>
+</html>`,
+  );
+}
 
 async function startStaticServer() {
   const server = createServer((request, response) => {
@@ -231,6 +276,33 @@ async function runBrowserSuite(browserName, browserType, server) {
       assert.ok(result.movedTransform?.includes("250"));
     });
 
+    await runCase(caseName("routed connectors recompute around moving obstacles"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.routedConnector());
+      assert.equal(result.sameNode, true);
+      assert.ok(result.before);
+      assert.ok(result.after);
+      assert.notEqual(result.before, result.after);
+      assert.ok(result.before.includes("route") === false);
+    });
+
+    await runCase(caseName("responsive SVG sizing preserves semantic viewBox"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.responsiveSizing());
+      assert.deepEqual(
+        [result.beforeWidth, result.beforeHeight, result.afterWidth, result.afterHeight],
+        [480, 270, 320, 180],
+      );
+      assert.equal(result.viewBoxBefore, "0 0 480 270");
+      assert.equal(result.viewBoxAfter, result.viewBoxBefore);
+    });
+
+    await runCase(caseName("static renderer provides a useful no-player fallback"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.staticFallback());
+      assert.equal(result.svgCount, 1);
+      assert.equal(result.viewBox, "0 0 480 270");
+      assert.ok(result.transform?.includes("170"));
+      assert.equal(result.scriptCount, 0);
+    });
+
     await runCase(caseName("prefers-reduced-motion prevents custom-element autoplay/play advancement"), async () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       const result = await page.evaluate(() => globalThis.__anim8Browser.reducedMotionCustomElement());
@@ -238,6 +310,14 @@ async function runBrowserSuite(browserName, browserType, server) {
       assert.equal(result.after, result.before);
       assert.equal(result.childrenAfterDisconnect, 0);
       await page.emulateMedia({ reducedMotion: "no-preference" });
+    });
+
+    await runCase(caseName("hidden documents suspend playback without hidden-time catch-up"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.hiddenTabPolicy());
+      assert.ok(result.beforeHide > 250);
+      assert.equal(result.whileHidden, result.atHide);
+      assert.ok(result.afterResume > result.whileHidden);
+      assert.equal(result.playing, true);
     });
 
     await runCase(caseName("multiple player instances remain isolated"), async () => {
@@ -283,8 +363,19 @@ async function runBrowserSuite(browserName, browserType, server) {
       });
     }
 
+    await runCase(caseName("React SSR markup hydrates without replacement or recoverable errors"), async () => {
+      await page.goto(`${server.origin}/tests/browser/.tmp/react-hydration.html`, { waitUntil: "load" });
+      await page.waitForFunction(() => globalThis.__anim8HydrationReady === true);
+      const result = await page.evaluate(() => globalThis.__anim8HydrationResult);
+      assert.equal(result.sameSvg, true);
+      assert.equal(result.sameObject, true);
+      assert.equal(result.svgCount, 1);
+      assert.deepEqual(result.recoverableErrors, []);
+      assert.ok(result.transform?.includes("170"), "hydrated initialTime=250 should preserve the SSR pose");
+    });
+
     assert.equal(pageErrors.length, 0, pageErrors.map(error => error.message).join("\n"));
-    const caseCount = browserName === "chromium" ? 7 : 6;
+    const caseCount = browserName === "chromium" ? 12 : 11;
     console.log(`PASS browser harness (${browserName}, ${caseCount} cases)`);
     return true;
   } finally {
@@ -299,6 +390,7 @@ async function main() {
 
   runBuilds();
   assertBuiltOutputs();
+  await prepareReactHydrationFixture();
 
   const requested = requestedBrowserNames();
   const requireAll = process.env.ANIM8_BROWSER_REQUIRE_ALL === "1";

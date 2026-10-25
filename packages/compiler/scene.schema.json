@@ -110,6 +110,13 @@
       "items": {
         "$ref": "#/$defs/interaction"
       }
+    },
+    "stateMachines": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "#/$defs/stateMachine"
+      }
     }
   },
   "$defs": {
@@ -439,14 +446,50 @@
                   "enum": [
                     "straight",
                     "curve",
-                    "orthogonal"
+                    "orthogonal",
+                    "routed"
                   ]
                 },
                 "label": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "routing": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "clearance": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 512
+                    },
+                    "bendPenalty": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  }
                 }
-              }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "required": [
+                      "routing"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "kind": {
+                        "const": "routed"
+                      }
+                    },
+                    "required": [
+                      "kind"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "required": [
@@ -504,7 +547,9 @@
             "resize",
             "draw",
             "morph",
-            "visibility"
+            "visibility",
+            "reparent",
+            "zOrder"
           ]
         },
         "target": {
@@ -521,13 +566,57 @@
           "maximum": 3600000
         },
         "easing": {
-          "enum": [
-            "linear",
-            "easeIn",
-            "easeOut",
-            "easeInOut",
-            "spring"
+          "oneOf": [
+            {
+              "enum": [
+                "linear",
+                "easeIn",
+                "easeOut",
+                "easeInOut",
+                "spring"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "x1",
+                "y1",
+                "x2",
+                "y2"
+              ],
+              "properties": {
+                "type": {
+                  "const": "cubicBezier"
+                },
+                "x1": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "y1": {
+                  "type": "number",
+                  "minimum": -10,
+                  "maximum": 10
+                },
+                "x2": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "y2": {
+                  "type": "number",
+                  "minimum": -10,
+                  "maximum": 10
+                }
+              }
+            }
           ]
+        },
+        "interrupt": {
+          "type": "boolean",
+          "description": "When true, this later action may explicitly interrupt an overlapping action on the same target/property and starts from the sampled interruption pose."
         }
       }
     },
@@ -777,6 +866,50 @@
                 },
                 "visible": {
                   "type": "boolean"
+                }
+              }
+            },
+            {
+              "required": [
+                "parentId"
+              ],
+              "properties": {
+                "type": {
+                  "const": "reparent"
+                },
+                "duration": {
+                  "const": 0
+                },
+                "parentId": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/id"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "preserveWorld": {
+                  "type": "boolean"
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "zOrder"
+                },
+                "duration": {
+                  "const": 0
+                },
+                "to": {
+                  "type": "integer",
+                  "minimum": -1000000,
+                  "maximum": 1000000
                 }
               }
             }
@@ -1071,6 +1204,102 @@
           "$ref": "#/$defs/expression"
         }
       }
+    },
+    "stateMachineGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "equals"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "equals": {
+          "$ref": "#/$defs/scalar"
+        }
+      },
+      "description": "Compiler additionally verifies guard keys are declared in scene.state."
+    },
+    "stateMachineTransition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "event",
+        "target"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "event": {
+          "$ref": "#/$defs/interactionEvent"
+        },
+        "target": {
+          "$ref": "#/$defs/id"
+        },
+        "guard": {
+          "$ref": "#/$defs/stateMachineGuard"
+        },
+        "actions": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/stateAction"
+          }
+        }
+      }
+    },
+    "stateMachineState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "transitions"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "transitions": {
+          "type": "array",
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/stateMachineTransition"
+          }
+        }
+      }
+    },
+    "stateMachine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "initial",
+        "states"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "initial": {
+          "$ref": "#/$defs/id"
+        },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/stateMachineState"
+          }
+        }
+      },
+      "description": "Compiler additionally verifies unique machine/state/transition ids, initial/target state references, event targets, guards, and state actions."
     }
   }
 }

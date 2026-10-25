@@ -129,6 +129,9 @@ importers:
 
   packages/react:
     dependencies:
+      '@anim8/a11y':
+        specifier: workspace:*
+        version: link:../a11y
       '@anim8/player':
         specifier: workspace:*
         version: link:../player
@@ -168,6 +171,9 @@ importers:
 
   packages/vue:
     dependencies:
+      '@anim8/a11y':
+        specifier: workspace:*
+        version: link:../a11y
       '@anim8/player':
         specifier: workspace:*
         version: link:../player
@@ -184,6 +190,9 @@ importers:
 
   packages/web-component:
     dependencies:
+      '@anim8/a11y':
+        specifier: workspace:*
+        version: link:../a11y
       '@anim8/core':
         specifier: workspace:*
         version: link:../core

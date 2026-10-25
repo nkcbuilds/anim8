@@ -1,3 +1,4 @@
+import { describeScene, type DescribeSceneOptions } from "@anim8/a11y";
 import {
   createElement,
   useEffect,
@@ -28,6 +29,8 @@ export interface Anim8PlayerProps
   scene: Anim8Scene;
   initialTime?: number;
   options?: PlayerOptions;
+  /** Deterministic accessible scene summary. Set false to disable the generated label. */
+  accessibility?: false | Omit<DescribeSceneOptions, "time" | "context">;
 }
 
 function normalizedInitialTime(value: number | undefined): number {
@@ -81,16 +84,24 @@ export function Anim8Player({
   scene,
   initialTime = 0,
   options,
+  accessibility,
   ...hostProps
 }: Anim8PlayerProps) {
   const { containerRef } = useAnim8Player(scene, {
     ...options,
     initialTime,
   });
-  const svg = renderSceneAt(scene, normalizedInitialTime(initialTime));
+  const time = normalizedInitialTime(initialTime);
+  const svg = renderSceneAt(scene, time);
+  const summary = accessibility === false
+    ? undefined
+    : describeScene(scene, { time, ...(accessibility ?? {}) });
+  const generatedLabel = summary?.text;
 
   return createElement("div", {
     ...hostProps,
+    ...(generatedLabel && hostProps["aria-label"] === undefined ? { "aria-label": generatedLabel } : {}),
+    ...(generatedLabel && hostProps.role === undefined ? { role: "group" } : {}),
     ref: containerRef,
     "data-anim8-player": "",
     dangerouslySetInnerHTML: { __html: svg },

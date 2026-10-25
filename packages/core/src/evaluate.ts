@@ -1,12 +1,54 @@
 import { defaultCamera } from "./defaults.js";
 import { ease, lerp, lerpColor } from "./easing.js";
-import { quadraticPoint } from "./geometry.js";
+import { decomposeMatrix, identityMatrix, invertMatrix, multiply, quadraticPoint, worldMatrix, worldOpacity } from "./geometry.js";
 import { canonicalMorphPathToString, interpolateMorphPath, morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
 import { evaluateExpression } from "./expression.js";
 import type { Action, Binding, CameraAction, CameraState, DrawableObject, EvaluatedScene, EvaluationContext, PointValue, SceneDocument, ScalarValue } from "./types.js";
 
 const clone = <T>(value: T): T => structuredClone(value);
 type ObjectAction = Exclude<Action, CameraAction>;
+
+function actionProperties(action: Action): readonly string[] {
+  switch (action.type) {
+    case "move":
+    case "followPath": return ["x", "y"];
+    case "rotate": return ["rotation"];
+    case "scale": return ["scaleX", "scaleY"];
+    case "opacity": return ["opacity"];
+    case "fill": return ["fill"];
+    case "stroke": return ["stroke"];
+    case "resize": return ["width", "height"];
+    case "draw": return ["drawProgress"];
+    case "morph": return ["d"];
+    case "visibility": return ["visible"];
+    case "reparent": return ["parentId"];
+    case "zOrder": return ["z"];
+    case "camera": return [
+      ...(action.to.x !== undefined ? ["camera.x"] : []),
+      ...(action.to.y !== undefined ? ["camera.y"] : []),
+      ...(action.to.zoom !== undefined ? ["camera.zoom"] : []),
+    ];
+  }
+}
+
+function sameActionTarget(a: Action, b: Action): boolean {
+  if (a.type === "camera" || b.type === "camera") return a.type === "camera" && b.type === "camera";
+  return a.target === b.target;
+}
+
+function interruptionTime(action: Action, actions: readonly Action[]): number | undefined {
+  const end = action.start + action.duration;
+  let interruption: number | undefined;
+  const properties = actionProperties(action);
+
+  for (const candidate of actions) {
+    if (!candidate.interrupt || candidate.start <= action.start || candidate.start >= end) continue;
+    if (!sameActionTarget(action, candidate)) continue;
+    if (!actionProperties(candidate).some(property => properties.includes(property))) continue;
+    if (interruption === undefined || candidate.start < interruption) interruption = candidate.start;
+  }
+  return interruption;
+}
 
 export function sceneDuration(scene: SceneDocument): number {
   return scene.timeline.reduce((max, action) => Math.max(max, action.start + action.duration), 0);
@@ -54,6 +96,65 @@ function applyAction(state: Map<string, DrawableObject>, action: ObjectAction, t
 
   if (action.type === "visibility") {
     if (time >= action.start) target.visible = action.visible;
+    return;
+  }
+
+  if (action.type === "zOrder") {
+    if (time >= action.start) target.z = action.to;
+    return;
+  }
+
+  if (action.type === "reparent") {
+    if (time < action.start) return;
+    const nextParent = action.parentId === null ? undefined : state.get(action.parentId);
+    if (action.parentId !== null && (!nextParent || nextParent.type !== "group")) return;
+
+    // Guard against dynamic cycles even if an untrusted caller bypasses validation.
+    let ancestor = nextParent;
+    const seen = new Set<string>();
+    while (ancestor) {
+      if (ancestor.id === target.id || seen.has(ancestor.id)) return;
+      seen.add(ancestor.id);
+      ancestor = ancestor.parentId ? state.get(ancestor.parentId) : undefined;
+    }
+
+    const preserveWorld = action.preserveWorld !== false;
+    const oldWorld = preserveWorld ? worldMatrix(target, state) : undefined;
+    const oldWorldOpacity = preserveWorld ? worldOpacity(target, state) : undefined;
+
+    if (target.parentId) {
+      const oldParent = state.get(target.parentId);
+      if (oldParent?.type === "group") {
+        oldParent.children = oldParent.children.filter(id => id !== target.id);
+      }
+    }
+
+    if (action.parentId === null) {
+      delete target.parentId;
+    } else {
+      target.parentId = action.parentId;
+      const group = state.get(action.parentId);
+      if (group?.type === "group" && !group.children.includes(target.id)) {
+        group.children = [...group.children, target.id];
+      }
+    }
+
+    if (preserveWorld && oldWorld) {
+      const parentMatrix = nextParent ? worldMatrix(nextParent, state) : identityMatrix();
+      const inverseParent = invertMatrix(parentMatrix);
+      if (inverseParent) {
+        const local = decomposeMatrix(multiply(inverseParent, oldWorld));
+        const opacity = target.transform.opacity;
+        target.transform = { ...local, opacity };
+      }
+
+      if (oldWorldOpacity !== undefined) {
+        const parentOpacity = nextParent ? worldOpacity(nextParent, state) : 1;
+        if (parentOpacity > Number.EPSILON) {
+          target.transform.opacity = oldWorldOpacity / parentOpacity;
+        }
+      }
+    }
     return;
   }
 
@@ -181,11 +282,19 @@ export function evaluate(scene: SceneDocument, time: number, context: Evaluation
   const clamped = Math.max(0, Math.min(time, duration));
   const state = new Map(scene.objects.map(object => [object.id, clone(object)]));
   const camera = clone(scene.scene.camera ?? defaultCamera());
-  const actions = [...scene.timeline].sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+  const actions = scene.timeline
+    .map((action, index) => ({ action, index }))
+    .sort((a, b) => a.action.start - b.action.start || a.index - b.index)
+    .map(entry => entry.action);
 
   for (const action of actions) {
     if (clamped < action.start) continue;
-    const actionTime = Math.min(clamped, action.start + action.duration);
+    const interruptedAt = interruptionTime(action, actions);
+    const actionTime = Math.min(
+      clamped,
+      action.start + action.duration,
+      interruptedAt ?? Number.POSITIVE_INFINITY,
+    );
     if (action.type === "camera") applyCameraAction(camera, action, actionTime);
     else applyAction(state, action, actionTime);
   }

@@ -1,4 +1,4 @@
-import { anchorPoint, worldMatrix, worldOpacity, worldVisible, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument } from "@anim8/core";
+import { anchorPoint, routeConnector, worldMatrix, worldOpacity, worldVisible, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument } from "@anim8/core";
 import { evaluate } from "@anim8/core";
 
 const esc = (value: string): string => value.replace(/[&<>"']/g, char => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[char]!));
@@ -58,6 +58,13 @@ function connectorPath(connector: ConnectorObject, objects: ReadonlyMap<string, 
   if (!fromObject || !toObject) return "";
   const from = anchorPoint(fromObject, connector.from.anchor, objects);
   const to = anchorPoint(toObject, connector.to.anchor, objects);
+  if (connector.kind === "routed") {
+    const routed = routeConnector(connector, objects);
+    if (routed.length < 2) return "";
+    return routed.map((point, index) =>
+      `${index === 0 ? "M" : "L"} ${formatNumber(point.x)} ${formatNumber(point.y)}`
+    ).join(" ");
+  }
   if (connector.kind === "curve") {
     const mx = (from.x + to.x) / 2;
     return `M ${formatNumber(from.x)} ${formatNumber(from.y)} C ${formatNumber(mx)} ${formatNumber(from.y)}, ${formatNumber(mx)} ${formatNumber(to.y)}, ${formatNumber(to.x)} ${formatNumber(to.y)}`;
@@ -340,6 +347,90 @@ function createDefs(document: Document): SVGDefsElement {
   return defs;
 }
 
+function adoptObjectRecord(object: MountedObject, element: Element): ObjectDomRecord | undefined {
+  const tag = element.tagName.toLowerCase();
+  switch (object.type) {
+    case "rect":
+    case "circle":
+    case "ellipse": {
+      if (tag !== "g") return undefined;
+      const shapeTag = object.type;
+      const shape = Array.from(element.children).find(child => child.tagName.toLowerCase() === shapeTag);
+      if (!shape) return undefined;
+      const label = Array.from(element.children).find(child => child.tagName.toLowerCase() === "text");
+      return {
+        type: object.type,
+        element: element as SVGElement,
+        shape: shape as SVGElement,
+        ...(label ? { label: label as SVGTextElement } : {}),
+      };
+    }
+    case "polygon":
+    case "polyline":
+    case "text":
+    case "line":
+    case "path":
+    case "image":
+      if (tag !== object.type) return undefined;
+      return { type: object.type, element: element as SVGElement };
+    case "connector":
+      if (tag !== "path") return undefined;
+      return { type: object.type, element: element as SVGElement };
+  }
+}
+
+function findHydratableSvg(container: Element, frame: EvaluatedScene): {
+  svg: SVGSVGElement;
+  defs: SVGDefsElement;
+  world: SVGGElement;
+  background?: SVGRectElement;
+  records: Map<string, ObjectDomRecord>;
+} | undefined {
+  // Non-browser DOM hosts may support replaceChildren but not children.
+  if (!container.children || container.children.length !== 1) return undefined;
+  const candidate = container.firstElementChild;
+  if (!candidate || candidate.namespaceURI !== SVG_NS || candidate.tagName.toLowerCase() !== "svg") return undefined;
+
+  const svg = candidate as SVGSVGElement;
+  const world = Array.from(svg.children).find(
+    child => child.tagName.toLowerCase() === "g" && child.getAttribute("data-anim8-camera") === "world",
+  ) as SVGGElement | undefined;
+  if (!world) return undefined;
+
+  let defs = Array.from(svg.children).find(child => child.tagName.toLowerCase() === "defs") as SVGDefsElement | undefined;
+  if (!defs) {
+    const document = container.ownerDocument;
+    if (!document?.createElementNS) return undefined;
+    defs = createDefs(document);
+    svg.insertBefore(defs, svg.firstChild);
+  }
+
+  const objects = new Map(frame.objects.map(object => [object.id, object]));
+  const records = new Map<string, ObjectDomRecord>();
+  for (const child of Array.from(world.children)) {
+    const id = child.getAttribute("data-anim8-id");
+    if (!id) continue;
+    const object = objects.get(id);
+    if (!object || object.type === "group") {
+      child.remove();
+      continue;
+    }
+    const record = adoptObjectRecord(object, child);
+    if (record) records.set(id, record);
+    else child.remove();
+  }
+
+  const background = Array.from(svg.children).find(
+    child =>
+      child !== defs &&
+      child !== world &&
+      child.tagName.toLowerCase() === "rect" &&
+      !child.hasAttribute("data-anim8-id"),
+  ) as SVGRectElement | undefined;
+
+  return { svg, defs, world, ...(background ? { background } : {}), records };
+}
+
 export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
   const document = container.ownerDocument ?? globalThis.document;
 
@@ -358,19 +449,23 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
     };
   }
 
-  const svg = createSvgElement(document, "svg");
+  const hydrated = findHydratableSvg(container, frame);
+  const svg = hydrated?.svg ?? createSvgElement(document, "svg");
   setAttribute(svg, "xmlns", SVG_NS);
   setAttribute(svg, "role", "img");
 
-  const defs = createDefs(document);
-  svg.appendChild(defs);
-  const world = createSvgElement(document, "g");
+  const defs = hydrated?.defs ?? createDefs(document);
+  const world = hydrated?.world ?? createSvgElement(document, "g");
   setAttribute(world, "data-anim8-camera", "world");
-  svg.appendChild(world);
-  container.replaceChildren(svg);
 
-  const records = new Map<string, ObjectDomRecord>();
-  let background: SVGRectElement | undefined;
+  if (!hydrated) {
+    svg.appendChild(defs);
+    svg.appendChild(world);
+    container.replaceChildren(svg);
+  }
+
+  const records = hydrated?.records ?? new Map<string, ObjectDomRecord>();
+  let background: SVGRectElement | undefined = hydrated?.background;
 
   const update = (next: EvaluatedScene): void => {
     setAttribute(svg, "viewBox", `0 0 ${formatNumber(next.scene.width)} ${formatNumber(next.scene.height)}`);

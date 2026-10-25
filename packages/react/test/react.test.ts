@@ -118,4 +118,26 @@ describe("@anim8/react", () => {
     const html = renderToStaticMarkup(createElement(Probe));
     expect(html).toBe('<div data-controller="none"></div>');
   });
+  it("generates an SSR-safe accessible label and preserves an explicit host label", () => {
+    const generated = renderToStaticMarkup(createElement(Anim8Player, { scene }));
+    expect(generated).toContain('role="group"');
+    expect(generated).toContain('aria-label="Visible objects: &lt;safe&gt;."');
+
+    const explicit = renderToStaticMarkup(createElement(Anim8Player, {
+      scene,
+      "aria-label": "Custom animation description",
+    }));
+    expect(explicit).toContain('aria-label="Custom animation description"');
+    expect(explicit).not.toContain('aria-label="Visible objects:');
+  });
+
+  it("can disable generated accessibility metadata", () => {
+    const html = renderToStaticMarkup(createElement(Anim8Player, {
+      scene,
+      accessibility: false,
+    }));
+    expect(html).not.toContain('aria-label=');
+    expect(html).not.toContain('role="group"');
+  });
+
 });

@@ -565,7 +565,7 @@ function parseConnect(state: ParseState, tokens: Token[], line: number): void {
   if (!requireKnownObject(state, from, line, fromToken.column)) return;
   if (!requireKnownObject(state, to, line, toToken.column)) return;
 
-  let kind: "straight" | "curve" | "orthogonal" = "straight";
+  let kind: "straight" | "curve" | "orthogonal" | "routed" = "straight";
   let label: string | undefined;
   let index = 4;
 
@@ -581,12 +581,12 @@ function parseConnect(state: ParseState, tokens: Token[], line: number): void {
       if (!kindToken) return;
       if (
         kindToken.quoted
-        || (kindToken.value !== "straight" && kindToken.value !== "curve" && kindToken.value !== "orthogonal")
+        || (kindToken.value !== "straight" && kindToken.value !== "curve" && kindToken.value !== "orthogonal" && kindToken.value !== "routed")
       ) {
         diagnostic(
           state,
           "INVALID_CONNECTOR_KIND",
-          "Connector kind must be 'straight', 'curve', or 'orthogonal'.",
+          "Connector kind must be 'straight', 'curve', 'orthogonal', or 'routed'.",
           line,
           kindToken.column,
         );

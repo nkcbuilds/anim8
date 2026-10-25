@@ -111,11 +111,20 @@ export interface GroupObject extends BaseObject {
   children: string[];
 }
 
+export interface ConnectorRouting {
+  /** World-space clearance around obstacles. */
+  clearance?: number;
+  /** Extra cost applied when a Manhattan route changes direction. */
+  bendPenalty?: number;
+}
+
 export interface ConnectorObject extends BaseObject {
   type: "connector";
   from: AnchorRef;
   to: AnchorRef;
-  kind: "straight" | "curve" | "orthogonal";
+  kind: "straight" | "curve" | "orthogonal" | "routed";
+  /** Optional deterministic routing parameters used by routed connectors. */
+  routing?: ConnectorRouting;
   label?: string;
 }
 
@@ -151,12 +160,28 @@ export interface AnchorRef {
 
 export type EasingName = "linear" | "easeIn" | "easeOut" | "easeInOut" | "spring";
 
+export interface CubicBezierEasing {
+  type: "cubicBezier";
+  /** CSS-compatible x control points must remain in [0, 1]. */
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export type Easing = EasingName | CubicBezierEasing;
+
 export interface ActionBase {
   id: string;
   target: string;
   start: number;
   duration: number;
-  easing?: EasingName;
+  easing?: Easing;
+  /**
+   * Explicitly retargets an already-active conflicting action from its sampled
+   * pose at this action's start time. Without this flag, overlaps are invalid.
+   */
+  interrupt?: boolean;
 }
 
 export interface MoveAction extends ActionBase {
@@ -222,12 +247,28 @@ export interface VisibilityAction extends ActionBase {
   visible: boolean;
 }
 
+/** Instant structural change to object group/container membership. */
+export interface ReparentAction extends ActionBase {
+  type: "reparent";
+  /** null moves the object to the scene root. */
+  parentId: string | null;
+  /** Preserve the evaluated world pose while changing coordinate spaces. */
+  preserveWorld?: boolean;
+}
+
+/** Instant structural change to object layer ordering. */
+export interface ZOrderAction extends ActionBase {
+  type: "zOrder";
+  to: number;
+}
+
 export interface CameraAction {
   id: string;
   type: "camera";
   start: number;
   duration: number;
-  easing?: EasingName;
+  easing?: Easing;
+  interrupt?: boolean;
   /** Absolute camera values. Omitted fields retain their current value. */
   to: CameraTarget;
 }
@@ -244,7 +285,9 @@ export type Action =
   | ResizeAction
   | DrawAction
   | MorphAction
-  | VisibilityAction;
+  | VisibilityAction
+  | ReparentAction
+  | ZOrderAction;
 
 export interface Marker {
   id: string;
@@ -269,6 +312,36 @@ export interface Interaction {
   event: InteractionTrigger;
   actions: StateAction[];
 }
+
+export interface StateMachineGuard {
+  /** Declared scene.state key compared with strict scalar equality. */
+  key: string;
+  equals: ScalarValue;
+}
+
+export interface StateMachineTransition {
+  id: string;
+  event: InteractionTrigger;
+  /** Destination state id within the containing state machine. */
+  target: string;
+  guard?: StateMachineGuard;
+  /** Optional bounded scene-state mutations applied when the transition fires. */
+  actions?: StateAction[];
+}
+
+export interface StateMachineState {
+  id: string;
+  transitions: StateMachineTransition[];
+}
+
+export interface StateMachine {
+  id: string;
+  initial: string;
+  states: StateMachineState[];
+}
+
+/** Explicit runtime state for serializable state machines. */
+export type StateMachineSnapshot = Record<string, string>;
 
 export type Expression =
   | { kind: "literal"; value: ScalarValue }
@@ -298,6 +371,7 @@ export interface SceneDocument {
   state?: Record<string, ScalarValue>;
   bindings?: Binding[];
   interactions?: Interaction[];
+  stateMachines?: StateMachine[];
   markers?: Marker[];
 }
 

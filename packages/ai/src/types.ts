@@ -10,6 +10,13 @@ export type CapabilityTag =
   | "sketch-theme"
   | "visibility"
   | "multi-object"
+  | "state"
+  | "reactivity"
+  | "camera"
+  | "paths"
+  | "morph"
+  | "layout"
+  | "state-machine"
   | "safety";
 
 export interface BenchmarkPromptCase {
