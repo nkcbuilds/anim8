@@ -165,4 +165,41 @@ describe("player declarative interactions", () => {
 
     controller.destroy();
   });
+
+  it("dispatches state-machine events and exposes the explicit machine snapshot", () => {
+    const container = new FakeElement();
+    const doc = scene();
+    doc.stateMachines = [{
+      id: "flow",
+      initial: "idle",
+      states: [
+        {
+          id: "idle",
+          transitions: [{
+            id: "start",
+            event: { type: "custom", name: "machine-advance" },
+            target: "running",
+            actions: [{ type: "increment", key: "count", by: 7 }],
+          }],
+        },
+        { id: "running", transitions: [] },
+      ],
+    }];
+
+    const frames: EvaluatedScene[] = [];
+    const controller = mountPlayer(container as unknown as Element, doc, {
+      onFrame: frame => frames.push(frame),
+    });
+
+    expect(controller.getMachineState("flow")).toBe("idle");
+    controller.dispatch("machine-advance");
+    expect(controller.getMachineState("flow")).toBe("running");
+    expect(frames.at(-1)?.objects[0]?.transform.x).toBe(7);
+
+    controller.dispatch("machine-advance");
+    expect(controller.getMachineState("flow")).toBe("running");
+    expect(frames.at(-1)?.objects[0]?.transform.x).toBe(7);
+
+    controller.destroy();
+  });
 });
