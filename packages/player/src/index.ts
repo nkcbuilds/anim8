@@ -37,6 +37,7 @@ export interface PlayerController {
   previousStep(): void;
   getTime(): number;
   getDuration(): number;
+  getState(): Readonly<Record<string, ScalarValue>>;
   getMachineState(id: string): string | undefined;
   isPlaying(): boolean;
   destroy(): void;
@@ -216,6 +217,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
     },
     getTime: () => time,
     getDuration: () => duration,
+    getState: () => ({ ...localState }),
     getMachineState: id => localMachines[id],
     isPlaying: () => playing,
     destroy: () => {
@@ -253,6 +255,7 @@ export class Anim8PlayerElement extends HTMLElementBase {
   setSpeed(speed: number): void { this.#controller?.setSpeed(speed); }
   setInput(name: string, value: ScalarValue): void { this.#controller?.setInput(name, value); }
   dispatch(name: string): void { this.#controller?.dispatch(name); }
+  getState(): Readonly<Record<string, ScalarValue>> { return this.#controller?.getState() ?? {}; }
   getMachineState(id: string): string | undefined { return this.#controller?.getMachineState(id); }
 
   disconnectedCallback(): void { this.#controller?.destroy(); }
