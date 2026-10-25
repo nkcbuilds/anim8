@@ -227,7 +227,7 @@ describe("authoring", () => {
     const a = s.box("A", { id: "a" });
     const b = s.box("B", { id: "b" });
 
-    s.at(100, a.rotate(10, { duration: 100 }));
+    s.atTime(100, a.rotate(10, { duration: 100 }));
     s.after(50, b.rotate(20, { duration: 100 }));
     s.stagger(
       50,
@@ -264,7 +264,7 @@ describe("authoring", () => {
   it("retargets and cancels actions while preserving sampled poses", () => {
     const retargeted = scene();
     const node = retargeted.box("R", { id: "node", x: 0, y: 0 });
-    const [moveId] = retargeted.at(0, node.moveTo({ x: 100, y: 0 }, { duration: 1000, easing: "linear" }));
+    const [moveId] = retargeted.atTime(0, node.moveTo({ x: 100, y: 0 }, { duration: 1000, easing: "linear" }));
     expect(moveId).toBeDefined();
     retargeted.retarget(
       moveId!,
@@ -275,7 +275,7 @@ describe("authoring", () => {
 
     const cancelled = scene();
     const cancelledNode = cancelled.box("C", { id: "node", x: 0, y: 0 });
-    const [cancelId] = cancelled.at(0, cancelledNode.moveTo({ x: 100, y: 0 }, { duration: 1000, easing: "linear" }));
+    const [cancelId] = cancelled.atTime(0, cancelledNode.moveTo({ x: 100, y: 0 }, { duration: 1000, easing: "linear" }));
     expect(cancelId).toBeDefined();
     cancelled.cancel(cancelId!, 500);
     expect(evaluate(cancelled.toJSON(), 500).objects[0]?.transform.x).toBeCloseTo(50, 8);
