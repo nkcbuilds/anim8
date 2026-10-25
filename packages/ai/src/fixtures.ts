@@ -97,6 +97,106 @@ export const BENCHMARK_CASES: readonly BenchmarkPromptCase[] = [
     prompt: "Create three rectangular nodes A, B, and C in a row. Connect A to B and B to C with separate connectors using valid endpoint object ids and side anchors.",
     capabilityTags: ["geometry", "text", "connectors", "multi-object"],
   },
+  {
+    id: "routed-connector-obstacle",
+    prompt: "Create two rectangular endpoint nodes with a third rectangular obstacle between them. Connect the endpoints using a routed connector with finite clearance so the renderer can deterministically route around the obstacle.",
+    capabilityTags: ["geometry", "connectors", "layout", "multi-object"],
+  },
+  {
+    id: "camera-pan-zoom",
+    prompt: "Create two labeled nodes far apart in an 800 by 450 scene. Add a scene-level camera action that pans and zooms over 900 milliseconds without declaring an object target.",
+    capabilityTags: ["geometry", "camera", "motion", "timing"],
+  },
+  {
+    id: "follow-polyline-path",
+    prompt: "Create one labeled card and animate it for 1000 milliseconds with a followPath action using at least four explicit finite polyline points.",
+    capabilityTags: ["geometry", "motion", "timing", "paths"],
+  },
+  {
+    id: "draw-path-progress",
+    prompt: "Create a visible open SVG path with drawProgress initially zero, then animate a draw action from zero to one over 800 milliseconds.",
+    capabilityTags: ["geometry", "paths", "motion", "timing"],
+  },
+  {
+    id: "compatible-path-morph",
+    prompt: "Create one path object and morph it over 700 milliseconds to another compatible path with the same subpath and segment topology. Use simple cubic-compatible geometry rather than arbitrary unrelated SVG paths.",
+    capabilityTags: ["geometry", "paths", "morph", "motion"],
+  },
+  {
+    id: "ellipse-polygon-polyline",
+    prompt: "Create one ellipse, one triangle-like polygon with explicit points, and one open polyline in the same scene. Give every object a unique id and keep the timeline empty.",
+    capabilityTags: ["geometry", "multi-object"],
+  },
+  {
+    id: "nested-group-transform",
+    prompt: "Create an outer group containing an inner group, with a rectangular card inside the inner group. Use correct parentId and children references and give the groups non-zero transforms.",
+    capabilityTags: ["geometry", "groups", "multi-object"],
+  },
+  {
+    id: "state-bound-position",
+    prompt: "Create a scene state number named index and bind one object's x position to a constrained expression that reads state.index. Do not serialize JavaScript functions.",
+    capabilityTags: ["geometry", "state", "reactivity"],
+  },
+  {
+    id: "click-toggle-state",
+    prompt: "Create a boolean state key named active and one rectangular node. Add a declarative click interaction targeting that node which toggles active using a supported state action.",
+    capabilityTags: ["geometry", "state", "reactivity"],
+  },
+  {
+    id: "custom-event-increment",
+    prompt: "Create a numeric state key named count and a custom named event interaction called advance which increments count by one. Keep the interaction fully serializable.",
+    capabilityTags: ["state", "reactivity"],
+  },
+  {
+    id: "two-state-machine",
+    prompt: "Create a serializable state machine named flow with initial state idle and a custom advance event that transitions idle to running while setting a declared boolean state key enabled to true.",
+    capabilityTags: ["state", "reactivity", "state-machine"],
+  },
+  {
+    id: "guarded-state-machine",
+    prompt: "Create a state machine transition that fires on a custom finish event only when a declared scalar state key phase equals ready, then transitions to done using a valid scalar-equality guard.",
+    capabilityTags: ["state", "reactivity", "state-machine"],
+  },
+  {
+    id: "camera-and-object-concurrency",
+    prompt: "Create a card that moves for 800 milliseconds while a camera pan action runs over the same interval. The object and camera actions may overlap because they write different targets.",
+    capabilityTags: ["geometry", "motion", "timing", "camera"],
+  },
+  {
+    id: "explicit-interruption",
+    prompt: "Create one card with a 1000 millisecond move action, then at 500 milliseconds start a second move action on the same card with interrupt true so it retargets deterministically instead of creating an invalid implicit overlap.",
+    capabilityTags: ["geometry", "motion", "timing"],
+  },
+  {
+    id: "custom-cubic-bezier",
+    prompt: "Create one card that moves over 600 milliseconds using a serializable cubicBezier easing object with x control points inside zero to one and finite y control points.",
+    capabilityTags: ["geometry", "motion", "timing"],
+  },
+  {
+    id: "database-request-flow",
+    prompt: "Create labeled Client, API, and Database nodes with connectors Client to API and API to Database. Animate a small Query object from the API toward the Database in a later timeline stage.",
+    capabilityTags: ["geometry", "text", "connectors", "motion", "timing", "multi-object"],
+  },
+  {
+    id: "array-pointer-flow",
+    prompt: "Create four adjacent labeled array-cell rectangles and a separate pointer label. Animate the pointer between at least two cell positions using non-overlapping move actions.",
+    capabilityTags: ["geometry", "text", "motion", "timing", "multi-object"],
+  },
+  {
+    id: "graph-traversal-highlight",
+    prompt: "Create four graph nodes with valid connectors and a multi-stage timeline that changes node fill colors one after another to represent traversal without conflicting overlapping writes.",
+    capabilityTags: ["geometry", "connectors", "styling", "timing", "multi-object"],
+  },
+  {
+    id: "tree-parent-child-diagram",
+    prompt: "Create a small binary-tree diagram with one root and two child nodes, connected using valid node ids and anchors. Place the children below the root and keep stable ids.",
+    capabilityTags: ["geometry", "connectors", "layout", "multi-object"],
+  },
+  {
+    id: "reactive-visibility",
+    prompt: "Create a declared boolean state key visibleFlag and bind an object's opacity to a constrained expression derived from that state so the scene has serializable reactive visual behavior.",
+    capabilityTags: ["geometry", "state", "reactivity", "visibility"],
+  },
 ] as const;
 
 export function getBenchmarkCase(id: string): BenchmarkPromptCase | undefined {
