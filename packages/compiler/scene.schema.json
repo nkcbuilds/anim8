@@ -547,7 +547,9 @@
             "resize",
             "draw",
             "morph",
-            "visibility"
+            "visibility",
+            "reparent",
+            "zOrder"
           ]
         },
         "target": {
@@ -864,6 +866,50 @@
                 },
                 "visible": {
                   "type": "boolean"
+                }
+              }
+            },
+            {
+              "required": [
+                "parentId"
+              ],
+              "properties": {
+                "type": {
+                  "const": "reparent"
+                },
+                "duration": {
+                  "const": 0
+                },
+                "parentId": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/id"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "preserveWorld": {
+                  "type": "boolean"
+                }
+              }
+            },
+            {
+              "required": [
+                "to"
+              ],
+              "properties": {
+                "type": {
+                  "const": "zOrder"
+                },
+                "duration": {
+                  "const": 0
+                },
+                "to": {
+                  "type": "integer",
+                  "minimum": -1000000,
+                  "maximum": 1000000
                 }
               }
             }
