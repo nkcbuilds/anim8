@@ -1178,6 +1178,38 @@ function parseStateMachine(
     return null;
   }
 
+  const rawStateIds = new Set(
+    value.states.flatMap(state =>
+      isRecord(state) && typeof state.id === "string" && /^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(state.id)
+        ? [state.id]
+        : []
+    ),
+  );
+
+  if (initial && !rawStateIds.has(initial)) {
+    diagnostic(
+      diagnostics,
+      "UNKNOWN_STATE_MACHINE_INITIAL",
+      `${path}.initial`,
+      `Initial state '${initial}' does not exist in machine '${id ?? "<invalid>"}'.`,
+    );
+  }
+
+  value.states.forEach((rawState, stateIndex) => {
+    if (!isRecord(rawState) || !Array.isArray(rawState.transitions)) return;
+    rawState.transitions.forEach((rawTransition, transitionIndex) => {
+      if (!isRecord(rawTransition) || typeof rawTransition.target !== "string") return;
+      if (!/^[A-Za-z_][A-Za-z0-9_.:-]*$/.test(rawTransition.target)) return;
+      if (rawStateIds.has(rawTransition.target)) return;
+      diagnostic(
+        diagnostics,
+        "UNKNOWN_STATE_MACHINE_STATE",
+        `${path}.states[${stateIndex}].transitions[${transitionIndex}].target`,
+        `Target state '${rawTransition.target}' does not exist in machine '${id ?? "<invalid>"}'.`,
+      );
+    });
+  });
+
   const states = value.states
     .map((state, stateIndex) =>
       parseStateMachineState(state, `${path}.states[${stateIndex}]`, declaredState, objects, diagnostics)
@@ -1209,28 +1241,6 @@ function parseStateMachine(
         );
       }
       transitionIds.add(transition.id);
-    });
-  });
-
-  if (!stateIds.has(initial)) {
-    diagnostic(
-      diagnostics,
-      "UNKNOWN_STATE_MACHINE_INITIAL",
-      `${path}.initial`,
-      `Initial state '${initial}' does not exist in machine '${id}'.`,
-    );
-  }
-
-  states.forEach((state, stateIndex) => {
-    state.transitions.forEach((transition, transitionIndex) => {
-      if (!stateIds.has(transition.target)) {
-        diagnostic(
-          diagnostics,
-          "UNKNOWN_STATE_MACHINE_STATE",
-          `${path}.states[${stateIndex}].transitions[${transitionIndex}].target`,
-          `Target state '${transition.target}' does not exist in machine '${id}'.`,
-        );
-      }
     });
   });
 
