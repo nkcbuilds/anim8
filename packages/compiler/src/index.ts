@@ -2178,3 +2178,5 @@ export function compileJson(source: string): CompileResult {
     };
   }
 }
+
+export * from "./migrations.js";
