@@ -462,11 +462,11 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  connect(from: NodeHandle, to: NodeHandle, options: { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; label?: string } = {}): NodeHandle {
+  connect(from: NodeHandle, to: NodeHandle, options: { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string } = {}): NodeHandle {
     const id = this.next("connector");
     this.objects.push({
       id, type: "connector", from: { objectId: from.id, ...(options.from ? { anchor: options.from } : {}) }, to: { objectId: to.id, ...(options.to ? { anchor: options.to } : {}) },
-      kind: options.kind ?? "straight", ...(options.label ? { label: options.label } : {}),
+      kind: options.kind ?? "straight", ...(options.routing ? { routing: structuredClone(options.routing) } : {}), ...(options.label ? { label: options.label } : {}),
       transform: defaultTransform(), style: { ...defaultStyle(), fill: "none" }, visible: true, z: this.objects.length,
     });
     return new NodeHandle(id, this);
