@@ -321,6 +321,52 @@ async function staticFallback() {
   };
 }
 
+async function hiddenTabPolicy() {
+  reset();
+  const container = host("hidden-tab-host");
+  const controller = mountPlayer(container, motionScene(), { autoplay: false });
+
+  let hidden = false;
+  Object.defineProperty(document, "hidden", {
+    configurable: true,
+    get: () => hidden,
+  });
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => hidden ? "hidden" : "visible",
+  });
+
+  try {
+    controller.seek(250);
+    controller.play();
+    await new Promise(resolve => setTimeout(resolve, 80));
+    const beforeHide = controller.getTime();
+
+    hidden = true;
+    document.dispatchEvent(new Event("visibilitychange"));
+    const atHide = controller.getTime();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const whileHidden = controller.getTime();
+
+    hidden = false;
+    document.dispatchEvent(new Event("visibilitychange"));
+    await new Promise(resolve => setTimeout(resolve, 80));
+    const afterResume = controller.getTime();
+
+    return {
+      beforeHide,
+      atHide,
+      whileHidden,
+      afterResume,
+      playing: controller.isPlaying(),
+    };
+  } finally {
+    controller.destroy();
+    delete document.hidden;
+    delete document.visibilityState;
+  }
+}
+
 async function multipleInstances() {
   reset();
   const firstHost = host("player-one");
@@ -419,6 +465,7 @@ window.__anim8Browser = {
   routedConnector,
   responsiveSizing,
   staticFallback,
+  hiddenTabPolicy,
   multipleInstances,
   mountUnmount,
   reducedMotionCustomElement,
