@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scene } from "../src/index.js";
+import { scene, stateAction } from "../src/index.js";
 
 describe("authoring", () => {
   it("builds compact swap semantics into deterministic primitive actions", () => {
@@ -186,4 +186,39 @@ describe("authoring", () => {
     expect(() => box.pulse({ scale: 0 })).toThrow("Pulse scale");
     expect(() => box.shake({ distance: 0 })).toThrow("Shake distance");
   });
+
+  it("authors serializable interactions and state machines without imperative callbacks", () => {
+    const s = scene();
+    const node = s.box("", { id: "node" });
+    s.state("count", 0);
+    node.onClick(stateAction.increment("count"));
+    s.on("reset", stateAction.set("count", 0));
+    s.stateMachine({
+      id: "flow",
+      initial: "idle",
+      states: [
+        {
+          id: "idle",
+          transitions: [{
+            id: "advance",
+            event: { type: "custom", name: "advance" },
+            target: "done",
+            actions: [stateAction.increment("count", 2)],
+          }],
+        },
+        { id: "done", transitions: [] },
+      ],
+    });
+
+    const doc = s.toJSON();
+    expect(doc.interactions).toEqual([
+      expect.objectContaining({ event: { type: "click", target: "node" } }),
+      expect.objectContaining({ event: { type: "custom", name: "reset" } }),
+    ]);
+    expect(doc.stateMachines?.[0]).toEqual(expect.objectContaining({
+      id: "flow",
+      initial: "idle",
+    }));
+  });
+
 });
