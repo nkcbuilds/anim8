@@ -71,3 +71,37 @@ controller.dispatch("reset");
 ```
 
 Only keys declared in `scene.state` can be changed. State actions are bounded, deterministic data operations (`set`, `toggle`, and `increment`); they are not callbacks or executable code.
+
+
+## Serializable state machines
+
+For multi-step interactive behavior, use bounded state machines rather than callbacks:
+
+```json
+{
+  "state": { "count": 0 },
+  "stateMachines": [
+    {
+      "id": "flow",
+      "initial": "idle",
+      "states": [
+        {
+          "id": "idle",
+          "transitions": [
+            {
+              "id": "start",
+              "event": { "type": "custom", "name": "advance" },
+              "target": "running",
+              "guard": { "key": "count", "equals": 0 },
+              "actions": [{ "type": "increment", "key": "count", "by": 1 }]
+            }
+          ]
+        },
+        { "id": "running", "transitions": [] }
+      ]
+    }
+  ]
+}
+```
+
+Machine state is explicit player state, not hidden timeline state. `controller.getMachineState("flow")` inspects the current machine state and `controller.getState()` returns a copy of the current scalar state. Dispatching the same event from the same scalar/machine snapshot produces the same result.
