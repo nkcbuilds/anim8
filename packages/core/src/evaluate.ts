@@ -221,7 +221,10 @@ export function evaluate(scene: SceneDocument, time: number, context: Evaluation
   const clamped = Math.max(0, Math.min(time, duration));
   const state = new Map(scene.objects.map(object => [object.id, clone(object)]));
   const camera = clone(scene.scene.camera ?? defaultCamera());
-  const actions = [...scene.timeline].sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+  const actions = scene.timeline
+    .map((action, index) => ({ action, index }))
+    .sort((a, b) => a.action.start - b.action.start || a.index - b.index)
+    .map(entry => entry.action);
 
   for (const action of actions) {
     if (clamped < action.start) continue;
