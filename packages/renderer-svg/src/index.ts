@@ -1,4 +1,4 @@
-import { anchorPoint, worldMatrix, worldOpacity, worldVisible, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument } from "@anim8/core";
+import { anchorPoint, routeConnector, worldMatrix, worldOpacity, worldVisible, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument } from "@anim8/core";
 import { evaluate } from "@anim8/core";
 
 const esc = (value: string): string => value.replace(/[&<>"']/g, char => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[char]!));
@@ -58,6 +58,13 @@ function connectorPath(connector: ConnectorObject, objects: ReadonlyMap<string, 
   if (!fromObject || !toObject) return "";
   const from = anchorPoint(fromObject, connector.from.anchor, objects);
   const to = anchorPoint(toObject, connector.to.anchor, objects);
+  if (connector.kind === "routed") {
+    const routed = routeConnector(connector, objects);
+    if (routed.length < 2) return "";
+    return routed.map((point, index) =>
+      `${index === 0 ? "M" : "L"} ${formatNumber(point.x)} ${formatNumber(point.y)}`
+    ).join(" ");
+  }
   if (connector.kind === "curve") {
     const mx = (from.x + to.x) / 2;
     return `M ${formatNumber(from.x)} ${formatNumber(from.y)} C ${formatNumber(mx)} ${formatNumber(from.y)}, ${formatNumber(mx)} ${formatNumber(to.y)}, ${formatNumber(to.x)} ${formatNumber(to.y)}`;
