@@ -38,6 +38,9 @@ jobs:
       - name: Run release checks
         run: pnpm check
 
+      - name: Configure reliable Ubuntu package downloads
+        run: bash .github/scripts/prepare-apt.sh
+
       - name: Install browser matrix
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
