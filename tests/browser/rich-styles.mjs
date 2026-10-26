@@ -19,11 +19,11 @@ const compiled = await build({ stdin: { contents: `
     hydrate(time){const svg=host.firstElementChild, shape=host.querySelector('[data-anim8-id="leader"]');mount=mountSvg(host,evaluate(scene,time));return svg===host.firstElementChild&&shape===host.querySelector('[data-anim8-id="leader"]');},
     seek(time){mount.update(evaluate(scene,time));},
     xml(time){return [renderSvg(evaluate(scene,time)),renderSketchSvg(evaluate(scene,time))];},
-    curvedReveal(progress){
+    curvedReveal(progress,cap="butt"){
       const doc={version:"1.0",scene:{width:240,height:160,background:"white"},timeline:[],objects:[{
         id:"curve",type:"path",d:"M 20 140 Q 120 -80 220 140",drawProgress:progress,
         transform:{x:0,y:0,rotation:0,scaleX:1,scaleY:1,opacity:1},
-        style:{fill:"none",stroke:"#000000",strokeWidth:20,strokeDasharray:[12,6],strokeLinecap:"butt"},visible:true,z:0
+        style:{fill:"none",stroke:"#000000",strokeWidth:20,strokeDasharray:[12,6],strokeLinecap:cap},visible:true,z:0
       }]};
       return [renderSvg(evaluate(doc,0)),renderSketchSvg(evaluate(doc,0))];
     },
@@ -57,15 +57,17 @@ try {
       }
       const revealPage=await browser.newPage({viewport:{width:240,height:160},deviceScaleFactor:1});
       await revealPage.setContent('<html><body style="margin:0;background:white"></body></html>');
-      const clip={x:30,y:0,width:180,height:120};
+      const clip={x:0,y:0,width:240,height:160};
       const blank=await revealPage.screenshot({clip});
-      const zero=await page.evaluate(()=>DEMO.curvedReveal(0));
-      const partial=await page.evaluate(()=>DEMO.curvedReveal(0.5));
+      for(const cap of ["butt","round","square"]){
+      const zero=await page.evaluate(cap=>DEMO.curvedReveal(0,cap),cap);
+      const partial=await page.evaluate(cap=>DEMO.curvedReveal(0.5,cap),cap);
       for(let i=0;i<zero.length;i++){
         await revealPage.setContent('<html><body style="margin:0;background:white">'+zero[i]+'</body></html>');
         assert.ok((await revealPage.screenshot({clip})).equals(blank),name+' unrevealed curved outline must not leak stroke (renderer '+i+')');
         await revealPage.setContent('<html><body style="margin:0;background:white">'+partial[i]+'</body></html>');
         assert.ok(!(await revealPage.screenshot({clip})).equals(blank),name+' partial curved reveal must actually draw stroke (renderer '+i+')');
+      }
       }
       await revealPage.close();
       await page.evaluate(() => DEMO.seek(3000));
