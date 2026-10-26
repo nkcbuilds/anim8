@@ -57,6 +57,17 @@ jobs:
           path: artifacts/rich-styles/
           if-no-files-found: warn
 
+      - name: Qualify full merge-sort box motion and stable identity
+        run: pnpm sorting:browser
+
+      - name: Save merge-sort motion evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sorting-motion
+          path: artifacts/sorting/
+          if-no-files-found: warn
+
       - name: Validate all 150 gallery scenes in Chromium
         run: pnpm catalog:browser
 

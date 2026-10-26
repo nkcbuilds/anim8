@@ -79,3 +79,5 @@ Combine nested groups, camera moves, markers, reusable presets, graph layouts, r
 Complexity remains bounded: compiler limits protect against resource exhaustion, routed connectors consider at most 48 nearby obstacles, and large dense graphs need deliberate layout. This is a 2D scene engine; it does not automatically prove the scientific correctness of an explanation, typeset arbitrary LaTeX or render 3D simulations. Model-generated explanations still require validation and subject-matter review.
 
 Run `pnpm browser:styles` after building and installing Chromium, Firefox and WebKit. It verifies valid SVG in both renderers, static/mounted pixel parity at five timestamps, forward/reverse seek consistency, dashed reveal/flow, finish-state cleanup and hydration identity. Previews are saved under `artifacts/rich-styles/`.
+
+For actual grouped-box motion through a complete algorithm, see the [merge-sort explanation](../../examples/merge-sort-motion/README.md). It keeps twelve boxes and their identity tags intact through recursive splits and stable merges, with independent sorting/motion checks and real forward/reverse browser playback.

@@ -25,9 +25,12 @@
     "model:benchmark": "node tests/model-eval/run.mjs",
     "release:preflight": "node tests/release/preflight.mjs",
     "release:metadata": "node tests/release/check-version.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm security:adversarial && pnpm model:providers:smoke && pnpm release:metadata && pnpm release:preflight && node packages/cli/dist/cli.js validate examples/complex-styling/scene.json",
-    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm playground:browser && pnpm qualification:browser && pnpm browser:styles",
-    "browser:styles": "node tests/browser/rich-styles.mjs"
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm security:adversarial && pnpm model:providers:smoke && pnpm release:metadata && pnpm release:preflight && node packages/cli/dist/cli.js validate examples/complex-styling/scene.json && pnpm sorting:check",
+    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm playground:browser && pnpm qualification:browser && pnpm browser:styles && pnpm sorting:browser",
+    "browser:styles": "node tests/browser/rich-styles.mjs",
+    "sorting:generate": "node examples/merge-sort-motion/generate.mjs",
+    "sorting:check": "node tests/qualification/sorting.mjs",
+    "sorting:browser": "node tests/browser/sorting.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

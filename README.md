@@ -175,6 +175,8 @@ Independent fill/outline/text colors, linear gradients, multicolor text spans, d
 
 See the [visual styling guide](docs/guides/visual-styling.md) and the [animated quorum-write example](examples/complex-styling/README.md). `pnpm browser:styles` verifies static/mounted pixel parity, seeking and cleanup in Chromium, Firefox and WebKit. Subject-matter accuracy and large-graph readability still require review.
 
+The [full merge-sort motion example](examples/merge-sort-motion/README.md) moves twelve persistent boxes and their original identity tags through recursive splits and stable merges. `pnpm sorting:check` checks the algorithm and movement; `pnpm sorting:browser` verifies real playback, reverse playback, DOM identity and static/player pixel parity in all three browsers.
+
 ## Security model
 
 Remote/model-generated scene documents are untrusted data. Anim8 does not evaluate JavaScript from JSON, and the compiler enforces structural/resource policies before rendering. See [docs/security.md](docs/security.md).
