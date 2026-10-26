@@ -1,3 +1,4 @@
+import { attributesSvg, gradientSvg, gradients, outlineAttributes, paint, resourceId, textAttributes, textSvg } from "../../../internal/svg-style.js";
 import {
   anchorPoint,
   evaluate,
@@ -8,6 +9,8 @@ import {
   type EvaluatedScene,
   type SceneDocument,
   type Style,
+  type TextRun,
+  parseMorphPathData,
 } from "@anim8/core";
 import {
   sketchEllipse,
@@ -101,12 +104,11 @@ function renderSketchPaths(
   const width = formatNumber(strokeWidth(style));
   if (strokeColor(style) === "none" || strokeWidth(style) <= 0) return "";
 
-  const draw = drawAttributes(drawProgress);
-  return paths
-    .map((path, index) =>
-      `<path data-sketch-part="${escapeXml(part)}" data-sketch-pass="${index}" d="${escapeXml(formatPathData(sketchPathToSvg(path)))}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${draw}/>`,
-    )
-    .join("");
+  return paths.map((path, index) => {
+    const d = formatPathData(sketchPathToSvg(path));
+    const reveal = sketchReveal(d, style, drawProgress);
+    return reveal.definition + `<path data-sketch-part="${escapeXml(part)}" data-sketch-pass="${index}" d="${escapeXml(d)}" fill="none" stroke="${color}" stroke-width="${width}" ${attributesSvg(outlineAttributes({ ...style, strokeLinecap: style.strokeLinecap ?? "round", strokeLinejoin: style.strokeLinejoin ?? "round" }, drawProgress))}${reveal.attribute}/>`;
+  }).join("");
 }
 
 function pointsAttribute(points: readonly { x: number; y: number }[]): string {
@@ -121,16 +123,15 @@ function renderSketchText(
   key: string,
   x = 0,
   y = 0,
+  runs?: readonly TextRun[],
 ): string {
-  const color = escapeXml(style.color ?? DEFAULT_TEXT);
-  const size = formatNumber(style.fontSize ?? DEFAULT_FONT_SIZE);
-  const family = style.fontFamily ? ` font-family="${escapeXml(style.fontFamily)}"` : "";
-  const exact = `<text data-sketch-part="${escapeXml(key)}-fill" x="${formatNumber(x)}" y="${formatNumber(y)}" dominant-baseline="middle" text-anchor="middle" fill="${color}" stroke="none" font-size="${size}"${family}>${escapeXml(text)}</text>`;
+  const exact = `<text data-sketch-part="${escapeXml(key)}-fill" x="${formatNumber(x)}" y="${formatNumber(y)}" dominant-baseline="middle" ${attributesSvg(textAttributes(style))}>${textSvg(text, runs)}</text>`;
+  if (runs) return exact;
 
   const outlines = Array.from({ length: PASSES }, (_, pass) => {
     const dx = sketchJitter(seed, objectId, `${key}:text:pass:${pass}:x`, ROUGHNESS * 0.28);
     const dy = sketchJitter(seed, objectId, `${key}:text:pass:${pass}:y`, ROUGHNESS * 0.28);
-    return `<text data-sketch-part="${escapeXml(key)}-stroke" data-sketch-pass="${pass}" x="${formatNumber(x + dx)}" y="${formatNumber(y + dy)}" dominant-baseline="middle" text-anchor="middle" fill="none" stroke="${color}" stroke-width="0.28" stroke-linecap="round" stroke-linejoin="round" font-size="${size}"${family}>${escapeXml(text)}</text>`;
+    return `<text data-sketch-part="${escapeXml(key)}-stroke" data-sketch-pass="${pass}" x="${formatNumber(x + dx)}" y="${formatNumber(y + dy)}" dominant-baseline="middle" ${attributesSvg({ ...textAttributes(style), fill: "none", stroke: style.color ?? DEFAULT_TEXT, "stroke-width": "0.28", "stroke-linecap": "round", "stroke-linejoin": "round" })}>${escapeXml(text)}</text>`;
   }).join("");
 
   return exact + outlines;
@@ -146,14 +147,14 @@ function renderRect(
   const radius = object.style.radius ?? 10;
   const base = fill === "none"
     ? ""
-    : `<rect data-sketch-part="fill" x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" rx="${formatNumber(radius)}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<rect data-sketch-part="fill" x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" rx="${formatNumber(radius)}" fill="${escapeXml(fill)}" stroke="none" fill-opacity="${formatNumber(object.style.fillOpacity ?? 1)}"/>`;
   const outline = renderSketchPaths(
     sketchRectangle(x, y, object.width, object.height, sketchContext(seed, object.id), "outline"),
     object.style,
     "outline",
   );
   const label = object.text
-    ? renderSketchText(object.text, object.style, seed, object.id, "label")
+    ? renderSketchText(object.text, object.style, seed, object.id, "label", 0, 0, object.textRuns)
     : "";
   return base + outline + label;
 }
@@ -165,14 +166,14 @@ function renderCircle(
   const fill = object.style.fill ?? "none";
   const base = fill === "none"
     ? ""
-    : `<circle data-sketch-part="fill" cx="0" cy="0" r="${formatNumber(object.radius)}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<circle data-sketch-part="fill" cx="0" cy="0" r="${formatNumber(object.radius)}" fill="${escapeXml(fill)}" stroke="none" fill-opacity="${formatNumber(object.style.fillOpacity ?? 1)}"/>`;
   const outline = renderSketchPaths(
     sketchEllipse(0, 0, object.radius, object.radius, sketchContext(seed, object.id), "outline"),
     object.style,
     "outline",
   );
   const label = object.text
-    ? renderSketchText(object.text, object.style, seed, object.id, "label")
+    ? renderSketchText(object.text, object.style, seed, object.id, "label", 0, 0, object.textRuns)
     : "";
   return base + outline + label;
 }
@@ -184,14 +185,14 @@ function renderEllipse(
   const fill = object.style.fill ?? "none";
   const base = fill === "none"
     ? ""
-    : `<ellipse data-sketch-part="fill" cx="0" cy="0" rx="${formatNumber(object.rx)}" ry="${formatNumber(object.ry)}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<ellipse data-sketch-part="fill" cx="0" cy="0" rx="${formatNumber(object.rx)}" ry="${formatNumber(object.ry)}" fill="${escapeXml(fill)}" stroke="none" fill-opacity="${formatNumber(object.style.fillOpacity ?? 1)}"/>`;
   const outline = renderSketchPaths(
     sketchEllipse(0, 0, object.rx, object.ry, sketchContext(seed, object.id), "outline"),
     object.style,
     "outline",
   );
   const label = object.text
-    ? renderSketchText(object.text, object.style, seed, object.id, "label")
+    ? renderSketchText(object.text, object.style, seed, object.id, "label", 0, 0, object.textRuns)
     : "";
   return base + outline + label;
 }
@@ -204,7 +205,7 @@ function renderPointShape(
   const tag = object.type;
   const base = fill === "none"
     ? ""
-    : `<${tag} data-sketch-part="fill" points="${pointsAttribute(object.points)}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<${tag} data-sketch-part="fill" points="${pointsAttribute(object.points)}" fill="${escapeXml(fill)}" stroke="none" fill-opacity="${formatNumber(object.style.fillOpacity ?? 1)}"/>`;
   const outline = renderSketchPaths(
     sketchPolyline(
       object.points,
@@ -241,19 +242,19 @@ function renderPath(
   const fill = object.style.fill ?? "none";
   const base = fill === "none"
     ? ""
-    : `<path data-sketch-part="fill" d="${escapeXml(formatPathData(object.d))}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<path data-sketch-part="fill" d="${escapeXml(formatPathData(object.d))}" fill="${escapeXml(fill)}" stroke="none" fill-opacity="${formatNumber(object.style.fillOpacity ?? 1)}"/>`;
   if (strokeColor(object.style) === "none" || strokeWidth(object.style) <= 0) return base;
 
   const color = escapeXml(strokeColor(object.style));
   const width = formatNumber(strokeWidth(object.style));
-  const draw = drawAttributes(object.drawProgress);
+  const reveal = sketchReveal(formatPathData(object.d), object.style, object.drawProgress);
   const outlines = Array.from({ length: PASSES }, (_, pass) => {
     const dx = sketchJitter(seed, object.id, `path:pass:${pass}:x`, ROUGHNESS * 0.35);
     const dy = sketchJitter(seed, object.id, `path:pass:${pass}:y`, ROUGHNESS * 0.35);
-    return `<path data-sketch-part="path" data-sketch-pass="${pass}" d="${escapeXml(formatPathData(object.d))}" transform="translate(${formatNumber(dx)} ${formatNumber(dy)})" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${draw}/>`;
+    return `<path data-sketch-part="path" data-sketch-pass="${pass}" d="${escapeXml(formatPathData(object.d))}" transform="translate(${formatNumber(dx)} ${formatNumber(dy)})" fill="none" stroke="${color}" stroke-width="${width}" ${attributesSvg(outlineAttributes({ ...object.style, strokeLinecap: object.style.strokeLinecap ?? "round", strokeLinejoin: object.style.strokeLinejoin ?? "round" }, object.drawProgress))}${reveal.attribute}/>`;
   }).join("");
 
-  return base + outlines;
+  return base + reveal.definition + outlines;
 }
 
 function connectorBasePath(
@@ -320,7 +321,7 @@ function renderCurveOverdraw(
     const cp1y = from.y + sketchJitter(seed, connector.id, `curve:pass:${pass}:cp1:y`, ROUGHNESS);
     const cp2x = midX + sketchJitter(seed, connector.id, `curve:pass:${pass}:cp2:x`, ROUGHNESS);
     const cp2y = to.y + sketchJitter(seed, connector.id, `curve:pass:${pass}:cp2:y`, ROUGHNESS);
-    return `<path data-sketch-part="connector-overdraw" data-sketch-pass="${pass}" d="M ${formatNumber(from.x)} ${formatNumber(from.y)} C ${formatNumber(cp1x)} ${formatNumber(cp1y)} ${formatNumber(cp2x)} ${formatNumber(cp2y)} ${formatNumber(to.x)} ${formatNumber(to.y)}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    return `<path data-sketch-part="connector-overdraw" data-sketch-pass="${pass}" d="M ${formatNumber(from.x)} ${formatNumber(from.y)} C ${formatNumber(cp1x)} ${formatNumber(cp1y)} ${formatNumber(cp2x)} ${formatNumber(cp2y)} ${formatNumber(to.x)} ${formatNumber(to.y)}" fill="none" stroke="${color}" stroke-width="${width}" ${attributesSvg(outlineAttributes(connector.style))}/>`;
   }).join("");
 }
 
@@ -335,7 +336,7 @@ function renderConnector(
 
   const color = escapeXml(strokeColor(connector.style));
   const width = formatNumber(strokeWidth(connector.style));
-  const exact = `<path data-sketch-part="connector-base" d="${base.d}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#anim8-sketch-arrow)"/>`;
+  const exact = `<path data-sketch-part="connector-base" d="${base.d}" fill="none" stroke="${color}" stroke-width="${width}" ${attributesSvg(outlineAttributes(connector.style))} marker-end="url(#anim8-sketch-arrow)"/>`;
 
   let overdraw = "";
   if (strokeColor(connector.style) !== "none" && strokeWidth(connector.style) > 0) {
@@ -402,7 +403,7 @@ function renderObject(
       body = renderPointShape(object, seed);
       break;
     case "text":
-      body = renderSketchText(object.text, object.style, seed, object.id, "text");
+      body = renderSketchText(object.text, object.style, seed, object.id, "text", 0, 0, object.textRuns);
       break;
     case "line":
       body = renderLine(object, seed);
@@ -426,9 +427,11 @@ function renderObject(
  * a persistent object's rough marks stable while it moves.
  */
 export function renderSketchSvg(frame: EvaluatedScene): string {
-  const objects = new Map(frame.objects.map(object => [object.id, object] as const));
+  const originalObjects = new Map(frame.objects.map(o => [o.id, o]));
+  const painted = frame.objects.map(object => ({ ...object, style: { ...object.style, fill: paint(object.style, "fill", "none", object, originalObjects), stroke: paint(object.style, "stroke", DEFAULT_STROKE, object, originalObjects), color: paint(object.style, "color", DEFAULT_TEXT) } }));
+  const objects = new Map(painted.map(object => [object.id, object] as const));
   const seed: SketchSeed = frame.scene.seed ?? 0;
-  const ordered = frame.objects
+  const ordered = painted
     .map((object, index) => ({ object, index }))
     .sort((left, right) => left.object.z - right.object.z || left.index - right.index)
     .map(entry => entry.object);
@@ -439,10 +442,26 @@ export function renderSketchSvg(frame: EvaluatedScene): string {
     : "";
   const world = `<g data-anim8-camera="world" transform="${cameraTransform(frame)}">${body}</g>`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(frame.scene.width)} ${formatNumber(frame.scene.height)}" role="img"><defs><marker id="anim8-sketch-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3 z" fill="context-stroke"/></marker></defs>${background}${world}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(frame.scene.width)} ${formatNumber(frame.scene.height)}" role="img"><defs><marker id="anim8-sketch-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3 z" fill="context-stroke"/></marker>${gradients(frame.objects).map(gradientSvg).join("")}</defs>${background}${world}</svg>`;
 }
 
 /** Evaluate a scene with @anim8/core and render the resulting frame as sketch SVG. */
 export function renderSketchSceneAt(scene: SceneDocument, time: number): string {
   return renderSketchSvg(evaluate(scene, time));
+}
+
+// Sketch paths use the bounded canonical cubic subset, so control points bound the mask.
+function sketchReveal(d: string, style: Style, progress?: number): { definition: string; attribute: string } {
+  if (!style.strokeDasharray?.length || progress === undefined || progress >= 1) return { definition: "", attribute: "" };
+  const path = parseMorphPathData(d);
+  if (!path.ok) throw new Error("Dashed sketch reveal requires an M/L/H/V/C/Q/Z path: " + path.message);
+  const points = path.path.subpaths.flatMap(p => [p.start, ...p.segments.flatMap(s => [{ x: s.x, y: s.y }, { x: s.c1x, y: s.c1y }, { x: s.c2x, y: s.c2y }])]);
+  const pad = (style.strokeWidth ?? 2) * 2 + 4;
+  const xs = points.map(p => p.x), ys = points.map(p => p.y);
+  const minX = Math.min(...xs) - pad, minY = Math.min(...ys) - pad;
+  const id = resourceId(["sketch-reveal", d, style.strokeWidth, progress]);
+  return {
+    attribute: ` mask="url(#${id})"`,
+    definition: `<mask id="${id}" maskUnits="userSpaceOnUse" x="${formatNumber(minX)}" y="${formatNumber(minY)}" width="${formatNumber(Math.max(...xs) + pad - minX)}" height="${formatNumber(Math.max(...ys) + pad - minY)}"><path d="${escapeXml(d)}" fill="white" stroke="white" stroke-width="${formatNumber((style.strokeWidth ?? 2) + 2)}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - Math.max(0, progress))}"/></mask>`,
+  };
 }

@@ -3,6 +3,10 @@ import {
   defaultCamera,
   defaultStyle,
   defaultTransform,
+  STYLE_KEYS,
+  styleIssues,
+  styleProperties,
+  textRunIssues,
   morphPathCompatibility,
   parseMorphPathData,
   validateScene,
@@ -24,10 +28,12 @@ import {
   type Diagnostic,
   type DrawableObject,
   type Easing,
+  type LinearGradient,
   type PointValue,
   type SceneDocument,
   type Style,
   type Transform,
+  type TextRun,
 } from "@anim8/core";
 
 export interface CompileResult {
@@ -200,9 +206,12 @@ function parseTransform(value: unknown, path: string, diagnostics: Diagnostic[])
   return transform;
 }
 
-function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[]): Style {
-  const style = defaultStyle();
-  if (value === undefined) return style;
+function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[], partial = false): Style {
+  const style: Style = partial ? {} : defaultStyle();
+  if (value === undefined) {
+    if (partial) diagnostic(diagnostics, "INVALID_STYLE_TARGET", path, "style.to requires a style object.");
+    return style;
+  }
   if (!isRecord(value)) {
     diagnostic(diagnostics, "INVALID_STYLE", path, "style must be a JSON object.");
     return style;
@@ -244,6 +253,26 @@ function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[]): St
     style[key] = candidate;
   }
 
+  for (const key of STYLE_KEYS) {
+    if (["fill", "stroke", "color", "fontFamily", "strokeWidth", "fontSize", "radius"].includes(key)) continue;
+    if (value[key] !== undefined) (style as Record<string, unknown>)[key] = value[key];
+  }
+  const issues = styleIssues(style);
+  for (const issue of issues) diagnostic(diagnostics, "INVALID_STYLE_VALUE", `${path}.${issue.property}`, issue.message);
+  if (!issues.length) {
+    if (style.strokeDasharray) style.strokeDasharray = [...style.strokeDasharray];
+    for (const key of ["fillGradient", "strokeGradient", "colorGradient"] as const) {
+      const g = style[key];
+      if (g) style[key] = {
+        type: "linear", ...(g.from ? { from: { x: g.from.x, y: g.from.y } } : {}), ...(g.to ? { to: { x: g.to.x, y: g.to.y } } : {}),
+        stops: g.stops.map(stop => ({ offset: stop.offset, color: stop.color, ...(stop.opacity !== undefined ? { opacity: stop.opacity } : {}) })),
+      } satisfies LinearGradient;
+    }
+  }
+  if (partial) {
+    if (Object.keys(style).length === 0) diagnostic(diagnostics, "INVALID_STYLE_TARGET", path, "style.to requires at least one supported style property.");
+    for (const key of Object.keys(value)) if (!(STYLE_KEYS as readonly string[]).includes(key)) diagnostic(diagnostics, "INVALID_STYLE_TARGET", `${path}.${key}`, "Unsupported style property.");
+  }
   return style;
 }
 
@@ -635,12 +664,22 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
     ...(parentId ? { parentId } : {}),
   };
 
+  let textRuns: TextRun[] | undefined;
+  if (value.textRuns !== undefined) {
+    if (!["rect", "circle", "ellipse", "text"].includes(type)) diagnostic(diagnostics, "INVALID_TEXT_RUNS", `${path}.textRuns`, "Only text and labeled shapes expose textRuns.");
+    const issues = textRunIssues(value.textRuns as TextRun[], typeof value.text === "string" ? value.text : "");
+    for (const message of issues) diagnostic(diagnostics, "INVALID_TEXT_RUNS", `${path}.textRuns`, message);
+    if (!issues.length) textRuns = (value.textRuns as TextRun[]).map(run => ({ text: run.text, ...(run.color !== undefined ? { color: run.color } : {}), ...(run.fontWeight !== undefined ? { fontWeight: run.fontWeight } : {}), ...(run.fontStyle !== undefined ? { fontStyle: run.fontStyle } : {}) }));
+  }
+  const labelRuns = textRuns ? { textRuns } : {};
+
   switch (type) {
     case "rect": {
       const text = parseOptionalText(value.text, `${path}.text`, diagnostics);
       return {
         ...base,
         type,
+        ...labelRuns,
         width: parsePositiveDimension(value.width, 100, `${path}.width`, diagnostics),
         height: parsePositiveDimension(value.height, 60, `${path}.height`, diagnostics),
         ...(text !== undefined ? { text } : {}),
@@ -651,6 +690,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       return {
         ...base,
         type,
+        ...labelRuns,
         radius: parsePositiveDimension(value.radius, 30, `${path}.radius`, diagnostics),
         ...(text !== undefined ? { text } : {}),
       };
@@ -663,6 +703,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       return {
         ...base,
         type,
+        ...labelRuns,
         rx,
         ry,
         ...(text !== undefined ? { text } : {}),
@@ -685,6 +726,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       return {
         ...base,
         type,
+        ...labelRuns,
         text: parseBoundedText(value.text, "", `${path}.text`, diagnostics),
       };
     case "line":
@@ -796,7 +838,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
 }
 
 
-const BINDING_PROPERTIES = ["x","y","rotation","scaleX","scaleY","opacity","fill","stroke","text"] as const;
+const BINDING_PROPERTIES = ["x","y","rotation","scaleX","scaleY","opacity","fill","stroke","color","strokeDashoffset","text"] as const;
 const EXPRESSION_OPS = ["add","sub","mul","div","min","max","clamp","lerp","eq","lt","gt","and","or","not"] as const;
 
 function parseScalar(value: unknown, path: string, diagnostics: Diagnostic[]): ScalarValue | null {
@@ -1352,6 +1394,8 @@ function actionProperties(action: Action): readonly ActionProperty[] {
     case "opacity": return ["opacity"];
     case "fill": return ["fill"];
     case "stroke": return ["stroke"];
+    case "style": return styleProperties(action.to) as ActionProperty[];
+    case "text": return ["text"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
     case "reparent": return ["parentId"];
@@ -1533,6 +1577,19 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
   const objectBase = { ...base, target };
 
   switch (value.type) {
+    case "text": {
+      if (typeof value.to !== "string" || value.to.length > COMPILER_LIMITS.textLength) {
+        diagnostic(diagnostics, "INVALID_TEXT_TARGET", `${path}.to`, "text.to requires a bounded string."); return null;
+      }
+      if (value.textRuns !== undefined) {
+        const issues = textRunIssues(value.textRuns as TextRun[], value.to);
+        for (const message of issues) diagnostic(diagnostics, "INVALID_TEXT_RUNS", `${path}.textRuns`, message);
+        if (issues.length) return null;
+      }
+      return { ...objectBase, type: "text", to: value.to, ...(value.textRuns !== undefined ? { textRuns: (value.textRuns as TextRun[]).map(run => ({ text: run.text, ...(run.color !== undefined ? { color: run.color } : {}), ...(run.fontWeight !== undefined ? { fontWeight: run.fontWeight } : {}), ...(run.fontStyle !== undefined ? { fontStyle: run.fontStyle } : {}) })) } : {}) };
+    }
+    case "style":
+      return { ...objectBase, type: "style", to: parseStyle(value.to, `${path}.to`, diagnostics, true) };
     case "move": {
       const to = isRecord(value.to) && boundedNumber(value.to.x) && boundedNumber(value.to.y)
         ? { x: value.to.x, y: value.to.y }
@@ -1692,7 +1749,7 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
         "UNKNOWN_ACTION",
         `${path}.type`,
         `Unsupported action type '${value.type}'.`,
-        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, morph, visibility, reparent, or zOrder.",
+        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, style, text, resize, draw, morph, visibility, reparent, or zOrder.",
       );
       return null;
   }
@@ -1931,6 +1988,7 @@ function validateTimelineReferences(
       }
     }
 
+    if (action.type === "text" && target.type !== "text" && target.type !== "rect" && target.type !== "circle" && target.type !== "ellipse") diagnostic(diagnostics, "UNSUPPORTED_TEXT_TARGET", `timeline[${index}].target`, "Only text and labeled shapes expose text.");
     if (action.type === "resize") {
       if (target.type !== "rect" && target.type !== "image" && target.type !== "ellipse" && target.type !== "circle") {
         diagnostic(

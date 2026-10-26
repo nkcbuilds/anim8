@@ -69,14 +69,25 @@ export function ease(easing: Easing | undefined, t: number): number {
 export const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
 
 export function lerpColor(a: string, b: string, t: number): string {
-  const parse = (value: string): [number, number, number] | null => {
-    const m = /^#([0-9a-f]{6})$/i.exec(value);
-    if (!m?.[1]) return null;
-    const n = Number.parseInt(m[1], 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  if (t <= 0) return a;
+  if (t >= 1) return b;
+  const parse = (value: string): [number, number, number, number] | null => {
+    const named: Record<string, string> = { black: "#000000", white: "#ffffff", red: "#ff0000", green: "#008000", blue: "#0000ff", yellow: "#ffff00", orange: "#ffa500", purple: "#800080", transparent: "#00000000" };
+    const source = named[value.toLowerCase()] ?? value;
+    let hex = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(source)?.[1];
+    if (hex) {
+      if (hex.length < 5) hex = [...hex].map(c => c + c).join("");
+      return [Number.parseInt(hex.slice(0, 2), 16), Number.parseInt(hex.slice(2, 4), 16), Number.parseInt(hex.slice(4, 6), 16), hex.length === 8 ? Number.parseInt(hex.slice(6), 16) / 255 : 1];
+    }
+    const rgb = /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i.exec(source);
+    if (!rgb) return null;
+    const channels = [Number(rgb[1]), Number(rgb[2]), Number(rgb[3]), rgb[4] === undefined ? 1 : Number(rgb[4])] as [number, number, number, number];
+    return channels.every(Number.isFinite) ? channels : null;
   };
   const ca = parse(a), cb = parse(b);
   if (!ca || !cb) return t < 1 ? a : b;
-  const c = ca.map((v, i) => Math.round(lerp(v, cb[i]!, t)));
+  const c = ca.slice(0, 3).map((v, i) => Math.round(Math.max(0, Math.min(255, lerp(v, cb[i]!, t)))));
+  const alpha = clamp01(lerp(ca[3], cb[3], t));
+  if (alpha < 1) return `rgba(${c.join(",")},${Number(alpha.toFixed(6))})`;
   return `#${c.map(v => v.toString(16).padStart(2, "0")).join("")}`;
 }

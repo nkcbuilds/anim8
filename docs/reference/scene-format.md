@@ -111,6 +111,10 @@ arc commands are not silently resampled.
 
 `scene.camera` defines the base camera as `{ x, y, zoom }`. A `camera` timeline action can animate any subset of those absolute values. Camera state is evaluated from absolute time just like object actions, so seek and reverse do not depend on previous rendered frames.
 
+## Visual styling
+
+The additive optional styling fields include linear `fillGradient`/`strokeGradient`/`colorGradient`, `strokeDasharray`, `strokeDashoffset`, cap/join settings, independent paint opacity and typography. Text/labeled shapes may carry `textRuns` that concatenate exactly to their plain `text`. Timeline `style` actions animate a partial style patch; `text` actions replace a plain/rich label at their endpoint. Existing scenes retain their v1 format; consumers using these new fields/actions need a library version that supports them. See [complete semantics and limits](../guides/visual-styling.md).
+
 ## Security
 
 Unknown executable content is not part of the scene format. Do not place JavaScript, event handlers, raw HTML, or arbitrary SVG markup in generated scene documents.
