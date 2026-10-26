@@ -71,22 +71,25 @@ jobs:
       - name: Validate all 150 gallery scenes in Chromium
         run: pnpm catalog:browser
 
-      - name: Qualify simultaneous playback, mount lifecycle and browser memory
-        run: pnpm qualification:browser
+      - name: Qualify desktop, mobile emulation, throttled CPU and dense scenes
+        run: pnpm qualification:matrix
+
+      - name: Save browser qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-qualification
+          path: artifacts/qualification/
+          if-no-files-found: warn
 
       - name: Qualify editable playground in Chromium
         run: pnpm playground:browser
 
-      - name: Export GIF and MP4 through FFmpeg when available
-        run: |
-          if command -v ffmpeg >/dev/null 2>&1; then
-            mkdir -p .bench
-            node packages/export/dist/cli.js examples/catalog/computing/binary-search/scene.json .bench/anim8-ci.gif --fps 10 --duration-ms 500
-            node packages/export/dist/cli.js examples/catalog/computing/binary-search/scene.json .bench/anim8-ci.mp4 --fps 10 --duration-ms 500
-            test -s .bench/anim8-ci.gif && test -s .bench/anim8-ci.mp4
-          else
-            echo 'SKIP: FFmpeg is not installed on this runner; exporter unit tests still ran.'
-          fi
+      - name: Install required media qualification tools
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Inspect and decode real GIF and MP4 exports
+        run: pnpm qualification:media
 
       - name: Validate reference scenes
         run: |
