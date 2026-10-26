@@ -462,6 +462,6 @@ function sketchReveal(d: string, style: Style, progress?: number): { definition:
   const id = resourceId(["sketch-reveal", d, style.strokeWidth, progress]);
   return {
     attribute: ` mask="url(#${id})"`,
-    definition: `<mask id="${id}" maskUnits="userSpaceOnUse" x="${formatNumber(minX)}" y="${formatNumber(minY)}" width="${formatNumber(Math.max(...xs) + pad - minX)}" height="${formatNumber(Math.max(...ys) + pad - minY)}"><path d="${escapeXml(d)}" fill="white" stroke="white" stroke-width="${formatNumber((style.strokeWidth ?? 2) + 2)}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - Math.max(0, progress))}"/></mask>`,
+    definition: `<mask id="${id}" maskUnits="userSpaceOnUse" x="${formatNumber(minX)}" y="${formatNumber(minY)}" width="${formatNumber(Math.max(...xs) + pad - minX)}" height="${formatNumber(Math.max(...ys) + pad - minY)}"><path d="${escapeXml(d)}" fill="${style.fill === undefined || style.fill === "none" ? "none" : "white"}" stroke="white" stroke-width="${formatNumber((style.strokeWidth ?? 2) + 2)}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - Math.max(0, progress))}"/></mask>`,
   };
 }

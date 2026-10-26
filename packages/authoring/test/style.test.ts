@@ -20,6 +20,8 @@ describe("styling authoring", () => {
     expect(() => s.box("x", { strokeDasharray: [-1] })).toThrow();
     expect(() => s.text([{ text: "x", color: "url(x)" }])).toThrow();
     expect(() => s.box().styleTo({ strokeOpacity: 2 })).toThrow();
+    expect(() => s.keyframes(s.box(), [{ offset: 1, style: { strokeOpacity: 2 } }], { duration: 300 })).toThrow();
+    expect(() => s.keyframes(s.box(), [{ offset: 1, style: {} }], { duration: 300 })).toThrow();
   });
 });
 

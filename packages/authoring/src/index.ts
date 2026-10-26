@@ -669,7 +669,7 @@ export class SceneBuilder {
         pending.push({ type: "stroke", target: target.id, to: frame.stroke, duration: segmentDuration, easing });
       }
 
-      if (frame.style !== undefined) pending.push({ type: "style", target: target.id, to: structuredClone(frame.style), duration: segmentDuration, easing });
+      if (frame.style !== undefined) pending.push(target.styleTo(frame.style, { duration: segmentDuration, easing }));
       for (const action of pending) ids.push(this.scheduleAt(segmentStart, action));
       previousOffset = frame.offset;
     }

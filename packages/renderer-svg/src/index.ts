@@ -634,7 +634,7 @@ function revealMask(object: RevealObject, frame: EvaluatedScene, objects: Readon
   return {
     region: { id: revealId(object, frame), maskUnits: "userSpaceOnUse", x: formatNumber(minX), y: formatNumber(minY), width: formatNumber(Math.max(...corners.map(p => p.x)) + pad - minX), height: formatNumber(Math.max(...corners.map(p => p.y)) + pad - minY) },
     tag: object.type,
-    shape: { ...(object.type === "path" ? { d: formatPathData(object.d) } : { points: points(object.points) }), fill: "white", stroke: "white", "stroke-width": formatNumber(object.style.strokeWidth ?? 2), "stroke-linecap": object.style.strokeLinecap ?? "butt", "stroke-linejoin": object.style.strokeLinejoin ?? "miter", pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": formatNumber(1 - Math.max(0, object.drawProgress ?? 1)) },
+    shape: { ...(object.type === "path" ? { d: formatPathData(object.d) } : { points: points(object.points) }), fill: paint(object.style, "fill", "none", object, objects) === "none" ? "none" : "white", stroke: "white", "stroke-width": formatNumber(object.style.strokeWidth ?? 2), "stroke-linecap": object.style.strokeLinecap ?? "butt", "stroke-linejoin": object.style.strokeLinejoin ?? "miter", pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": formatNumber(1 - Math.max(0, object.drawProgress ?? 1)) },
   };
 }
 
