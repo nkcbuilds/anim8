@@ -49,6 +49,19 @@ jobs:
       - name: Validate all 150 gallery scenes in Chromium
         run: pnpm catalog:browser
 
+      - name: Qualify browser performance and lifecycle
+        run: pnpm qualification:browser
+
+      - name: Qualify playground interactions
+        run: pnpm playground:browser
+
+      - name: Verify publishing credentials and matching release tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: node tests/release/preflight.mjs --publish
+        env:
+          ANIM8_RELEASE_TAG: ${{ github.ref_name }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish public packages
         if: startsWith(github.ref, 'refs/tags/v')
         run: pnpm -r --filter "./packages/**" publish --access public --no-git-checks --provenance

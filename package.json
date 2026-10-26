@@ -17,9 +17,16 @@
     "catalog": "node tests/catalog/run.mjs",
     "catalog:browser": "node tests/catalog/browser.mjs",
     "catalog:serve": "node examples/catalog/serve.mjs",
-    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm release:metadata",
-    "release:check": "pnpm check && pnpm browser",
-    "release:metadata": "node tests/release/check-version.mjs"
+    "playground": "node examples/playground/server.mjs",
+    "playground:browser": "node tests/qualification/playground.mjs",
+    "qualification:browser": "node tests/qualification/browser.mjs",
+    "security:adversarial": "node tests/qualification/adversarial.mjs",
+    "model:providers:smoke": "node tests/model-eval/test.mjs",
+    "model:benchmark": "node tests/model-eval/run.mjs",
+    "release:preflight": "node tests/release/preflight.mjs",
+    "release:metadata": "node tests/release/check-version.mjs",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm security:adversarial && pnpm model:providers:smoke && pnpm release:metadata && pnpm release:preflight",
+    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm playground:browser && pnpm qualification:browser"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
