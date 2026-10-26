@@ -10,8 +10,10 @@ The integrated qualification scripts are:
 | `pnpm browser` | Chromium, Firefox and WebKit player/wrapper correctness |
 | `pnpm catalog:browser` | Real Chromium visuals and clipping guard on 150 scenes |
 | `pnpm qualification:browser` | RAF cadence, 12 active players, 30 mount/unmount cycles, Chrome JS heap |
+| `pnpm qualification:matrix` | Desktop, CPU-throttled mobile Chromium, mobile WebKit, 200-object scene and retained JSON evidence |
+| `pnpm qualification:media` | Real GIF/MP4 codec, size, frame count, duration, complete decode and file protection |
 | `pnpm playground:browser` | Local JSON editor, compilation diagnostics, example switching, playback and CORS |
 | `node tests/model-eval/run.mjs --models ...` | Explicitly paid live API generation success rates and repair metrics |
 | `pnpm release:preflight` | Built package manifests/exports/README/license/bin and release version agreement |
 
-For browser, replay under pinned OS/browser/hardware and increase stress thresholds on low-end machines. Current tests use permissive smoke limits to avoid flaky CI; no mobile soak or arbitrary adversarial security certification is claimed. For model evaluation, results must be audited manually for scientific and pedagogical content; the validator cannot check semantic quality. For release state, consult the [release checklist](../release/README.md).
+For browser, replay under pinned OS/browser/hardware and run longer samples with `pnpm qualification:matrix --duration-ms 60000`. Current tests use permissive smoke limits; mobile emulation and CPU throttling do not establish physical-device performance. See [profile definitions and report details](../../tests/qualification/README.md). No arbitrary adversarial security certification is claimed. For model evaluation, results must be audited manually for scientific and pedagogical content; the validator cannot check semantic quality. For release state, consult the [release checklist](../release/README.md).

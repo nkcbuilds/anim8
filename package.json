@@ -20,13 +20,15 @@
     "playground": "node examples/playground/server.mjs",
     "playground:browser": "node tests/qualification/playground.mjs",
     "qualification:browser": "node tests/qualification/browser.mjs",
+    "qualification:matrix": "node tests/qualification/browser.mjs --matrix",
+    "qualification:media": "node tests/qualification/media.mjs",
     "security:adversarial": "node tests/qualification/adversarial.mjs",
     "model:providers:smoke": "node tests/model-eval/test.mjs",
     "model:benchmark": "node tests/model-eval/run.mjs",
     "release:preflight": "node tests/release/preflight.mjs",
     "release:metadata": "node tests/release/check-version.mjs",
     "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm security:adversarial && pnpm model:providers:smoke && pnpm release:metadata && pnpm release:preflight",
-    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm playground:browser && pnpm qualification:browser"
+    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm playground:browser && pnpm qualification:matrix && pnpm qualification:media"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
