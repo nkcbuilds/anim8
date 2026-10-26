@@ -11,10 +11,12 @@ Current limitations include:
 - Declarative bindings, interactions, and bounded serializable state machines are implemented. State-machine guards intentionally use declared-state scalar equality rather than an executable/general-purpose guard language.
 - React, Vue, and web-component integrations are implemented and SSR-smoke-tested; real Next.js static-export and Astro static/client builds run in the consumer suite. Broader framework/version matrices are not yet established.
 - Real Chromium, Firefox, and WebKit behavior suites exist. Byte-stable screenshot checks remain Chromium-only because cross-engine rasterization is not a valid byte-for-byte contract.
-- The model-generation benchmark harness is provider-neutral, but has not yet been run against multiple external model providers.
-- Export to video/GIF is not included in the core runtime.
+- Real-model OpenAI/Anthropic/Gemini transport adapters and a 36-case opt-in runner exist, but no multi-provider **live measured** results or expert-rated pedagogical outcomes are available (API credentials not configured).
+- Video/GIF export exists in **optional Node** `@anim8/export`, outside the browser runtime, and requires Playwright Chromium plus FFmpeg; cross-platform encoding and arbitrary media reproducibility are not yet release-qualified.
 - Reduced-motion behavior and deterministic headless accessibility summaries are implemented. React and Vue expose SSR-safe generated labels, while the web component exposes a live `aria-describedby` summary. Applications with specialized narration still need to author domain-specific descriptions.
-- A full interactive editor/playground is not included; the runtime examples are deliberately separate and lightweight.
+- A local interactive JSON playground exists under `examples/playground`, but not a complete timeline/keyframe/graph editor or hosted collaborative workspace. The playground is loopback-only; its server is not designed for public exposure.
+
+Compiler/resource adversarial mutations, multi-player Chromium frame/heap smoke tests, and a Chromium playground suite run in qualification, but not comprehensive mobile, low-end device, multi-hour memory-soak or penetration testing.
 
 Packaging qualification now operates on real tarballs and includes public export resolution, isolated imports, private deep-import blocking, publint, and Are the Types Wrong using Anim8's ESM-only contract. Static SVG/rendered numeric output uses deterministic bounded canonicalization.
 

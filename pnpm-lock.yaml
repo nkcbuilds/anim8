@@ -85,6 +85,21 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/export:
+    dependencies:
+      '@anim8/compiler':
+        specifier: workspace:*
+        version: link:../compiler
+      '@anim8/core':
+        specifier: workspace:*
+        version: link:../core
+      '@anim8/renderer-svg':
+        specifier: workspace:*
+        version: link:../renderer-svg
+      playwright:
+        specifier: ^1.50.0
+        version: 1.64.1
+
   packages/layout:
     dependencies:
       '@anim8/core':

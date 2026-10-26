@@ -49,6 +49,23 @@ jobs:
       - name: Validate all 150 gallery scenes in Chromium
         run: pnpm catalog:browser
 
+      - name: Qualify simultaneous playback, mount lifecycle and browser memory
+        run: pnpm qualification:browser
+
+      - name: Qualify editable playground in Chromium
+        run: pnpm playground:browser
+
+      - name: Export GIF and MP4 through FFmpeg when available
+        run: |
+          if command -v ffmpeg >/dev/null 2>&1; then
+            mkdir -p .bench
+            node packages/export/dist/cli.js examples/catalog/computing/binary-search/scene.json .bench/anim8-ci.gif --fps 10 --duration-ms 500
+            node packages/export/dist/cli.js examples/catalog/computing/binary-search/scene.json .bench/anim8-ci.mp4 --fps 10 --duration-ms 500
+            test -s .bench/anim8-ci.gif && test -s .bench/anim8-ci.mp4
+          else
+            echo 'SKIP: FFmpeg is not installed on this runner; exporter unit tests still ran.'
+          fi
+
       - name: Validate reference scenes
         run: |
           node packages/cli/dist/cli.js validate examples/two-sum/scene.json

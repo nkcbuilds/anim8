@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src", "test"],
+  "compilerOptions": {
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@anim8/compiler": ["../compiler/src/index.ts"],
+      "@anim8/core": ["../core/src/index.ts"],
+      "@anim8/renderer-svg": ["../renderer-svg/src/index.ts"]
+    }
+  }
+}

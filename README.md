@@ -67,6 +67,7 @@ Every object keeps a stable identity. The boxes, their text, and attached connec
 | `@anim8/presets` | Technical shapes composed from generic primitives |
 | `@anim8/dsl` | Optional concise text authoring syntax |
 | `@anim8/ai` | Provider-neutral model-generation benchmark harness |
+| `@anim8/export` | Optional deterministic SVG frame sequence and GIF/MP4 encoder (Playwright + FFmpeg) |
 
 Optional graph layout engines and heavyweight sketch dependencies are intentionally not part of the standard runtime.
 
@@ -155,6 +156,18 @@ Research and architectural decisions live in `docs/research` and `docs/architect
 ## 150 teaching examples
 
 The [teaching scene catalog](examples/catalog/README.md) contains 150 portable and independently validated animations across computing, math/science, and real-world workflows. Each teaches a concept in four narrated, seekable stages. Browse and scrub the full collection with `pnpm catalog:serve` after building; then open `http://127.0.0.1:4178`. Catalog determinism checks run as part of `pnpm check`, and a dedicated Chromium layout pass runs in CI after browser installation.
+
+## Interactive scene playground
+
+After `pnpm build`, run `pnpm playground` and open `http://127.0.0.1:4179`. The local-only [Anim8 Studio](examples/playground/README.md) includes editable JSON, the 150 example selector, compiler diagnostics, real SVG preview, deterministic time scrubbing, play/pause, import and JSON/SVG downloads. `pnpm playground:browser` qualifies the real Chromium editing and playback flow.
+
+## GIF/MP4 and SVG frame exports
+
+Build `@anim8/export`, then run `node packages/export/dist/cli.js input.json frames/ --fps 24` to export static frame SVGs. Install Playwright Chromium and FFmpeg to export GIF/MP4: `node packages/export/dist/cli.js input.json output.mp4 --fps 24`. Optional external dependencies remain outside the normal animation runtime. See [export package](packages/export/README.md) for limits and reproducibility details.
+
+## Real-model and adversarial qualification
+
+`pnpm model:providers:smoke` runs **offline**, fake-provider transport tests; it does not measure model quality. For opt-in paid real-provider tests, configure `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`, then follow [model evaluation instructions](tests/model-eval/README.md). `pnpm security:adversarial` runs a seeded untrusted-scene check, and `pnpm qualification:browser` reports real Chromium RAF timing, lifecycle and JS heap for multiple player instances. See [release checklist](docs/release/README.md) for outstanding gates and publication credentials.
 
 ## Security model
 
