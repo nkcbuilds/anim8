@@ -167,7 +167,7 @@ Build `@anim8/export`, then run `node packages/export/dist/cli.js input.json fra
 
 ## Real-model and adversarial qualification
 
-`pnpm model:providers:smoke` runs **offline**, fake-provider transport tests; it does not measure model quality. For opt-in paid real-provider tests, configure `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`, then follow [model evaluation instructions](tests/model-eval/README.md). `pnpm security:adversarial` runs a seeded untrusted-scene check, and `pnpm qualification:browser` reports real Chromium RAF timing, lifecycle and JS heap for multiple player instances. See [release checklist](docs/release/README.md) for outstanding gates and publication credentials.
+`pnpm model:providers:smoke` runs **offline**, fake-provider transport tests; it does not measure model quality. For opt-in paid real-provider tests, configure `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`, then follow [model evaluation instructions](tests/model-eval/README.md). `pnpm security:adversarial` runs a seeded untrusted-scene check. `pnpm qualification:matrix` checks desktop, CPU-throttled mobile Chromium, mobile WebKit and a larger scene, saving timing/lifecycle/Chromium heap evidence to `artifacts/qualification/browser.json`. Emulation does not establish physical-device performance. `pnpm qualification:media` requires FFmpeg/ffprobe and verifies real MP4/GIF output by inspecting and decoding it. See [qualification instructions](tests/qualification/README.md) and the [release checklist](docs/release/README.md) for outstanding gates and publication credentials.
 
 ## Security model
 
