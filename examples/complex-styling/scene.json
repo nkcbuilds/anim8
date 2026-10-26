@@ -1,0 +1,679 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1200,
+    "height": 700,
+    "background": "#ffffff"
+  },
+  "objects": [
+    {
+      "id": "heading",
+      "type": "text",
+      "transform": {
+        "x": 600,
+        "y": 42,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 32,
+        "fontWeight": 700
+      },
+      "visible": true,
+      "z": 0,
+      "text": "How a quorum commits a write"
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "transform": {
+        "x": 600,
+        "y": 85,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 18
+      },
+      "visible": true,
+      "z": 1,
+      "text": "3 replicas. A majority of 2 can commit, even with 1 offline.",
+      "textRuns": [
+        {
+          "text": "3 replicas. A majority of ",
+          "color": "#475569"
+        },
+        {
+          "text": "2",
+          "color": "#059669",
+          "fontWeight": 800
+        },
+        {
+          "text": " can commit, even with ",
+          "color": "#475569"
+        },
+        {
+          "text": "1 offline.",
+          "color": "#dc2626",
+          "fontWeight": 700
+        }
+      ]
+    },
+    {
+      "id": "cluster",
+      "type": "rect",
+      "transform": {
+        "x": 745,
+        "y": 297,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#94a3b8",
+        "strokeWidth": 2,
+        "color": "#0f172a",
+        "fontSize": 18,
+        "strokeDasharray": [
+          12,
+          8
+        ],
+        "radius": 24
+      },
+      "visible": true,
+      "z": 2,
+      "width": 750,
+      "height": 310
+    },
+    {
+      "id": "cluster-label",
+      "type": "text",
+      "transform": {
+        "x": 744,
+        "y": 166,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 18,
+        "fontWeight": 600
+      },
+      "visible": true,
+      "z": 3,
+      "text": "Replicated log \u00b7 majority = 2 of 3"
+    },
+    {
+      "id": "client",
+      "type": "rect",
+      "transform": {
+        "x": 136,
+        "y": 282,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#7c3aed",
+        "strokeWidth": 2,
+        "color": "#5b21b6",
+        "fontSize": 18,
+        "fillGradient": {
+          "type": "linear",
+          "stops": [
+            {
+              "offset": 0,
+              "color": "#ede9fe"
+            },
+            {
+              "offset": 1,
+              "color": "#dbeafe"
+            }
+          ]
+        },
+        "fontWeight": 700
+      },
+      "visible": true,
+      "z": 4,
+      "width": 180,
+      "height": 80,
+      "text": "Client"
+    },
+    {
+      "id": "leader",
+      "type": "rect",
+      "transform": {
+        "x": 490,
+        "y": 282,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#fff7ed",
+        "stroke": "#ea580c",
+        "strokeWidth": 2,
+        "color": "#9a3412",
+        "fontSize": 18,
+        "strokeDasharray": [
+          8,
+          5
+        ],
+        "fontWeight": 700
+      },
+      "visible": true,
+      "z": 5,
+      "width": 180,
+      "height": 80,
+      "text": "Leader \u00b7 append"
+    },
+    {
+      "id": "follower-a",
+      "type": "rect",
+      "transform": {
+        "x": 940,
+        "y": 242,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#eff6ff",
+        "stroke": "#2563eb",
+        "strokeWidth": 2,
+        "color": "#1e40af",
+        "fontSize": 18,
+        "strokeDasharray": [
+          8,
+          5
+        ],
+        "fontWeight": 700
+      },
+      "visible": true,
+      "z": 6,
+      "width": 180,
+      "height": 80,
+      "text": "Replica A \u00b7 pending"
+    },
+    {
+      "id": "follower-b",
+      "type": "rect",
+      "transform": {
+        "x": 940,
+        "y": 372,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#fef2f2",
+        "stroke": "#ef4444",
+        "strokeWidth": 2,
+        "color": "#991b1b",
+        "fontSize": 18,
+        "strokeDasharray": [
+          3,
+          6
+        ],
+        "strokeOpacity": 0.7,
+        "fontStyle": "italic"
+      },
+      "visible": true,
+      "z": 7,
+      "width": 180,
+      "height": 80,
+      "text": "Replica B \u00b7 offline"
+    },
+    {
+      "id": "request",
+      "type": "connector",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#7c3aed",
+        "strokeWidth": 3,
+        "color": "#6d28d9",
+        "fontSize": 14,
+        "strokeDasharray": [
+          10,
+          6
+        ],
+        "strokeLinecap": "round"
+      },
+      "visible": true,
+      "z": 8,
+      "kind": "orthogonal",
+      "from": {
+        "objectId": "client",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "leader",
+        "anchor": "left"
+      },
+      "label": "1. write"
+    },
+    {
+      "id": "replicate",
+      "type": "connector",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#7c3aed",
+        "strokeWidth": 3,
+        "color": "#6d28d9",
+        "fontSize": 14,
+        "strokeDasharray": [
+          10,
+          6
+        ],
+        "strokeLinecap": "round"
+      },
+      "visible": true,
+      "z": 9,
+      "kind": "orthogonal",
+      "from": {
+        "objectId": "leader",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "follower-a",
+        "anchor": "left"
+      },
+      "label": "2. replicate"
+    },
+    {
+      "id": "unreachable",
+      "type": "connector",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#ef4444",
+        "strokeWidth": 2,
+        "color": "#dc2626",
+        "fontSize": 14,
+        "strokeDasharray": [
+          3,
+          6
+        ],
+        "strokeOpacity": 0.7
+      },
+      "visible": true,
+      "z": 10,
+      "kind": "orthogonal",
+      "from": {
+        "objectId": "leader",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "follower-b",
+        "anchor": "left"
+      },
+      "label": "No ACK"
+    },
+    {
+      "id": "commit-progress",
+      "type": "path",
+      "transform": {
+        "x": 400,
+        "y": 478,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#059669",
+        "strokeWidth": 5,
+        "color": "#0f172a",
+        "fontSize": 18,
+        "strokeDasharray": [
+          12,
+          6
+        ],
+        "strokeLinecap": "round",
+        "strokeGradient": {
+          "type": "linear",
+          "stops": [
+            {
+              "offset": 0,
+              "color": "#0ea5e9"
+            },
+            {
+              "offset": 1,
+              "color": "#16a34a"
+            }
+          ]
+        }
+      },
+      "visible": true,
+      "z": 11,
+      "d": "M 0 0 L 680 0",
+      "drawProgress": 0
+    },
+    {
+      "id": "commit-label",
+      "type": "text",
+      "transform": {
+        "x": 744,
+        "y": 515,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#047857",
+        "fontSize": 17
+      },
+      "visible": true,
+      "z": 12,
+      "text": "Commit only after the leader + Replica A acknowledge the log entry."
+    },
+    {
+      "id": "step1",
+      "type": "text",
+      "transform": {
+        "x": 210,
+        "y": 590,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#ea580c",
+        "fontSize": 20,
+        "fontWeight": 700
+      },
+      "visible": true,
+      "z": 13,
+      "text": "1  Append locally"
+    },
+    {
+      "id": "step2",
+      "type": "text",
+      "transform": {
+        "x": 600,
+        "y": 590,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#2563eb",
+        "fontSize": 20,
+        "fontWeight": 700
+      },
+      "visible": true,
+      "z": 14,
+      "text": "2  Receive replica ACK"
+    },
+    {
+      "id": "step3",
+      "type": "text",
+      "transform": {
+        "x": 990,
+        "y": 590,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#059669",
+        "fontSize": 20,
+        "fontWeight": 700
+      },
+      "visible": true,
+      "z": 15,
+      "text": "3  Commit + reply"
+    },
+    {
+      "id": "note",
+      "type": "text",
+      "transform": {
+        "x": 600,
+        "y": 650,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#64748b",
+        "strokeWidth": 2,
+        "color": "#475569",
+        "fontSize": 17
+      },
+      "visible": true,
+      "z": 16,
+      "text": "A network partition reduces availability; it does not lower the majority threshold."
+    }
+  ],
+  "timeline": [
+    {
+      "id": "flow-request",
+      "type": "style",
+      "target": "request",
+      "start": 0,
+      "duration": 3200,
+      "to": {
+        "strokeDashoffset": -96
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "flow-replicate",
+      "type": "style",
+      "target": "replicate",
+      "start": 0,
+      "duration": 3200,
+      "to": {
+        "strokeDashoffset": -96
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "append",
+      "type": "style",
+      "target": "leader",
+      "start": 500,
+      "duration": 900,
+      "to": {
+        "fill": "#ffedd5",
+        "stroke": "#f97316",
+        "strokeWidth": 4
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "ack",
+      "type": "style",
+      "target": "follower-a",
+      "start": 1900,
+      "duration": 800,
+      "to": {
+        "fill": "#dcfce7",
+        "stroke": "#16a34a",
+        "color": "#166534",
+        "strokeDasharray": []
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "committed",
+      "type": "style",
+      "target": "leader",
+      "start": 2800,
+      "duration": 700,
+      "to": {
+        "fill": "#dcfce7",
+        "stroke": "#16a34a",
+        "color": "#166534",
+        "strokeDasharray": []
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "edge-finish",
+      "type": "style",
+      "target": "replicate",
+      "start": 3200,
+      "duration": 400,
+      "to": {
+        "stroke": "#16a34a",
+        "color": "#166534",
+        "strokeDasharray": []
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "reveal-quorum",
+      "type": "draw",
+      "target": "commit-progress",
+      "start": 2800,
+      "duration": 1400,
+      "to": 1,
+      "easing": "linear"
+    },
+    {
+      "id": "progress-flow",
+      "type": "style",
+      "target": "commit-progress",
+      "start": 2800,
+      "duration": 1400,
+      "to": {
+        "strokeDashoffset": -54
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "reply",
+      "type": "style",
+      "target": "request",
+      "start": 3600,
+      "duration": 600,
+      "to": {
+        "stroke": "#16a34a",
+        "color": "#166534",
+        "strokeDasharray": []
+      },
+      "easing": "linear"
+    },
+    {
+      "id": "finish-hold",
+      "type": "opacity",
+      "target": "heading",
+      "start": 4200,
+      "duration": 1800,
+      "to": 1
+    },
+    {
+      "id": "ack-label",
+      "type": "text",
+      "target": "follower-a",
+      "start": 2700,
+      "duration": 0,
+      "to": "Replica A \u00b7 ACK"
+    },
+    {
+      "id": "commit-label-update",
+      "type": "text",
+      "target": "leader",
+      "start": 3500,
+      "duration": 0,
+      "to": "Leader \u00b7 committed"
+    },
+    {
+      "id": "reply-label-update",
+      "type": "text",
+      "target": "client",
+      "start": 4200,
+      "duration": 0,
+      "to": "Client \u00b7 success"
+    }
+  ],
+  "markers": [
+    {
+      "id": "append",
+      "label": "Append locally",
+      "time": 500
+    },
+    {
+      "id": "ack",
+      "label": "Replica acknowledges",
+      "time": 1900
+    },
+    {
+      "id": "commit",
+      "label": "Majority commits",
+      "time": 2800
+    },
+    {
+      "id": "reply",
+      "label": "Reply to client",
+      "time": 4200
+    }
+  ]
+}

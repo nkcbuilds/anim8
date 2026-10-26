@@ -169,6 +169,14 @@ Build `@anim8/export`, then run `node packages/export/dist/cli.js input.json fra
 
 `pnpm model:providers:smoke` runs **offline**, fake-provider transport tests; it does not measure model quality. For opt-in paid real-provider tests, configure `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`, then follow [model evaluation instructions](tests/model-eval/README.md). `pnpm security:adversarial` runs a seeded untrusted-scene check. `pnpm qualification:matrix` checks desktop, CPU-throttled mobile Chromium, mobile WebKit and a larger scene, saving timing/lifecycle/Chromium heap evidence to `artifacts/qualification/browser.json`. Emulation does not establish physical-device performance. `pnpm qualification:media` requires FFmpeg/ffprobe and verifies real MP4/GIF output by inspecting and decoding it. See [qualification instructions](tests/qualification/README.md) and the [release checklist](docs/release/README.md) for outstanding gates and publication credentials.
 
+## Rich styling and complex explanations
+
+Independent fill/outline/text colors, linear gradients, multicolor text spans, dashed/dotted outlines, animated dash flow, style keyframes and timed label replacements are supported. Connector labels render in SVG and arrowheads follow their connector color. Combine these with groups, routed connectors, graph layouts, camera moves and state machines for layered 2D explanations.
+
+See the [visual styling guide](docs/guides/visual-styling.md) and the [animated quorum-write example](examples/complex-styling/README.md). `pnpm browser:styles` verifies static/mounted pixel parity, seeking and cleanup in Chromium, Firefox and WebKit. Subject-matter accuracy and large-graph readability still require review.
+
+The [full merge-sort motion example](examples/merge-sort-motion/README.md) moves twelve persistent boxes and their original identity tags through recursive splits and stable merges. `pnpm sorting:check` checks the algorithm and movement; `pnpm sorting:browser` verifies real playback, reverse playback, DOM identity and static/player pixel parity in all three browsers.
+
 ## Security model
 
 Remote/model-generated scene documents are untrusted data. Anim8 does not evaluate JavaScript from JSON, and the compiler enforces structural/resource policies before rendering. See [docs/security.md](docs/security.md).

@@ -1,4 +1,5 @@
 import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
+import { styleIssues, styleProperties, textRunIssues } from "./style.js";
 import { morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
 import type { Action, ScalarValue, SceneDocument, StateAction } from "./types.js";
 
@@ -18,6 +19,8 @@ const props = (action: Action): string[] => {
     case "opacity": return ["opacity"];
     case "fill": return ["fill"];
     case "stroke": return ["stroke"];
+    case "style": return styleProperties(action.to);
+    case "text": return ["text"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
     case "morph": return ["d"];
@@ -104,6 +107,10 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
   const ids = new Set<string>();
   const objectById = new Map<string, SceneDocument["objects"][number]>();
   scene.objects.forEach((object, index) => {
+    for (const issue of styleIssues(object.style)) diagnostics.push({ code: "INVALID_STYLE_VALUE", path: `objects[${index}].style.${issue.property}`, message: issue.message });
+    if ((object.type === "text" || object.type === "rect" || object.type === "circle" || object.type === "ellipse") && object.textRuns !== undefined) {
+      for (const message of textRunIssues(object.textRuns, object.text ?? "")) diagnostics.push({ code: "INVALID_TEXT_RUNS", path: `objects[${index}].textRuns`, message });
+    }
     if (ids.has(object.id)) diagnostics.push({ code: "DUPLICATE_ID", path: `objects[${index}].id`, message: `Object '${object.id}' is duplicated.` });
     ids.add(object.id);
     objectById.set(object.id, object);
@@ -177,6 +184,10 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
   });
 
   scene.timeline.forEach((action, index) => {
+    if (action.type === "style") {
+      if (!Object.keys(action.to).length) diagnostics.push({ code: "INVALID_STYLE_TARGET", path: `timeline[${index}].to`, message: "Style actions require a nonempty patch." });
+      for (const issue of styleIssues(action.to)) diagnostics.push({ code: "INVALID_STYLE_VALUE", path: `timeline[${index}].to.${issue.property}`, message: issue.message });
+    }
     if (!Number.isFinite(action.start) || action.start < 0) diagnostics.push({ code: "INVALID_TIME", path: `timeline[${index}].start`, message: "start must be a finite number >= 0." });
     if (!Number.isFinite(action.duration) || action.duration < 0) diagnostics.push({ code: "INVALID_DURATION", path: `timeline[${index}].duration`, message: "duration must be a finite number >= 0." });
 
@@ -209,6 +220,11 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
     });
 
     const target = objectById.get(action.target);
+    if (action.type === "text") {
+      if (target && target.type !== "text" && target.type !== "rect" && target.type !== "circle" && target.type !== "ellipse") diagnostics.push({ code: "UNSUPPORTED_TEXT_TARGET", path: `timeline[${index}].target`, message: "Only text and labeled shapes expose text." });
+      if (typeof action.to !== "string" || action.to.length > 32768) diagnostics.push({ code: "INVALID_TEXT_TARGET", path: `timeline[${index}].to`, message: "text.to requires a bounded string." });
+      if (action.textRuns) for (const message of textRunIssues(action.textRuns, action.to)) diagnostics.push({ code: "INVALID_TEXT_RUNS", path: `timeline[${index}].textRuns`, message });
+    }
 
     if (action.type === "followPath") {
       if (action.points.length < 2) {

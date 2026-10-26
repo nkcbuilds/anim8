@@ -38,6 +38,9 @@ jobs:
       - name: Run release checks
         run: pnpm check
 
+      - name: Configure reliable Ubuntu package downloads
+        run: bash .github/scripts/prepare-apt.sh
+
       - name: Install browser matrix
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
@@ -45,6 +48,28 @@ jobs:
         run: pnpm browser
         env:
           ANIM8_BROWSER_REQUIRE_ALL: "1"
+
+      - name: Verify rich styles, dashed reveal and static/mounted pixel parity
+        run: pnpm browser:styles
+
+      - name: Save styling previews
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rich-styles
+          path: artifacts/rich-styles/
+          if-no-files-found: warn
+
+      - name: Qualify full merge-sort box motion and stable identity
+        run: pnpm sorting:browser
+
+      - name: Save merge-sort motion evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sorting-motion
+          path: artifacts/sorting/
+          if-no-files-found: warn
 
       - name: Validate all 150 gallery scenes in Chromium
         run: pnpm catalog:browser

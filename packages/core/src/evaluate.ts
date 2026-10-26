@@ -1,4 +1,5 @@
 import { defaultCamera } from "./defaults.js";
+import { interpolateStyle, styleProperties } from "./style.js";
 import { ease, lerp, lerpColor } from "./easing.js";
 import { decomposeMatrix, identityMatrix, invertMatrix, multiply, quadraticPoint, worldMatrix, worldOpacity } from "./geometry.js";
 import { canonicalMorphPathToString, interpolateMorphPath, morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
@@ -17,6 +18,8 @@ function actionProperties(action: Action): readonly string[] {
     case "opacity": return ["opacity"];
     case "fill": return ["fill"];
     case "stroke": return ["stroke"];
+    case "style": return styleProperties(action.to);
+    case "text": return ["text"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
     case "morph": return ["d"];
@@ -199,9 +202,21 @@ function applyAction(state: Map<string, DrawableObject>, action: ObjectAction, t
       break;
     case "fill":
       target.style.fill = lerpColor(target.style.fill ?? "#ffffff", action.to, progress);
+      if (progress >= 1) delete target.style.fillGradient;
       break;
     case "stroke":
       target.style.stroke = lerpColor(target.style.stroke ?? "#1f2937", action.to, progress);
+      if (progress >= 1) delete target.style.strokeGradient;
+      break;
+    case "style":
+      target.style = interpolateStyle(target.style, action.to, progress);
+      break;
+    case "text":
+      if (time >= action.start + action.duration && (target.type === "text" || target.type === "rect" || target.type === "circle" || target.type === "ellipse")) {
+        target.text = action.to;
+        if (action.textRuns) target.textRuns = clone(action.textRuns);
+        else delete target.textRuns;
+      }
       break;
     case "resize":
       switch (target.type) {
@@ -268,12 +283,18 @@ function applyBinding(state: Map<string, DrawableObject>, binding: Binding, time
     target.transform[property as "x"|"y"|"rotation"|"scaleX"|"scaleY"|"opacity"] = value;
     return;
   }
-  if ((property === "fill" || property === "stroke") && typeof value === "string") {
+  if ((property === "fill" || property === "stroke" || property === "color") && typeof value === "string") {
     target.style[property] = value;
+    delete target.style[`${property}Gradient`];
+    return;
+  }
+  if (property === "strokeDashoffset" && typeof value === "number" && Number.isFinite(value)) {
+    target.style.strokeDashoffset = value;
     return;
   }
   if (property === "text" && typeof value === "string" && (target.type === "rect" || target.type === "circle" || target.type === "ellipse" || target.type === "text")) {
     target.text = value;
+    delete target.textRuns;
   }
 }
 

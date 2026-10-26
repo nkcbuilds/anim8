@@ -1,4 +1,4 @@
-import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
+import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, STYLE_KEYS, styleIssues, styleProperties, textRunIssues, type Style, type TextRun, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
 
 export interface SceneOptions {
   width?: number;
@@ -66,7 +66,7 @@ export type SemanticPosition =
   | "bottom-left"
   | "bottom-right";
 
-export interface ShapeOptions {
+export interface ShapeOptions extends Style {
   id?: string;
   x?: number;
   y?: number;
@@ -90,6 +90,7 @@ export type PendingAction = WithoutSchedule<Action>;
 type Pending = PendingAction;
 
 export interface Keyframe {
+  style?: Style;
   /** Normalized target time in (0, 1]. The current evaluated pose is implicit at 0. */
   offset: number;
   position?: PointValue;
@@ -149,6 +150,24 @@ export class NodeHandle {
   }
   fadeTo(to: number, options: MotionOptions = {}): Pending {
     return { type: "opacity", target: this.id, to, duration: options.duration ?? 400, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
+  }
+  styleTo(to: Style, options: MotionOptions = {}): Pending {
+    const issues = styleIssues(to);
+    if (!Object.keys(to).length || issues.length) throw new Error("Invalid style target: " + issues.map(i => i.message).join("; "));
+    return { type: "style", target: this.id, to: structuredClone(to), duration: options.duration ?? 400, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
+  }
+  colorTo(color: string, options: MotionOptions = {}): Pending {
+    return this.styleTo({ color }, options);
+  }
+  strokeTo(stroke: string, options: MotionOptions = {}): Pending {
+    return this.styleTo({ stroke }, options);
+  }
+  dashTo(offset: number, options: MotionOptions = {}): Pending {
+    return this.styleTo({ strokeDashoffset: offset }, options);
+  }
+  textTo(value: string | readonly TextRun[], options: MotionOptions = {}): Pending {
+    const { text, textRuns } = textContent(value);
+    return { type: "text", target: this.id, to: text, ...(textRuns ? { textRuns } : {}), duration: options.duration ?? 0, easing: "linear", ...(options.interrupt ? { interrupt: true } : {}) };
   }
   highlight(color = "#fef08a", options: MotionOptions = {}): Pending {
     return { type: "fill", target: this.id, to: color, duration: options.duration ?? 300, easing: options.easing ?? "easeInOut", ...(options.interrupt ? { interrupt: true } : {}) };
@@ -224,14 +243,11 @@ export class SceneBuilder {
   }
 
   private styleFor(options: ShapeOptions): ReturnType<typeof defaultStyle> {
-    return {
-      ...defaultStyle(),
-      ...(options.fill !== undefined ? { fill: options.fill } : {}),
-      ...(options.stroke !== undefined ? { stroke: options.stroke } : {}),
-      ...(options.strokeWidth !== undefined ? { strokeWidth: options.strokeWidth } : {}),
-      ...(options.color !== undefined ? { color: options.color } : {}),
-      ...(options.radius !== undefined ? { radius: options.radius } : {}),
-    };
+    const style: Style = { ...defaultStyle() };
+    for (const key of STYLE_KEYS) if (options[key] !== undefined) (style as Record<string, unknown>)[key] = structuredClone(options[key]);
+    const issues = styleIssues(style);
+    if (issues.length) throw new Error(issues.map(i => i.property + ": " + i.message).join("; "));
+    return style;
   }
 
   private objectById(id: string): DrawableObject {
@@ -391,10 +407,10 @@ export class SceneBuilder {
     };
   }
 
-  box(text = "", options: ShapeOptions = {}): NodeHandle {
+  box(text: string | readonly TextRun[] = "", options: ShapeOptions = {}): NodeHandle {
     const id = options.id ?? this.next("box");
     this.objects.push({
-      id, type: "rect", width: options.width ?? 100, height: options.height ?? 60, text,
+      id, type: "rect", width: options.width ?? 100, height: options.height ?? 60, ...textContent(text),
       transform: { ...defaultTransform(), x: options.x ?? 0, y: options.y ?? 0 },
       style: this.styleFor(options),
       visible: true, z: this.objects.length,
@@ -402,10 +418,10 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  circle(text = "", options: ShapeOptions = {}): NodeHandle {
+  circle(text: string | readonly TextRun[] = "", options: ShapeOptions = {}): NodeHandle {
     const id = options.id ?? this.next("circle");
     this.objects.push({
-      id, type: "circle", radius: (options.width ?? options.height ?? 60) / 2, text,
+      id, type: "circle", radius: (options.width ?? options.height ?? 60) / 2, ...textContent(text),
       transform: { ...defaultTransform(), x: options.x ?? 0, y: options.y ?? 0 },
       style: this.styleFor(options),
       visible: true, z: this.objects.length,
@@ -413,7 +429,7 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  ellipse(text = "", options: ShapeOptions = {}): NodeHandle {
+  ellipse(text: string | readonly TextRun[] = "", options: ShapeOptions = {}): NodeHandle {
     const id = options.id ?? this.next("ellipse");
     const width = options.width ?? 100;
     const height = options.height ?? 60;
@@ -421,7 +437,7 @@ export class SceneBuilder {
       throw new Error("Ellipse width and height must be finite numbers >= 0.");
     }
     this.objects.push({
-      id, type: "ellipse", rx: width / 2, ry: height / 2, text,
+      id, type: "ellipse", rx: width / 2, ry: height / 2, ...textContent(text),
       transform: { ...defaultTransform(), x: options.x ?? 0, y: options.y ?? 0 },
       style: this.styleFor(options),
       visible: true, z: this.objects.length,
@@ -470,10 +486,10 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  text(text: string, options: ShapeOptions = {}): NodeHandle {
+  text(text: string | readonly TextRun[], options: ShapeOptions = {}): NodeHandle {
     const id = options.id ?? this.next("text");
     this.objects.push({
-      id, type: "text", text,
+      id, type: "text", ...textContent(text),
       transform: { ...defaultTransform(), x: options.x ?? 0, y: options.y ?? 0 },
       style: this.styleFor(options), visible: true, z: this.objects.length,
     });
@@ -502,12 +518,12 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  connect(from: NodeHandle, to: NodeHandle, options: { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string } = {}): NodeHandle {
-    const id = this.next("connector");
+  connect(from: NodeHandle, to: NodeHandle, options: ShapeOptions & { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string } = {}): NodeHandle {
+    const id = options.id ?? this.next("connector");
     this.objects.push({
       id, type: "connector", from: { objectId: from.id, ...(options.from ? { anchor: options.from } : {}) }, to: { objectId: to.id, ...(options.to ? { anchor: options.to } : {}) },
       kind: options.kind ?? "straight", ...(options.routing ? { routing: structuredClone(options.routing) } : {}), ...(options.label ? { label: options.label } : {}),
-      transform: defaultTransform(), style: { ...defaultStyle(), fill: "none" }, visible: true, z: this.objects.length,
+      transform: defaultTransform(), style: { ...this.styleFor(options), fill: "none" }, visible: true, z: this.objects.length,
     });
     return new NodeHandle(id, this);
   }
@@ -653,6 +669,7 @@ export class SceneBuilder {
         pending.push({ type: "stroke", target: target.id, to: frame.stroke, duration: segmentDuration, easing });
       }
 
+      if (frame.style !== undefined) pending.push(target.styleTo(frame.style, { duration: segmentDuration, easing }));
       for (const action of pending) ids.push(this.scheduleAt(segmentStart, action));
       previousOffset = frame.offset;
     }
@@ -673,6 +690,8 @@ export class SceneBuilder {
       case "opacity": return ["opacity"];
       case "fill": return ["fill"];
       case "stroke": return ["stroke"];
+      case "style": return styleProperties(action.to);
+      case "text": return ["text"];
       case "resize": return ["width", "height"];
       case "draw": return ["drawProgress"];
       case "morph": return ["d"];
@@ -753,6 +772,9 @@ export class SceneBuilder {
       const object = frame.objects.find(item => item.id === original.target);
       if (!object) throw new Error(`Unknown target '${original.target}'.`);
       switch (original.type) {
+        case "text":
+          if (object.type === "text" || object.type === "rect" || object.type === "circle" || object.type === "ellipse") hold = { type: "text", target: original.target, to: object.text ?? "", ...(object.textRuns ? { textRuns: structuredClone(object.textRuns) } : {}), duration: 0, easing: "linear", interrupt: true };
+          break;
         case "move":
         case "followPath":
           hold = { type: "move", target: original.target, to: { x: object.transform.x, y: object.transform.y }, duration: 0, easing: "linear", interrupt: true };
@@ -772,6 +794,13 @@ export class SceneBuilder {
         case "stroke":
           hold = { type: "stroke", target: original.target, to: object.style.stroke ?? "none", duration: 0, easing: "linear", interrupt: true };
           break;
+        case "style": {
+          const defaults: Style = { fillGradient: null, strokeGradient: null, colorGradient: null, strokeDasharray: [], strokeDashoffset: 0, strokeLinecap: "butt", strokeLinejoin: "miter", fillOpacity: 1, strokeOpacity: 1, fontWeight: 400, fontStyle: "normal", fontFamily: "sans-serif", textAnchor: "middle", textStroke: "none", textStrokeWidth: 0, radius: 10, ...defaultStyle() };
+          const to: Style = {};
+          for (const key of Object.keys(original.to) as (keyof Style)[]) (to as Record<string, unknown>)[key] = structuredClone(object.style[key] ?? defaults[key]);
+          hold = { type: "style", target: original.target, to, duration: 0, easing: "linear", interrupt: true };
+          break;
+        }
         case "resize": {
           if (object.type === "rect" || object.type === "image") {
             hold = { type: "resize", target: original.target, to: { width: object.width, height: object.height }, duration: 0, easing: "linear", interrupt: true };
@@ -965,3 +994,11 @@ export const expr = {
 };
 
 export function scene(options: SceneOptions = {}): SceneBuilder { return new SceneBuilder(options); }
+
+function textContent(value: string | readonly TextRun[]): { text: string; textRuns?: TextRun[] } {
+  if (typeof value === "string") return { text: value };
+  const text = value.map(run => run.text).join("");
+  const issues = textRunIssues([...value], text);
+  if (issues.length) throw new Error(issues.join("; "));
+  return { text, textRuns: structuredClone([...value]) };
+}

@@ -86,3 +86,7 @@ means the repair should target that reference. Do not rewrite unrelated scene da
 ## Safety
 
 Never put JavaScript, `eval`, event-handler strings, arbitrary HTML, or unsafe external URLs into scene documents.
+
+## Styling generated explanations
+
+Use the [visual styling guide](visual-styling.md) for multicolor text, gradients, dashed outlines, flowing connections and completion states. Keep each rich label's plain `text` equal to its `textRuns` concatenation. Use `style` actions for visual changes and `text` actions for completion labels. Use `[]` for solid outlines and a negative `strokeDashoffset` target for forward dash flow; all animation timing remains explicit in the timeline. Validate every generated scene through the compiler. Visual validity does not establish subject-matter accuracy.
