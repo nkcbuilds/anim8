@@ -150,6 +150,34 @@ try {
       await page.locator("#file-input").setInputFiles({ name: "quorum.json", mimeType: "application/json", buffer: Buffer.from(quorumSource) });
       await validSource(page, "How a quorum commits");
       assert.equal(await page.locator("#scrubber").inputValue(), "0", "Import resets time");
+      for (const stepTime of [0, 1000]) {
+        const tied = { ...quorum, markers: [
+          { id: "first", label: "First tied step " + stepTime, time: stepTime },
+          { id: "second", label: "Second tied step", time: stepTime },
+          { id: "third", label: "Later step", time: 2000 },
+        ] };
+        await page.locator("#file-input").setInputFiles({ name: "tied-steps.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(tied)) });
+        await validSource(page, "First tied step " + stepTime);
+        await page.locator("#markers").selectOption("0");
+        assert.equal(await page.locator("#markers").inputValue(), "0", "Select the first same-time annotation");
+        await page.locator("#next-step").click();
+        assert.equal(await page.locator("#markers").inputValue(), "1", "Visit the second annotation at the same time");
+        assert.equal(await page.locator("#scrubber").inputValue(), String(stepTime));
+        await page.locator("#previous-step").click();
+        assert.equal(await page.locator("#markers").inputValue(), "0", "Return to the first same-time annotation");
+        await page.locator("#markers").selectOption("2");
+        await page.locator("#previous-step").click();
+        assert.equal(await page.locator("#markers").inputValue(), "1");
+        await page.locator("#scrubber").fill(String(stepTime + 300));
+        await page.locator("#previous-step").click();
+        assert.equal(await page.locator("#scrubber").inputValue(), String(stepTime), "Previous from between steps reaches the current step start");
+        await page.locator("#previous-step").click();
+        assert.equal(await page.locator("#markers").inputValue(), "0");
+        await page.locator("#previous-step").click();
+        assert.equal(await page.locator("#markers").inputValue(), "", "Before-first state must not jump to the last zero-time marker");
+        await page.locator("#next-step").click();
+        assert.equal(await page.locator("#markers").inputValue(), "0");
+      }
       // Source changes with no steps cannot retain the previous scene's markers.
       console.log(name + " · still scene");
       const still = { version: "1.0", scene: { width: 300, height: 200 }, objects: [], timeline: [] };

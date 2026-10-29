@@ -6,7 +6,7 @@ const $ = Object.fromEntries([
   "time-label", "duration-label", "dimensions", "format", "download-json", "download-svg",
   "open-file", "file-input", "speed", "markers", "previous-step", "next-step",
 ].map(id => [id, el(id)]));
-let player, markers = [], debounce, compileSeq = 0, sampleSeq = 0, pendingCompile;
+let player, markers = [], markerIndex = -1, markerTime = null, debounce, compileSeq = 0, sampleSeq = 0, pendingCompile;
 
 function download(filename, contents, type) {
   const url = URL.createObjectURL(new Blob([contents], { type }));
@@ -26,8 +26,12 @@ function sync() {
   $.play.textContent = playing ? "❚❚ Pause" : "▶ Play";
   $.play.setAttribute("aria-label", playing ? "Pause animation" : "Play animation");
   $.play.setAttribute("aria-pressed", String(playing));
-  const current = markers.findLastIndex(marker => marker.time <= time + 0.001);
-  $.markers.value = current < 0 ? "" : String(current);
+  // Retain an explicitly selected marker when several annotations share a time.
+  if (markerTime === null || Math.abs(markerTime - time) > 0.001) {
+    markerIndex = markers.findLastIndex(marker => marker.time <= time + 0.001);
+  }
+  markerTime = time;
+  $.markers.value = markerIndex < 0 ? "" : String(markerIndex);
 }
 function controls(enabled) {
   for (const id of ["play", "restart", "scrubber", "speed", "download-svg"]) $[id].disabled = !enabled;
@@ -41,7 +45,7 @@ function invalidate() {
   pause(); controls(false);
 }
 function clearPreview() {
-  player?.destroy(); player = undefined; markers = [];
+  player?.destroy(); player = undefined; markers = []; markerIndex = -1; markerTime = null;
   $.preview.replaceChildren(Object.assign(document.createElement("div"), {
     className: "placeholder", textContent: "Fix the scene to resume preview",
   }));
@@ -75,6 +79,7 @@ async function compileScene(reset = false) {
     player?.destroy();
     $.preview.replaceChildren();
     markers = [...(result.scene.markers ?? [])].sort((a, b) => a.time - b.time);
+    markerIndex = -1; markerTime = null;
     $.markers.replaceChildren(new Option(markers.length ? "Before first step" : "No steps", ""));
     markers.forEach((marker, index) => $.markers.add(new Option(
       (marker.time / 1000).toFixed(2) + "s · " + marker.label, String(index),
@@ -130,11 +135,21 @@ $.source.addEventListener("input", () => { ++sampleSeq; schedule(); });
 $.scrubber.addEventListener("input", () => { const time = Number($.scrubber.value); pause(); player?.seek(time); });
 $.speed.addEventListener("change", () => player?.setSpeed(Number($.speed.value)));
 $.markers.addEventListener("change", () => {
-  const time = $.markers.value === "" ? 0 : markers[Number($.markers.value)].time;
-  pause(); player?.seek(time);
+  const selected = $.markers.value === "" ? -1 : Number($.markers.value);
+  pause(); markerIndex = selected; markerTime = selected < 0 ? 0 : markers[selected].time; player?.seek(markerTime);
 });
-$["previous-step"].addEventListener("click", () => { pause(); player?.previousStep(); });
-$["next-step"].addEventListener("click", () => { pause(); player?.nextStep(); });
+$["previous-step"].addEventListener("click", () => {
+  pause();
+  const betweenSteps = markerIndex >= 0 && player.getTime() > markers[markerIndex].time + 0.001;
+  markerIndex = betweenSteps ? markerIndex : Math.max(-1, markerIndex - 1);
+  markerTime = markerIndex < 0 ? 0 : markers[markerIndex].time;
+  player?.seek(markerTime);
+});
+$["next-step"].addEventListener("click", () => {
+  pause();
+  if (markerIndex + 1 < markers.length) { markerTime = markers[++markerIndex].time; player?.seek(markerTime); }
+  else player?.seek(player.getDuration());
+});
 $.format.addEventListener("click", () => {
   try { ++sampleSeq; $.source.value = JSON.stringify(JSON.parse($.source.value), null, 2); schedule(); }
   catch (error) { invalidate(); clearPreview(); status("Invalid JSON", false); $.errors.textContent = error.message; }
