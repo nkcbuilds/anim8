@@ -1,6 +1,7 @@
 /** Verify editor → compiler → persistent player → exported frame in real browsers. */
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import { request as httpRequest } from "node:http";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { chromium, firefox, webkit } from "playwright";
 import { compileJson } from "../../packages/compiler/dist/index.js";
@@ -199,6 +200,27 @@ try {
     assert.equal(blocked.status, 403, "Cross-origin compilation must be rejected");
   }
   assert.equal((await fetch(origin + "/api/example?id=../../package.json")).status, 404);
+  // Unicode labels must survive TCP chunks ending inside a multibyte character.
+  const unicodeLabel = "Compare ≤ then merge 🚀";
+  const unicodeScene = { version: "1.0", scene: { width: 300, height: 200 }, objects: [], timeline: [], markers: [{ id: "compare", label: unicodeLabel, time: 0 }] };
+  const body = Buffer.from(JSON.stringify({ source: JSON.stringify(unicodeScene) }));
+  for (const character of ["≤", "🚀"]) {
+    const split = body.indexOf(Buffer.from(character)) + 1;
+    const result = await new Promise((resolve, reject) => {
+      const req = httpRequest(origin + "/api/compile", { method: "POST", headers: { Origin: origin, "Content-Type": "application/json" } }, res => {
+        const chunks = [];
+        res.on("data", chunk => chunks.push(chunk));
+        res.on("error", reject);
+        res.on("end", () => { try { resolve(JSON.parse(Buffer.concat(chunks).toString("utf8"))); } catch (error) { reject(error); } });
+      });
+      req.setTimeout(5000, () => req.destroy(Error("Unicode compile timed out")));
+      req.on("error", reject);
+      req.write(body.subarray(0, split));
+      setTimeout(() => req.end(body.subarray(split)), 20);
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.scene.markers[0].label, unicodeLabel, "Decode UTF-8 after collecting chunks");
+  }
   report.ok = true;
 } finally {
   server.kill();

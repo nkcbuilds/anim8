@@ -42,13 +42,14 @@ const server=createServer(async(req,res)=>{
   if(req.method==="POST"&&(url.pathname==="/api/render"||url.pathname==="/api/compile")){
    if(req.headers.origin!==origin){response(res,403,{error:"Cross-origin request denied"});return;}
    if(!/application\/json/.test(req.headers["content-type"]??"")){response(res,415,{error:"Expected JSON"});return;}
-   let bytes=0,raw="";
+   let bytes=0;const chunks=[];
    for await(const part of req){
      bytes+=part.length;
      if(bytes>2*1024*1024+4096){response(res,413,{error:"Scene too large"});req.destroy();return;}
-     raw+=part.toString();
+     chunks.push(part);
    }
-   const request=JSON.parse(raw);
+   // Decode once: a network chunk can end in the middle of a UTF-8 character.
+   const request=JSON.parse(Buffer.concat(chunks).toString("utf8"));
    if(typeof request.source!=="string"){response(res,400,{error:"Scene source must be text"});return;}
    const time=url.pathname==="/api/compile"?0:Number(request.timeMs);
    if(!Number.isFinite(time)||time<0||time>3600000){response(res,400,{error:"timeMs out of bounds"});return;}
