@@ -27,6 +27,12 @@ interface SceneDocument {
 
 Every object has a stable `id`, transform, style, visibility and z-order. Parent relationships are represented with `parentId`.
 
+## Explanation markers
+
+Optional `markers` contain `{ id, label, time }` with an absolute millisecond timestamp. JSON compilation preserves their source order and validates unique IDs, string labels (up to 32,768 characters), finite times in `0..3,600,000`, and a maximum of 10,000 entries. IDs follow the same syntax and length limits as object IDs, in a separate namespace.
+
+The player and playground order markers by time for stepping. Markers name existing points on the timeline; they do not extend animation duration. Use timestamps within the animated interval for reachable steps.
+
 ## Supported v1 generic objects
 
 - `rect`
