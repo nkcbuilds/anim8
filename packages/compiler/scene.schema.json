@@ -117,6 +117,33 @@
       "items": {
         "$ref": "#/$defs/stateMachine"
       }
+    },
+    "markers": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "time"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 32768
+          },
+          "time": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3600000
+          }
+        }
+      }
     }
   },
   "$defs": {
