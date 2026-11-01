@@ -4,6 +4,8 @@ import {
   evaluate,
   routeConnector,
   worldMatrix,
+  worldOpacity,
+  worldVisible,
   type ConnectorObject,
   type DrawableObject,
   type EvaluatedScene,
@@ -330,7 +332,7 @@ function renderConnector(
   objects: ReadonlyMap<string, DrawableObject>,
   seed: SketchSeed,
 ): string {
-  if (!connector.visible) return "";
+  if (!worldVisible(connector, objects)) return "";
   const base = connectorBasePath(connector, objects);
   if (!base) return "";
 
@@ -373,7 +375,7 @@ function renderConnector(
       )
     : "";
 
-  return `<g data-anim8-id="${escapeXml(connector.id)}" opacity="${formatNumber(connector.transform.opacity)}">${exact}${overdraw}${label}</g>`;
+  return `<g data-anim8-id="${escapeXml(connector.id)}" opacity="${formatNumber(worldOpacity(connector, objects))}">${exact}${overdraw}${label}</g>`;
 }
 
 function renderObject(
@@ -381,7 +383,7 @@ function renderObject(
   objects: ReadonlyMap<string, DrawableObject>,
   seed: SketchSeed,
 ): string {
-  if (!object.visible) return "";
+  if (!worldVisible(object, objects)) return "";
   if (object.type === "connector") return renderConnector(object, objects, seed);
   if (object.type === "group") return "";
 
@@ -416,7 +418,7 @@ function renderObject(
       break;
   }
 
-  return `<g data-anim8-id="${escapeXml(object.id)}" transform="${transform}" opacity="${formatNumber(object.transform.opacity)}">${body}</g>`;
+  return `<g data-anim8-id="${escapeXml(object.id)}" transform="${transform}" opacity="${formatNumber(worldOpacity(object, objects))}">${body}</g>`;
 }
 
 /**
@@ -459,8 +461,9 @@ function sketchReveal(d: string, style: Style, progress?: number): { definition:
   const pad = (style.strokeWidth ?? 2) * 2 + 4;
   const xs = points.map(p => p.x), ys = points.map(p => p.y);
   const minX = Math.min(...xs) - pad, minY = Math.min(...ys) - pad;
-  const maskFill = style.fill === undefined || style.fill === "none" ? "none" : "white";
-  const id = resourceId(["sketch-reveal", d, style.strokeWidth, progress, maskFill]);
+  // The fill is already painted separately; a reveal mask covers only strokes.
+  const maskFill = "none";
+  const id = resourceId(["sketch-reveal", d, style.strokeWidth, progress, style.fill ?? "none"]);
   return {
     attribute: ` mask="url(#${id})"`,
     definition: `<mask id="${id}" maskUnits="userSpaceOnUse" x="${formatNumber(minX)}" y="${formatNumber(minY)}" width="${formatNumber(Math.max(...xs) + pad - minX)}" height="${formatNumber(Math.max(...ys) + pad - minY)}"><path d="${escapeXml(d)}" fill="${maskFill}" stroke="${progress > 0 ? "white" : "none"}" stroke-width="${formatNumber((style.strokeWidth ?? 2) + 2)}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - Math.max(0, progress))}"/></mask>`,

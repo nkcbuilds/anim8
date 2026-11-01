@@ -52,6 +52,17 @@ jobs:
       - name: Verify rich styles, dashed reveal and static/mounted pixel parity
         run: pnpm browser:styles
 
+      - name: Verify renderer hierarchy and reveal pixels across browsers
+        run: pnpm browser:visual
+
+      - name: Save renderer quality evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rendering-quality
+          path: artifacts/rendering-quality/
+          if-no-files-found: warn
+
       - name: Save styling previews
         if: always()
         uses: actions/upload-artifact@v7

@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import { defaultStyle, defaultTransform, type SceneDocument } from "@anim8/core";
 import { renderSketchSceneAt } from "../src/index.js";
 
-it("isolates reveal masks for identical paths with different fill states", () => {
+it("keeps independently painted fills out of outline reveal masks", () => {
   const scene: SceneDocument = {
     version: "1.0", scene: { width: 480, height: 180 }, timeline: [],
     objects: ["none", "#fde68a"].map((fill, i) => ({
@@ -15,6 +15,6 @@ it("isolates reveal masks for identical paths with different fill states", () =>
   const masks = [...svg.matchAll(/<mask id="([^"]+)"[\s\S]*?<path[^>]* fill="([^"]+)"/g)];
   expect(masks).toHaveLength(2);
   expect(new Set(masks.map(m => m[1])).size).toBe(2);
-  expect(masks.map(m => m[2])).toEqual(["none", "white"]);
+  expect(masks.map(m => m[2])).toEqual(["none", "none"]);
   for (const mask of masks) expect(svg).toContain(`mask="url(#${mask[1]})"`);
 });

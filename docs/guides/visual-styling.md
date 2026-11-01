@@ -70,7 +70,7 @@ JSON uses `{ type: "style", target, start, duration, to: { ...stylePatch } }`. `
 
 Conflicting writes are rejected across legacy fill/stroke actions, style patches and bindings. A gradient and its solid channel count as the same property. An explicitly interrupted multi-property style action freezes its whole patch; split independent channels into separate actions if they should be interrupted independently. Seeking/reverse evaluates absolute time; styling has no CSS animation clock and finished states persist.
 
-Styled dashes and `draw` reveal compose using SVG masks, including horizontal paths. The sketch renderer supports the deterministic M/L/H/V/C/Q/Z subset for dashed path reveal; unsupported sketch reveal commands raise an error. Clean SVG supports arbitrary compiler-accepted SVG path data. Connector labels are rendered, and arrowheads inherit the connector's stroke.
+Styled dashes and `draw` reveal compose using stroke-only SVG masks, including horizontal paths. Fills remain independent of reveal progress. Filled dashed shapes use a temporary compositing group in the clean renderer so nested opacity is applied once to the combined fill and outline; the original shape node is retained during playback, hydration and completion. The sketch renderer supports the deterministic M/L/H/V/C/Q/Z subset for dashed path reveal; unsupported sketch reveal commands raise an error. Clean SVG supports arbitrary compiler-accepted SVG path data. Connector labels are rendered, and arrowheads inherit the connector's stroke.
 
 ## Complex explanations and limits
 

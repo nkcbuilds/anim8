@@ -8,6 +8,7 @@ The integrated qualification scripts are:
 |---|---|
 | `pnpm check` | 19 package builds/typechecks/tests, packaging, consumers, 150 catalog examples, 500 seeded hostile scene mutations and provider adapter mocks |
 | `pnpm browser` | Chromium, Firefox and WebKit player/wrapper correctness |
+| `pnpm browser:visual` | Three-engine pixel checks for outline reveal, static/mounted parity, fill preservation and nested group visibility/opacity |
 | `pnpm catalog:browser` | Real Chromium visuals and clipping guard on 150 scenes |
 | `pnpm qualification:browser` | RAF cadence, 12 active players, 30 mount/unmount cycles, Chrome JS heap |
 | `pnpm qualification:matrix` | Desktop, CPU-throttled mobile Chromium, mobile WebKit, 200-object scene and retained JSON evidence |
