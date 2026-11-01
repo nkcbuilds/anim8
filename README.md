@@ -159,7 +159,7 @@ The [teaching scene catalog](examples/catalog/README.md) contains 150 portable a
 
 ## Interactive scene playground
 
-After `pnpm build`, run `pnpm playground` and open `http://127.0.0.1:4179`. The local-only [Anim8 Studio](examples/playground/README.md) includes editable JSON, the 150 example selector, compiler diagnostics, real SVG preview, deterministic time scrubbing, play/pause, import and JSON/SVG downloads. `pnpm playground:browser` qualifies the real Chromium editing and playback flow.
+After `pnpm build`, run `pnpm playground` and open `http://127.0.0.1:4179`. The local-only [Anim8 Studio](examples/playground/README.md) includes editable JSON, a chooser with the 150 catalog scenes plus merge-sort motion and quorum-write demonstrations, compiler diagnostics, real SVG preview, deterministic time scrubbing, play/pause, speed controls, explanation steps, import and JSON/SVG downloads. Playback uses the browser player without per-frame server requests. `pnpm playground:browser` qualifies editing and playback in Chromium, Firefox, WebKit and a narrow mobile viewport.
 
 ## GIF/MP4 and SVG frame exports
 

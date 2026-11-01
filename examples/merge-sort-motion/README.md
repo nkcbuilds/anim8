@@ -17,7 +17,7 @@ pnpm build
 pnpm playground
 ```
 
-Open `http://127.0.0.1:4179` and import `examples/merge-sort-motion/scene.json`. Play, scrub, change speed, or seek through the split/merge markers. This extra example is separate from the 150-scene catalog.
+Open `http://127.0.0.1:4179`; merge sort is selected by default. Play, scrub, change speed, or use the explanation step selector and previous/next buttons to inspect the split/merge markers. The chooser includes this extra demonstration alongside the unchanged 150-scene catalog.
 
 ```sh
 pnpm sorting:generate       # reproduce scene.json and trace.json

@@ -12,7 +12,7 @@ node packages/cli/dist/cli.js validate examples/complex-styling/scene.json
 pnpm playground
 ```
 
-Open `http://127.0.0.1:4179` and import `examples/complex-styling/scene.json`. Seek through the markers or play the animation. The 150-scene catalog is unchanged; this extra example is imported separately.
+Open `http://127.0.0.1:4179` and choose **ADVANCED / How a quorum commits a write**. Use the explanation steps, scrubber or playback controls. The chooser includes this extra demonstration alongside the unchanged 150-scene catalog.
 
 With optional Playwright Chromium and FFmpeg installed:
 

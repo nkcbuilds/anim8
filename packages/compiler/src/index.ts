@@ -29,6 +29,7 @@ import {
   type DrawableObject,
   type Easing,
   type LinearGradient,
+  type Marker,
   type PointValue,
   type SceneDocument,
   type Style,
@@ -52,6 +53,7 @@ export const COMPILER_LIMITS = Object.freeze({
   sourceBytes: 2 * 1024 * 1024,
   objects: 5_000,
   timelineActions: 10_000,
+  markers: 10_000,
   bindings: 10_000,
   interactions: 5_000,
   interactionActions: 100,
@@ -2185,6 +2187,33 @@ function parseSceneMetadata(
   };
 }
 
+function parseMarkers(value: unknown, diagnostics: Diagnostic[]): Marker[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    diagnostic(diagnostics, "INVALID_MARKERS", "markers", "markers must be an array.");
+    return [];
+  }
+  const markers: Marker[] = [], ids = new Set<string>();
+  value.forEach((item: unknown, index: number) => {
+    const path = `markers[${index}]`;
+    if (!isRecord(item)) {
+      diagnostic(diagnostics, "INVALID_MARKER", path, "Marker must be an object.");
+      return;
+    }
+    const id = parseId(item.id, `${path}.id`, diagnostics);
+    if (id && ids.has(id)) diagnostic(diagnostics, "DUPLICATE_MARKER_ID", `${path}.id`, "Marker IDs must be unique.");
+    if (id) ids.add(id);
+    if (typeof item.label !== "string") diagnostic(diagnostics, "INVALID_TEXT", `${path}.label`, "Marker label must be a string.");
+    const label = typeof item.label === "string" ? parseBoundedText(item.label, "", `${path}.label`, diagnostics) : "";
+    if (!finite(item.time) || item.time < 0 || item.time > COMPILER_LIMITS.actionTime) {
+      diagnostic(diagnostics, "INVALID_MARKER_TIME", `${path}.time`, `Marker time must be between 0 and ${COMPILER_LIMITS.actionTime} milliseconds.`);
+      return;
+    }
+    if (id) markers.push({ id, label, time: item.time });
+  });
+  return markers;
+}
+
 export function compile(input: unknown): CompileResult {
   const diagnostics: Diagnostic[] = [];
   if (!isRecord(input)) {
@@ -2222,6 +2251,10 @@ export function compile(input: unknown): CompileResult {
     );
   }
 
+  if (Array.isArray(input.markers) && input.markers.length > COMPILER_LIMITS.markers) {
+    diagnostic(diagnostics, "LIMIT_MARKERS", "markers", `markers exceeds the ${COMPILER_LIMITS.markers}-entry limit.`);
+  }
+
   if (input.bindings !== undefined && !Array.isArray(input.bindings)) {
     diagnostic(diagnostics, "INVALID_BINDINGS", "bindings", "bindings must be an array.");
   } else if (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings) {
@@ -2257,6 +2290,7 @@ export function compile(input: unknown): CompileResult {
     !Array.isArray(input.timeline) ||
     input.objects.length > COMPILER_LIMITS.objects ||
     input.timeline.length > COMPILER_LIMITS.timelineActions ||
+    (Array.isArray(input.markers) && input.markers.length > COMPILER_LIMITS.markers) ||
     (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings) ||
     (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions) ||
     (Array.isArray(input.stateMachines) && input.stateMachines.length > COMPILER_LIMITS.stateMachines)
@@ -2273,6 +2307,7 @@ export function compile(input: unknown): CompileResult {
     .filter((value): value is Action => value !== null);
 
   const state = parseState(input.state, diagnostics);
+  const markers = parseMarkers(input.markers, diagnostics);
   const bindings = Array.isArray(input.bindings)
     ? input.bindings.map((value, index) => parseBinding(value, index, diagnostics)).filter((value): value is Binding => value !== null)
     : [];
@@ -2299,6 +2334,7 @@ export function compile(input: unknown): CompileResult {
     scene,
     objects,
     timeline,
+    ...(markers.length ? { markers } : {}),
     ...(state ? { state } : {}),
     ...(bindings.length ? { bindings } : {}),
     ...(interactions.length ? { interactions } : {}),

@@ -12,7 +12,7 @@ The integrated qualification scripts are:
 | `pnpm qualification:browser` | RAF cadence, 12 active players, 30 mount/unmount cycles, Chrome JS heap |
 | `pnpm qualification:matrix` | Desktop, CPU-throttled mobile Chromium, mobile WebKit, 200-object scene and retained JSON evidence |
 | `pnpm qualification:media` | Real GIF/MP4 codec, size, frame count, duration, complete decode and file protection |
-| `pnpm playground:browser` | Local JSON editor, compilation diagnostics, example switching, playback and CORS |
+| `pnpm playground:browser` | 152 selectable scenes, local persistent-player playback, steps/speed, diagnostics, imports/downloads and CORS in three engines plus a narrow mobile viewport |
 | `node tests/model-eval/run.mjs --models ...` | Explicitly paid live API generation success rates and repair metrics |
 | `pnpm release:preflight` | Built package manifests/exports/README/license/bin and release version agreement |
 
