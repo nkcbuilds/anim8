@@ -33,13 +33,13 @@ function transform(object: DrawableObject, objects: ReadonlyMap<string, Drawable
   return `matrix(${formatNumber(m.a)} ${formatNumber(m.b)} ${formatNumber(m.c)} ${formatNumber(m.d)} ${formatNumber(m.e)} ${formatNumber(m.f)})`;
 }
 
-function style(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): string {
+function style(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>, fillOverride?: string, opacityOverride?: number): string {
   const s = object.style;
   return [
-    `fill="${esc(paint(s, "fill", "none", object, objects))}"`,
+    `fill="${esc(fillOverride ?? paint(s, "fill", "none", object, objects))}"`,
     `stroke="${esc(paint(s, "stroke", "none", object, objects))}"`,
     `stroke-width="${formatNumber(s.strokeWidth ?? 0)}"`,
-    `opacity="${formatNumber(worldOpacity(object, objects))}"`,
+    `opacity="${formatNumber(opacityOverride ?? worldOpacity(object, objects))}"`,
     attributesSvg(outlineAttributes(s, "drawProgress" in object ? object.drawProgress : undefined)),
   ].join(" ");
 }
@@ -88,7 +88,7 @@ function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, Drawable
   }
   if (object.type === "group") return "";
   const t = transform(object, objects);
-  const common = `data-anim8-id="${esc(object.id)}" transform="${t}" ${style(object, objects)}`;
+  const common = object.type === "path" || object.type === "polygon" || object.type === "polyline" ? "" : `data-anim8-id="${esc(object.id)}" transform="${t}" ${style(object, objects)}`;
   switch (object.type) {
     case "rect": {
       const x = -object.width / 2, y = -object.height / 2;
@@ -105,15 +105,15 @@ function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, Drawable
       return `<g ${common}><ellipse cx="0" cy="0" rx="${formatNumber(object.rx)}" ry="${formatNumber(object.ry)}"/>${text}</g>`;
     }
     case "polygon":
-      return `<polygon ${common} points="${points(object.points)}"${drawAttributes(object, frame)}/>`;
+      return revealObjectSvg(object, objects, frame);
     case "polyline":
-      return `<polyline ${common} points="${points(object.points)}"${drawAttributes(object, frame)}/>`;
+      return revealObjectSvg(object, objects, frame);
     case "text":
       return `<text data-anim8-id="${esc(object.id)}" transform="${t}" x="0" y="0" dominant-baseline="middle" ${attributesSvg(textAttributes(object.style))} opacity="${formatNumber(worldOpacity(object, objects))}">${textSvg(object.text, object.textRuns)}</text>`;
     case "line":
       return `<line ${common} x1="0" y1="0" x2="${formatNumber(object.x2)}" y2="${formatNumber(object.y2)}"/>`;
     case "path":
-      return `<path ${common} d="${esc(formatPathData(object.d))}"${drawAttributes(object, frame)}/>`;
+      return revealObjectSvg(object, objects, frame);
     case "image":
       return `<image ${common} x="${formatNumber(-object.width/2)}" y="${formatNumber(-object.height/2)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" href="${esc(object.href)}"/>`;
   }
@@ -147,6 +147,8 @@ interface ObjectDomRecord {
   element: SVGElement;
   shape?: SVGElement;
   label?: SVGTextElement;
+  revealGroup?: SVGGElement;
+  revealFill?: SVGElement;
 }
 
 function createSvgElement<K extends keyof SVGElementTagNameMap>(
@@ -315,6 +317,7 @@ function syncObjectRecord(
     case "polyline":
       setAttribute(record.element, "points", points(object.points));
       syncDrawAttributes(record.element, object, frame);
+      syncRevealFill(document, record, object, objects);
       return;
     case "text":
       setAttribute(record.element, "x", 0);
@@ -333,6 +336,7 @@ function syncObjectRecord(
     case "path":
       setAttribute(record.element, "d", formatPathData(object.d));
       syncDrawAttributes(record.element, object, frame);
+      syncRevealFill(document, record, object, objects);
       return;
     case "image":
       setAttribute(record.element, "x", -object.width / 2);
@@ -423,15 +427,21 @@ function findHydratableSvg(container: Element, frame: EvaluatedScene): {
   const objects = new Map(frame.objects.map(object => [object.id, object]));
   const records = new Map<string, ObjectDomRecord>();
   for (const child of Array.from(world.children)) {
-    const id = child.getAttribute("data-anim8-id");
+    const revealGroup = child.hasAttribute("data-anim8-reveal-group");
+    const id = child.getAttribute("data-anim8-id") ?? child.getAttribute("data-anim8-reveal-group");
     if (!id) continue;
     const object = objects.get(id);
     if (!object || object.type === "group") {
       child.remove();
       continue;
     }
-    const record = adoptObjectRecord(object, child);
-    if (record) records.set(id, record);
+    const element = revealGroup ? Array.from(child.children).find(node => node.getAttribute("data-anim8-id") === id) : child;
+    const fill = revealGroup ? Array.from(child.children).find(node => node.getAttribute("data-anim8-reveal-fill") === id) : undefined;
+    const record = element ? adoptObjectRecord(object, element) : undefined;
+    if (record && (!revealGroup || (child.tagName.toLowerCase() === "g" && fill))) {
+      if (revealGroup) { record.revealGroup = child as SVGGElement; record.revealFill = fill as SVGElement; }
+      records.set(id, record);
+    }
     else child.remove();
   }
   for (const child of Array.from(world.children)) {
@@ -542,8 +552,7 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
 
     for (const [id, record] of records) {
       if (!liveIds.has(id)) {
-        record.label?.remove();
-        record.element.remove();
+        removeRecord(record);
         records.delete(id);
       }
     }
@@ -553,7 +562,7 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
 
       if (object.type === "group") {
         if (existing) {
-          existing.element.remove();
+          removeRecord(existing);
           records.delete(object.id);
         }
         continue;
@@ -561,14 +570,13 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
 
       let record = existing;
       if (!record || record.type !== object.type) {
-        record?.label?.remove();
-        record?.element.remove();
+        if (record) removeRecord(record);
         record = createObjectRecord(document, object);
         records.set(object.id, record);
       }
 
       syncObjectRecord(document, record, object, objects, next);
-      if (!worldVisible(object, objects)) { record.element.remove(); record.label?.remove(); }
+      if (!worldVisible(object, objects)) { (record.revealGroup ?? record.element).remove(); record.label?.remove(); }
     }
 
     const ordered = [...next.objects].sort((a, b) => a.z - b.z);
@@ -576,7 +584,7 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
       if (object.type === "group" || !worldVisible(object, objects)) continue;
       const record = records.get(object.id);
       if (record) {
-        world.appendChild(record.element);
+        world.appendChild(record.revealGroup ?? record.element);
         if (object.type === "connector" && record.label) world.appendChild(record.label);
       }
     }
@@ -614,6 +622,51 @@ function syncText(document: Document, element: SVGElement, text: string, runs?: 
 }
 
 type RevealObject = Extract<DrawableObject, { type: "path" | "polygon" | "polyline" }>;
+function splitRevealFill(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): object is RevealObject {
+  return needsRevealMask(object) && paint(object.style, "fill", "none", object, objects) !== "none";
+}
+function revealGeometry(object: RevealObject): Record<string, string> {
+  return object.type === "path" ? { d: formatPathData(object.d) } : { points: points(object.points) };
+}
+function revealFillAttributes(object: RevealObject, objects: ReadonlyMap<string, DrawableObject>): Record<string, string> {
+  return {
+    "data-anim8-reveal-fill": object.id, transform: transform(object, objects),
+    fill: paint(object.style, "fill", "none", object, objects), stroke: "none", "pointer-events": "none",
+    "fill-opacity": formatNumber(object.style.fillOpacity ?? 1), ...revealGeometry(object),
+  };
+}
+function revealObjectSvg(object: RevealObject, objects: ReadonlyMap<string, DrawableObject>, frame: EvaluatedScene): string {
+  const split = splitRevealFill(object, objects);
+  const outline = `<${object.type} data-anim8-id="${esc(object.id)}" transform="${transform(object, objects)}" ${style(object, objects, split ? "none" : undefined, split ? 1 : undefined)} ${attributesSvg(revealGeometry(object))}${split ? ' pointer-events="visible"' : ""}${drawAttributes(object, frame)}/>`;
+  if (!split) return outline;
+  // Apply world opacity once to the composed fill and stroke, matching a single
+  // SVG shape's compositing even where translucent paints overlap.
+  return `<g data-anim8-reveal-group="${esc(object.id)}" opacity="${formatNumber(worldOpacity(object, objects))}"><${object.type} ${attributesSvg(revealFillAttributes(object, objects))}/>${outline}</g>`;
+}
+function syncRevealFill(document: Document, record: ObjectDomRecord, object: RevealObject, objects: ReadonlyMap<string, DrawableObject>): void {
+  if (!splitRevealFill(object, objects)) {
+    record.element.removeAttribute("pointer-events");
+    if (record.revealGroup) {
+      record.element.remove(); record.revealGroup.remove();
+      delete record.revealGroup; delete record.revealFill;
+    }
+    return;
+  }
+  if (!record.revealGroup) {
+    record.revealGroup = createSvgElement(document, "g");
+    record.revealFill = createSvgElement(document, object.type);
+    record.revealGroup.appendChild(record.revealFill);
+    record.revealGroup.appendChild(record.element);
+  }
+  syncAttributes(record.revealGroup, { "data-anim8-reveal-group": object.id, opacity: formatNumber(worldOpacity(object, objects)) });
+  syncAttributes(record.revealFill!, revealFillAttributes(object, objects));
+  setAttribute(record.element, "fill", "none");
+  setAttribute(record.element, "opacity", 1);
+  setAttribute(record.element, "pointer-events", "visible");
+}
+function removeRecord(record: ObjectDomRecord): void {
+  record.revealGroup?.remove(); record.element.remove(); record.label?.remove();
+}
 function needsRevealMask(object: DrawableObject): object is RevealObject {
   return (object.type === "path" || object.type === "polygon" || object.type === "polyline") &&
     object.drawProgress !== undefined && object.drawProgress < 1 && Boolean(object.style.strokeDasharray?.length);
@@ -634,7 +687,7 @@ function revealMask(object: RevealObject, frame: EvaluatedScene, objects: Readon
   return {
     region: { id: revealId(object, frame), maskUnits: "userSpaceOnUse", x: formatNumber(minX), y: formatNumber(minY), width: formatNumber(Math.max(...corners.map(p => p.x)) + pad - minX), height: formatNumber(Math.max(...corners.map(p => p.y)) + pad - minY) },
     tag: object.type,
-    shape: { ...(object.type === "path" ? { d: formatPathData(object.d) } : { points: points(object.points) }), fill: paint(object.style, "fill", "none", object, objects) === "none" ? "none" : "white", stroke: Math.max(0, object.drawProgress ?? 1) > 0 ? "white" : "none", "stroke-width": formatNumber(object.style.strokeWidth ?? 2), "stroke-linecap": object.style.strokeLinecap ?? "butt", "stroke-linejoin": object.style.strokeLinejoin ?? "miter", pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": formatNumber(1 - Math.max(0, object.drawProgress ?? 1)) },
+    shape: { ...(object.type === "path" ? { d: formatPathData(object.d) } : { points: points(object.points) }), fill: "none", stroke: Math.max(0, object.drawProgress ?? 1) > 0 ? "white" : "none", "stroke-width": formatNumber(object.style.strokeWidth ?? 2), "stroke-linecap": object.style.strokeLinecap ?? "butt", "stroke-linejoin": object.style.strokeLinejoin ?? "miter", pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": formatNumber(1 - Math.max(0, object.drawProgress ?? 1)) },
   };
 }
 
