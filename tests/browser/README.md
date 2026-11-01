@@ -82,3 +82,11 @@ pnpm exec playwright install --with-deps chromium firefox webkit
 ```
 
 No fake DOM or fallback browser is used by this suite.
+
+## Renderer quality regressions
+
+Run `pnpm browser:visual` after building the workspace. This requires all three browser engines and exercises synthetic library fixtures, independently of catalog/playground examples.
+
+Each engine checks 18 outline combinations (path/polygon/polyline × butt/round/square caps × solid/dashed), zero/partial/full reveal and repeated seeks, exact static/mounted pixel parity, retained DOM identity, and independent fill visibility. Sixteen hierarchy states cover nested ancestor opacity, group/child visibility, shapes, text and labeled connectors, animation endpoints and backwards seeks. An independent red-over-white pixel oracle checks actual opacity, so agreement between renderers alone cannot conceal the same defect in both.
+
+Reports and failure screenshots are saved under `artifacts/rendering-quality/` and retained by CI/release workflows.

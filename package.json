@@ -28,11 +28,12 @@
     "release:preflight": "node tests/release/preflight.mjs",
     "release:metadata": "node tests/release/check-version.mjs",
     "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm security:adversarial && pnpm model:providers:smoke && pnpm release:metadata && pnpm release:preflight && node packages/cli/dist/cli.js validate examples/complex-styling/scene.json && pnpm sorting:check",
-    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm playground:browser && pnpm qualification:matrix && pnpm qualification:media && pnpm browser:styles && pnpm sorting:browser",
+    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm playground:browser && pnpm qualification:matrix && pnpm qualification:media && pnpm browser:styles && pnpm sorting:browser && pnpm browser:visual",
     "browser:styles": "node tests/browser/rich-styles.mjs",
     "sorting:generate": "node examples/merge-sort-motion/generate.mjs",
     "sorting:check": "node tests/qualification/sorting.mjs",
-    "sorting:browser": "node tests/browser/sorting.mjs"
+    "sorting:browser": "node tests/browser/sorting.mjs",
+    "browser:visual": "node tests/browser/rendering-quality.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

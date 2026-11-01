@@ -4,6 +4,8 @@ import {
   evaluate,
   routeConnector,
   worldMatrix,
+  worldOpacity,
+  worldVisible,
   type ConnectorObject,
   type DrawableObject,
   type EvaluatedScene,
@@ -330,7 +332,7 @@ function renderConnector(
   objects: ReadonlyMap<string, DrawableObject>,
   seed: SketchSeed,
 ): string {
-  if (!connector.visible) return "";
+  if (!worldVisible(connector, objects)) return "";
   const base = connectorBasePath(connector, objects);
   if (!base) return "";
 
@@ -373,7 +375,7 @@ function renderConnector(
       )
     : "";
 
-  return `<g data-anim8-id="${escapeXml(connector.id)}" opacity="${formatNumber(connector.transform.opacity)}">${exact}${overdraw}${label}</g>`;
+  return `<g data-anim8-id="${escapeXml(connector.id)}" opacity="${formatNumber(worldOpacity(connector, objects))}">${exact}${overdraw}${label}</g>`;
 }
 
 function renderObject(
@@ -381,7 +383,7 @@ function renderObject(
   objects: ReadonlyMap<string, DrawableObject>,
   seed: SketchSeed,
 ): string {
-  if (!object.visible) return "";
+  if (!worldVisible(object, objects)) return "";
   if (object.type === "connector") return renderConnector(object, objects, seed);
   if (object.type === "group") return "";
 
@@ -416,7 +418,7 @@ function renderObject(
       break;
   }
 
-  return `<g data-anim8-id="${escapeXml(object.id)}" transform="${transform}" opacity="${formatNumber(object.transform.opacity)}">${body}</g>`;
+  return `<g data-anim8-id="${escapeXml(object.id)}" transform="${transform}" opacity="${formatNumber(worldOpacity(object, objects))}">${body}</g>`;
 }
 
 /**
