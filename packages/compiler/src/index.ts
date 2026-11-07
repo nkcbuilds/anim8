@@ -28,6 +28,8 @@ import {
   type SceneDocument,
   type Style,
   type Transform,
+  DRAWABLE_TYPES,
+  isDrawableType,
 } from "@anim8/core";
 
 export interface CompileResult {
@@ -226,6 +228,11 @@ function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[]): St
       continue;
     }
     style[key] = candidate;
+  }
+
+  if (value.strokeStyle !== undefined) {
+    if (value.strokeStyle === "solid" || value.strokeStyle === "dashed" || value.strokeStyle === "dotted") style.strokeStyle = value.strokeStyle;
+    else diagnostic(diagnostics, "INVALID_STYLE_VALUE", `${path}.strokeStyle`, "strokeStyle must be solid, dashed, or dotted.");
   }
 
   const numberKeys = ["strokeWidth", "fontSize", "radius"] as const;
@@ -635,6 +642,11 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
     ...(parentId ? { parentId } : {}),
   };
 
+  const shapeDraw = () => {
+    const drawProgress = parseDrawProgress(value.drawProgress, `${path}.drawProgress`, diagnostics);
+    return drawProgress !== undefined ? { drawProgress } : {};
+  };
+
   switch (type) {
     case "rect": {
       const text = parseOptionalText(value.text, `${path}.text`, diagnostics);
@@ -644,6 +656,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         width: parsePositiveDimension(value.width, 100, `${path}.width`, diagnostics),
         height: parsePositiveDimension(value.height, 60, `${path}.height`, diagnostics),
         ...(text !== undefined ? { text } : {}),
+        ...shapeDraw(),
       };
     }
     case "circle": {
@@ -653,6 +666,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         type,
         radius: parsePositiveDimension(value.radius, 30, `${path}.radius`, diagnostics),
         ...(text !== undefined ? { text } : {}),
+        ...shapeDraw(),
       };
     }
     case "ellipse": {
@@ -666,6 +680,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         rx,
         ry,
         ...(text !== undefined ? { text } : {}),
+        ...shapeDraw(),
       };
     }
     case "polygon":
@@ -693,6 +708,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         type,
         x2: parseCoordinate(value.x2, 100, `${path}.x2`, diagnostics),
         y2: parseCoordinate(value.y2, 0, `${path}.y2`, diagnostics),
+        ...shapeDraw(),
       };
     case "path": {
       const d = parseBoundedText(value.d, "", `${path}.d`, diagnostics, COMPILER_LIMITS.pathLength);
@@ -769,6 +785,11 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       }
 
       const label = parseOptionalText(value.label, `${path}.label`, diagnostics);
+      let arrowheads: "end" | "start" | "both" | "none" | undefined;
+      if (value.arrowheads !== undefined) {
+        if (value.arrowheads === "end" || value.arrowheads === "start" || value.arrowheads === "both" || value.arrowheads === "none") arrowheads = value.arrowheads;
+        else diagnostic(diagnostics, "INVALID_CONNECTOR_ARROWHEADS", `${path}.arrowheads`, "arrowheads must be end, start, both, or none.");
+      }
       return {
         ...base,
         type,
@@ -777,6 +798,8 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         kind,
         ...(routing ? { routing } : {}),
         ...(label !== undefined ? { label } : {}),
+        ...(arrowheads !== undefined ? { arrowheads } : {}),
+        ...shapeDraw(),
       };
     }
     case "image": {
@@ -1951,13 +1974,13 @@ function validateTimelineReferences(
       }
     }
 
-    if (action.type === "draw" && target.type !== "path" && target.type !== "polygon" && target.type !== "polyline") {
+    if (action.type === "draw" && !isDrawableType(target.type)) {
       diagnostic(
         diagnostics,
         "UNSUPPORTED_DRAW_TARGET",
         `timeline[${index}].target`,
         `Object '${target.id}' of type '${target.type}' does not expose drawProgress.`,
-        "Use draw on path, polygon, or polyline objects.",
+        `Use draw on ${DRAWABLE_TYPES.join(", ")} objects.`,
       );
     }
 

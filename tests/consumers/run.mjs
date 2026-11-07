@@ -20,6 +20,8 @@ const workspacePackages = [
   "a11y",
   "authoring",
   "renderer-svg",
+  "sketch",
+  "renderer-sketch",
   "player",
   "react",
 ];

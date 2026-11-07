@@ -3,18 +3,40 @@
   "scene": {
     "width": 1000,
     "height": 560,
-    "theme": "clean",
-    "background": "#f8fafc",
+    "theme": "sketch",
+    "background": "#ffffff",
     "seed": 130
   },
   "objects": [
+    {
+      "id": "title_highlight",
+      "type": "path",
+      "d": "M 0 0 C 243.8 -3 568.8 3 828.5 -1",
+      "drawProgress": 0,
+      "transform": {
+        "x": 85.74400000000003,
+        "y": 61.44,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      },
+      "visible": true,
+      "z": 9,
+      "description": "Highlighter stroke under the title"
+    },
     {
       "id": "heading",
       "type": "text",
       "text": "True redaction removes sensitive document content",
       "transform": {
         "x": 500,
-        "y": 43,
+        "y": 48,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -23,71 +45,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 27,
-        "radius": 12
-      },
-      "visible": true,
-      "z": 10
-    },
-    {
-      "id": "context",
-      "type": "text",
-      "text": "WORKFLOWS  /  PIPELINE EXPLANATION",
-      "transform": {
-        "x": 500,
-        "y": 79,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#475569",
-        "fontSize": 13,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 32
       },
       "visible": true,
       "z": 10
     },
     {
       "id": "concept_0",
+      "description": "Identify secret",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 170,
-        "y": 275,
+        "x": 140,
+        "y": 265,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "Identify secret",
+      "metadata": {
+        "tone": "blue"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "Identify secret"
     },
     {
       "id": "stage_0",
       "type": "text",
-      "text": "STEP 1/4   Locate sensitive text or images",
+      "text": "Step 1 · Locate sensitive text or images",
       "description": "Locate sensitive text or images",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -96,48 +96,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_1",
+      "description": "Select region",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 390,
-        "y": 275,
+        "x": 380,
+        "y": 265,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "Select region",
+      "metadata": {
+        "tone": "neutral"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "Select region"
     },
     {
       "id": "stage_1",
       "type": "text",
-      "text": "STEP 2/4   Mark exact target regions",
+      "text": "Step 2 · Mark exact target regions",
       "description": "Mark exact target regions",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -146,48 +147,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_2",
+      "description": "Remove content",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 610,
-        "y": 275,
+        "x": 620,
+        "y": 265,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "Remove content",
+      "metadata": {
+        "tone": "neutral"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "Remove content"
     },
     {
       "id": "stage_2",
       "type": "text",
-      "text": "STEP 3/4   Remove underlying content from output",
+      "text": "Step 3 · Remove underlying content from output",
       "description": "Remove underlying content from output",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -196,48 +198,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_3",
+      "description": "Verify output",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 830,
-        "y": 275,
+        "x": 860,
+        "y": 265,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "Verify output",
+      "metadata": {
+        "tone": "green"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "Verify output"
     },
     {
       "id": "stage_3",
       "type": "text",
-      "text": "STEP 4/4   Search extracted text to confirm removal",
+      "text": "Step 4 · Search extracted text to confirm removal",
       "description": "Search extracted text to confirm removal",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -246,10 +249,9 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
@@ -272,16 +274,16 @@
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.18
       },
       "style": {
         "fill": "none",
-        "stroke": "#64748b",
+        "stroke": "#1e1e1e",
         "strokeWidth": 2,
-        "color": "#475569"
+        "color": "#1e1e1e"
       },
       "visible": true,
-      "z": 0
+      "z": 1
     },
     {
       "id": "link_1",
@@ -301,16 +303,16 @@
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.18
       },
       "style": {
         "fill": "none",
-        "stroke": "#64748b",
+        "stroke": "#1e1e1e",
         "strokeWidth": 2,
-        "color": "#475569"
+        "color": "#1e1e1e"
       },
       "visible": true,
-      "z": 0
+      "z": 1
     },
     {
       "id": "link_2",
@@ -330,123 +332,99 @@
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.18
       },
       "style": {
         "fill": "none",
-        "stroke": "#64748b",
+        "stroke": "#1e1e1e",
         "strokeWidth": 2,
-        "color": "#475569"
+        "color": "#1e1e1e"
       },
       "visible": true,
-      "z": 0
+      "z": 1
     },
     {
-      "id": "footer",
-      "type": "text",
-      "text": "Seek to any time  •  Every frame is deterministic",
-      "transform": {
-        "x": 500,
-        "y": 526,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#475569",
-        "fontSize": 12,
-        "radius": 12
-      },
-      "visible": true,
-      "z": 10
-    },
-    {
-      "id": "timeline_rule",
-      "type": "path",
-      "d": "M 0 0 L 710 0",
-      "drawProgress": 0,
-      "transform": {
-        "x": 145,
-        "y": 496,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "#94a3b8",
-        "strokeWidth": 4
-      },
-      "visible": true,
-      "z": 1,
-      "description": "Drawn progress through the four explanation stages"
-    },
-    {
-      "id": "focus_dot",
+      "id": "token",
       "type": "circle",
-      "radius": 9,
+      "radius": 6,
       "transform": {
-        "x": 170,
-        "y": 218,
+        "x": 140,
+        "y": 265,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0
       },
       "style": {
-        "fill": "#2563eb",
-        "stroke": "#eff6ff",
-        "strokeWidth": 2
+        "fill": "#1971c2",
+        "stroke": "#1971c2",
+        "strokeWidth": 1.5
       },
       "visible": true,
-      "z": 9,
-      "description": "Current focus in the explanatory sequence"
+      "z": 2,
+      "description": "Token travelling along the active connection"
     }
   ],
   "timeline": [
     {
-      "id": "advance_progress",
+      "id": "draw_title_highlight",
       "type": "draw",
-      "target": "timeline_rule",
+      "target": "title_highlight",
       "start": 0,
-      "duration": 3200,
-      "easing": "linear",
+      "duration": 700,
+      "easing": "easeOut",
       "to": 1
     },
     {
-      "id": "highlight_0",
+      "id": "reveal_0",
+      "type": "opacity",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 0,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_0",
       "type": "fill",
       "target": "concept_0",
       "start": 0,
-      "duration": 380,
+      "duration": 0,
       "easing": "easeInOut",
-      "to": "#bfdbfe"
+      "to": "#a5d8ff"
     },
     {
-      "id": "expand_0",
+      "id": "stroke_0",
+      "type": "stroke",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 0,
+      "easing": "easeInOut",
+      "to": "#1971c2"
+    },
+    {
+      "id": "pop_0",
       "type": "scale",
       "target": "concept_0",
-      "start": 400,
-      "duration": 230,
+      "start": 120,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_0",
-      "type": "stroke",
+      "id": "settle_0",
+      "type": "scale",
       "target": "concept_0",
-      "start": 160,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 340,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_0",
@@ -457,34 +435,55 @@
       "visible": true
     },
     {
-      "id": "highlight_1",
+      "id": "reveal_1",
+      "type": "opacity",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_1",
       "type": "fill",
       "target": "concept_1",
       "start": 900,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#a7f3d0"
+      "to": "#f1f3f5"
     },
     {
-      "id": "expand_1",
+      "id": "stroke_1",
+      "type": "stroke",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#1e1e1e"
+    },
+    {
+      "id": "pop_1",
       "type": "scale",
       "target": "concept_1",
-      "start": 1300,
-      "duration": 230,
+      "start": 1020,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_1",
-      "type": "stroke",
+      "id": "settle_1",
+      "type": "scale",
       "target": "concept_1",
-      "start": 1060,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 1240,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_1",
@@ -503,46 +502,85 @@
       "visible": false
     },
     {
-      "id": "focus_move_1",
+      "id": "reveal_link_0",
+      "type": "opacity",
+      "target": "link_0",
+      "start": 900,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "token_show",
+      "type": "opacity",
+      "target": "token",
+      "start": 900,
+      "duration": 120,
+      "easing": "linear",
+      "to": 1
+    },
+    {
+      "id": "token_move_1",
       "type": "move",
-      "target": "focus_dot",
+      "target": "token",
       "start": 940,
-      "duration": 360,
+      "duration": 420,
       "easing": "easeInOut",
       "to": {
-        "x": 390,
-        "y": 218
+        "x": 380,
+        "y": 265
       }
     },
     {
-      "id": "highlight_2",
+      "id": "reveal_2",
+      "type": "opacity",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_2",
       "type": "fill",
       "target": "concept_2",
       "start": 1800,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#fde68a"
+      "to": "#f1f3f5"
     },
     {
-      "id": "expand_2",
+      "id": "stroke_2",
+      "type": "stroke",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#1e1e1e"
+    },
+    {
+      "id": "pop_2",
       "type": "scale",
       "target": "concept_2",
-      "start": 2200,
-      "duration": 230,
+      "start": 1920,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_2",
-      "type": "stroke",
+      "id": "settle_2",
+      "type": "scale",
       "target": "concept_2",
-      "start": 1960,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 2140,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_2",
@@ -561,46 +599,76 @@
       "visible": false
     },
     {
-      "id": "focus_move_2",
+      "id": "reveal_link_1",
+      "type": "opacity",
+      "target": "link_1",
+      "start": 1800,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "token_move_2",
       "type": "move",
-      "target": "focus_dot",
+      "target": "token",
       "start": 1840,
-      "duration": 360,
+      "duration": 420,
       "easing": "easeInOut",
       "to": {
-        "x": 610,
-        "y": 218
+        "x": 620,
+        "y": 265
       }
     },
     {
-      "id": "highlight_3",
+      "id": "reveal_3",
+      "type": "opacity",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_3",
       "type": "fill",
       "target": "concept_3",
       "start": 2700,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#fecdd3"
+      "to": "#b2f2bb"
     },
     {
-      "id": "expand_3",
+      "id": "stroke_3",
+      "type": "stroke",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#2f9e44"
+    },
+    {
+      "id": "pop_3",
       "type": "scale",
       "target": "concept_3",
-      "start": 3100,
-      "duration": 230,
+      "start": 2820,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_3",
-      "type": "stroke",
+      "id": "settle_3",
+      "type": "scale",
       "target": "concept_3",
-      "start": 2860,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 3040,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_3",
@@ -619,15 +687,24 @@
       "visible": false
     },
     {
-      "id": "focus_move_3",
+      "id": "reveal_link_2",
+      "type": "opacity",
+      "target": "link_2",
+      "start": 2700,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "token_move_3",
       "type": "move",
-      "target": "focus_dot",
+      "target": "token",
       "start": 2740,
-      "duration": 360,
+      "duration": 420,
       "easing": "easeInOut",
       "to": {
-        "x": 830,
-        "y": 218
+        "x": 860,
+        "y": 265
       }
     }
   ],

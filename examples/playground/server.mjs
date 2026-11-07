@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { compileJson } from "../../packages/compiler/dist/index.js";
 import { evaluate, sceneDuration } from "../../packages/core/dist/index.js";
 import { renderSvg } from "../../packages/renderer-svg/dist/index.js";
+import { renderSketchSvg } from "../../packages/renderer-sketch/dist/index.js";
 const here=dirname(fileURLToPath(import.meta.url)), catalog=resolve(here,"../catalog");
 const manifest=JSON.parse(readFileSync(join(catalog,"index.json"),"utf8"));
 const entries=new Map(manifest.examples.map(e=>[e.id,e]));
@@ -47,7 +48,8 @@ const server=createServer(async(req,res)=>{
    if(!Number.isFinite(time)||time<0||time>3600000){response(res,400,{error:"timeMs out of bounds"});return;}
    const compiled=compileJson(request.source);
    if(!compiled.ok){response(res,200,{ok:false,diagnostics:compiled.diagnostics});return;}
-   const svg=renderSvg(evaluate(compiled.scene,time));
+   const frame=evaluate(compiled.scene,time);
+   const svg=frame.scene.theme==="sketch"?renderSketchSvg(frame):renderSvg(frame);
    response(res,200,{ok:true,svg,durationMs:sceneDuration(compiled.scene),diagnostics:compiled.diagnostics});return;
   }
   response(res,405,{error:"Method not allowed"});

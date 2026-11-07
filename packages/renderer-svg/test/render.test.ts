@@ -211,4 +211,41 @@ describe("SVG renderer", () => {
     expect(path).toBe("M 40 90 L 40 140 L 280 140 L 280 90");
   });
 
+
+  const drawScene = (progress: number | undefined, extra: Record<string, unknown> = {}): SceneDocument => ({
+  version: "1.0",
+  scene: { width: 400, height: 200, seed: 3 },
+  objects: [
+    { id: "a", type: "rect", width: 100, height: 50, text: "Start", transform: { ...defaultTransform(), x: 80, y: 100 }, style: { ...defaultStyle(), fill: "#a5d8ff" }, visible: true, z: 1, ...(progress === undefined ? {} : { drawProgress: progress }) },
+    { id: "b", type: "circle", radius: 30, transform: { ...defaultTransform(), x: 300, y: 100 }, style: defaultStyle(), visible: true, z: 1 },
+    { id: "edge", type: "connector", from: { objectId: "a" }, to: { objectId: "b" }, kind: "straight", transform: defaultTransform(), style: { ...defaultStyle(), fill: "none" }, visible: true, z: 0, ...(progress === undefined ? {} : { drawProgress: progress }), ...extra },
+  ],
+  timeline: [],
+} as SceneDocument);
+
+  it("draws shapes and connectors on, with arrowheads after the line", () => {
+    const svg = (progress: number) => renderSceneAt(drawScene(progress), 0);
+    const rect = (progress: number) => svg(progress).match(/<g data-anim8-id="a"[^>]*>/)![0];
+    const edge = (progress: number) => svg(progress).match(/<path data-anim8-id="edge"[^>]*>/)![0];
+    expect(rect(0)).toContain('stroke-opacity="0"');
+    expect(edge(0)).toContain('stroke-opacity="0"');
+    expect(rect(0.5)).not.toContain('stroke-opacity="0"');
+    expect(rect(0.5)).toMatch(/stroke-dasharray="[\d.]+ [\d.]+"/);
+    expect(rect(0.5)).toContain('fill-opacity="0"');
+    expect(rect(0.75)).toContain('fill-opacity="0.5"');
+    expect(rect(1)).not.toContain("stroke-dasharray");
+    expect(edge(0.4)).toContain('stroke-dashoffset="0.5"');
+    expect(edge(0.4)).not.toContain("marker-end");
+    expect(edge(0.9)).toContain('marker-end="url(#anim8-arrow)"');
+  });
+
+  it("supports arrowheads and dash styles", () => {
+    const edge = (extra: Record<string, unknown>) => renderSceneAt(drawScene(undefined, extra), 0).match(/<path data-anim8-id="edge"[^>]*>/)![0];
+    expect(edge({ arrowheads: "none" })).not.toContain("marker");
+    expect(edge({ arrowheads: "both" })).toContain('marker-start="url(#anim8-arrow-start)"');
+    expect(edge({ arrowheads: "both" })).toContain('marker-end="url(#anim8-arrow)"');
+    expect(edge({ arrowheads: "start" })).not.toContain("marker-end");
+    expect(edge({ style: { ...defaultStyle(), fill: "none", strokeStyle: "dashed" } })).toContain('stroke-dasharray="10 11"');
+    expect(renderSceneAt(drawScene(undefined), 0)).toContain('id="anim8-arrow-start"');
+  });
 });

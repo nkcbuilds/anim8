@@ -17,10 +17,10 @@ import {
 } from "vue";
 import {
   mountPlayer,
+  renderSceneMarkup,
   type PlayerController,
   type PlayerOptions,
 } from "@anim8/player";
-import { renderSceneAt } from "@anim8/renderer-svg";
 
 export type Anim8Scene = Parameters<typeof mountPlayer>[1];
 
@@ -146,7 +146,7 @@ export const Anim8Player = defineComponent({
         ...(generatedLabel && attrs.role === undefined ? { role: "group" } : {}),
         ref: containerRef,
         "data-anim8-player": "",
-        innerHTML: renderSceneAt(props.scene, time),
+        innerHTML: renderSceneMarkup(props.scene, time),
       });
     };
   },

@@ -6,6 +6,8 @@ import {
   sketchLine,
   sketchPathToSvg,
   sketchRectangle,
+  sketchRoundedRectangle,
+  sketchArrowhead,
   type SketchPath,
 } from "../src/index.js";
 
@@ -72,5 +74,48 @@ describe("@anim8/sketch", () => {
     expect(sketchEllipse(0, 0, 30, 20, context)).toEqual(
       sketchEllipse(0, 0, 30, 20, context),
     );
+  });
+
+  it("draws a rounded rectangle as one closed stroke per pass that does not boil when moved", () => {
+    const context = { seed: 3, objectId: "card" };
+    const paths = sketchRoundedRectangle(-80, -30, 160, 60, 14, context);
+    expect(paths).toHaveLength(2);
+    for (const path of paths) {
+      const first = path.commands[0]!;
+      const last = path.commands[path.commands.length - 1]!;
+      expect(first.type).toBe("M");
+      expect(last.to).toEqual(first.to);
+      expect(path.commands.filter(command => command.type === "M")).toHaveLength(1);
+    }
+    const moved = sketchRoundedRectangle(20, 70, 160, 60, 14, context);
+    const flat = (list: readonly SketchPath[]) => list.flatMap(path => path.commands.flatMap(command =>
+      command.type === "C" ? [command.cp1, command.cp2, command.to] : [command.to])).flatMap(point => [point.x, point.y]);
+    const expected = flat(paths.map(path => translatePath(path, 100, 100)));
+    flat(moved).forEach((value, index) => expect(value).toBeCloseTo(expected[index]!, 9));
+  });
+
+  it("keeps strokes visibly hand-drawn but bounded", () => {
+    const [stroke] = sketchLine({ x: 0, y: 0 }, { x: 200, y: 0 }, { seed: 11, objectId: "edge" });
+    const points = stroke!.commands.flatMap(command =>
+      command.type === "C" ? [command.cp1, command.cp2, command.to] : [command.to]);
+    const maxDeviation = Math.max(...points.map(point => Math.abs(point.y)));
+    expect(maxDeviation).toBeGreaterThan(0.5);
+    expect(maxDeviation).toBeLessThan(8);
+  });
+
+  it("points arrowheads back along the incoming direction", () => {
+    const head = sketchArrowhead({ x: 0, y: 0 }, { x: 100, y: 0 }, { seed: 1, objectId: "a", roughness: 0 }, { size: 10 });
+    expect(head).toHaveLength(4);
+    for (const path of head) {
+      const end = path.commands[path.commands.length - 1]!.to;
+      expect(end.x).toBeLessThan(100);
+    }
+  });
+
+  it("draws ellipses that overshoot their starting point", () => {
+    const [outline] = sketchEllipse(0, 0, 60, 30, { seed: 9, objectId: "oval" });
+    const start = outline!.commands[0]!.to;
+    const end = outline!.commands[outline!.commands.length - 1]!.to;
+    expect(Math.hypot(end.x - start.x, end.y - start.y)).toBeGreaterThan(1);
   });
 });

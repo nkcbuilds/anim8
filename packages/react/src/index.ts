@@ -8,10 +8,10 @@ import {
 } from "react";
 import {
   mountPlayer,
+  renderSceneMarkup,
   type PlayerController,
   type PlayerOptions,
 } from "@anim8/player";
-import { renderSceneAt } from "@anim8/renderer-svg";
 
 export type Anim8Scene = Parameters<typeof mountPlayer>[1];
 
@@ -92,7 +92,7 @@ export function Anim8Player({
     initialTime,
   });
   const time = normalizedInitialTime(initialTime);
-  const svg = renderSceneAt(scene, time);
+  const svg = renderSceneMarkup(scene, time);
   const summary = accessibility === false
     ? undefined
     : describeScene(scene, { time, ...(accessibility ?? {}) });

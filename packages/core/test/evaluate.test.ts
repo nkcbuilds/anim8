@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultStyle, defaultTransform, ease, evaluate, validateScene, type SceneDocument } from "../src/index.js";
+import { defaultStyle, defaultTransform, ease, evaluate, validateScene, type DrawableObject, type SceneDocument } from "../src/index.js";
 
 const scene: SceneDocument = {
   version: "1.0",
@@ -16,6 +16,38 @@ const scene: SceneDocument = {
 };
 
 describe("evaluate", () => {
+  it("advances draw actions for every drawable type and remains seekable", () => {
+    const geometry = [
+      { type: "rect", width: 80, height: 40 },
+      { type: "circle", radius: 20 },
+      { type: "ellipse", rx: 40, ry: 20 },
+      { type: "line", x2: 100, y2: 0 },
+      { type: "path", d: "M 0 0 L 100 0" },
+      { type: "polygon", points: [{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 25, y: 40 }] },
+      { type: "polyline", points: [{ x: 0, y: 0 }, { x: 50, y: 0 }] },
+      { type: "connector", from: { objectId: "rect" }, to: { objectId: "circle" }, kind: "straight" },
+    ];
+    const drawing: SceneDocument = {
+      version: "1.0", scene: { width: 600, height: 400 },
+      objects: geometry.map(shape => ({ ...shape, id: shape.type, drawProgress: 0,
+        transform: defaultTransform(), style: defaultStyle(), visible: true, z: 0,
+      } as DrawableObject)),
+      timeline: geometry.map(shape => ({ id: `draw-${shape.type}`, type: "draw", target: shape.type,
+        start: 100, duration: 1000, easing: "linear", to: 1 })),
+    };
+    expect(validateScene(drawing)).toEqual([]);
+    for (const [time, expected] of [[0, 0], [100, 0], [600, 0.5], [1100, 1], [2000, 1], [600, 0.5]] as const) {
+      for (const object of evaluate(drawing, time).objects) {
+        expect((object as { drawProgress: number }).drawProgress, object.type).toBe(expected);
+      }
+    }
+    expect(drawing.objects.every(object => (object as { drawProgress: number }).drawProgress === 0)).toBe(true);
+    for (const object of drawing.objects) {
+      (object as { drawProgress: number }).drawProgress = 1.1;
+    }
+    expect(validateScene(drawing).filter(issue => issue.code === "INVALID_DRAW_PROGRESS")).toHaveLength(geometry.length);
+  });
+
   it("is random-access deterministic", () => {
     const first = evaluate(scene, 500);
     evaluate(scene, 900);
@@ -94,11 +126,15 @@ describe("evaluate", () => {
           id: "path", type: "path", d: "M 0 0 L 10 10",
           transform: defaultTransform(), style: defaultStyle(), visible: true, z: 1,
         },
+        {
+          id: "caption", type: "text", text: "not drawable",
+          transform: defaultTransform(), style: defaultStyle(), visible: true, z: 2,
+        },
       ],
       timeline: [
         { id: "bad-circle", type: "resize", target: "circle", start: 0, duration: 100, to: { width: 80, height: 40 } },
         { id: "bad-resize", type: "resize", target: "path", start: 0, duration: 100, to: { width: 80, height: 40 } },
-        { id: "bad-draw", type: "draw", target: "circle", start: 0, duration: 100, to: 1 },
+        { id: "bad-draw", type: "draw", target: "caption", start: 0, duration: 100, to: 1 },
       ],
     };
     const codes = validateScene(invalid).map(diagnostic => diagnostic.code);

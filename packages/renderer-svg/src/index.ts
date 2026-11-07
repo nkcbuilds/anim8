@@ -1,4 +1,4 @@
-import { anchorPoint, routeConnector, worldMatrix, worldOpacity, worldVisible, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument } from "@anim8/core";
+import { connectorGeometry, fitText, worldMatrix, worldOpacity, worldVisible, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument, type Style } from "@anim8/core";
 import { evaluate } from "@anim8/core";
 
 const esc = (value: string): string => value.replace(/[&<>"']/g, char => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[char]!));
@@ -42,10 +42,134 @@ function style(object: DrawableObject, objects: ReadonlyMap<string, DrawableObje
   ].join(" ");
 }
 
-function drawAttributes(object: DrawableObject): string {
-  if ((object.type !== "path" && object.type !== "polygon" && object.type !== "polyline") || object.drawProgress === undefined) return "";
-  const progress = Math.max(0, Math.min(1, object.drawProgress));
-  return ` pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - progress)}"`;
+const clampUnit = (value: number): number => Math.max(0, Math.min(1, value));
+
+/** Share of a connector's draw-on time spent on the line before its arrowheads appear. */
+const SHAFT_SHARE = 0.8;
+
+/** Attributes managed by stroke effects; null means "remove". */
+type StrokeEffects = Record<"pathLength" | "stroke-dasharray" | "stroke-dashoffset" | "stroke-opacity" | "fill-opacity" | "marker-end" | "marker-start", string | null>;
+
+const NO_EFFECTS: StrokeEffects = {
+  pathLength: null, "stroke-dasharray": null, "stroke-dashoffset": null, "stroke-opacity": null, "fill-opacity": null, "marker-end": null, "marker-start": null,
+};
+
+function dashPattern(style: Style): readonly [number, number] | null {
+  const width = style.strokeWidth ?? 2;
+  if (style.strokeStyle === "dashed") return [8 + width, 8 + width * 1.5];
+  if (style.strokeStyle === "dotted") return [0.01, 4 + width * 2];
+  return null;
+}
+
+function patternList(pattern: readonly [number, number], length: number, progress: number): string {
+  const target = clampUnit(progress) * length;
+  const hidden = formatNumber(length + pattern[0] + pattern[1]);
+  if (target <= 0) return `0 ${hidden}`;
+  const list: string[] = [];
+  for (let position = 0; position < target; position += pattern[0] + pattern[1]) {
+    const dash = Math.min(pattern[0], target - position);
+    list.push(formatNumber(dash), position + pattern[0] + pattern[1] >= target ? hidden : formatNumber(pattern[1]));
+  }
+  return list.join(" ");
+}
+
+/** Analytic stroke length of an object, when it is cheap and exact enough to compute. */
+function strokeLength(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): number | undefined {
+  switch (object.type) {
+    case "rect": {
+      const r = Math.max(0, Math.min(object.style.radius ?? 10, object.width / 2, object.height / 2));
+      return 2 * (object.width + object.height) - 8 * r + 2 * Math.PI * r;
+    }
+    case "circle":
+      return 2 * Math.PI * object.radius;
+    case "ellipse": {
+      const a = object.rx, b = object.ry;
+      return Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b)));
+    }
+    case "line":
+      return Math.hypot(object.x2, object.y2);
+    case "polygon":
+    case "polyline": {
+      const pts = object.points;
+      let total = 0;
+      for (let index = 1; index < pts.length; index += 1) total += Math.hypot(pts[index]!.x - pts[index - 1]!.x, pts[index]!.y - pts[index - 1]!.y);
+      if (object.type === "polygon" && pts.length > 2) total += Math.hypot(pts[0]!.x - pts.at(-1)!.x, pts[0]!.y - pts.at(-1)!.y);
+      return total;
+    }
+    case "connector": {
+      const geometry = connectorGeometry(object, objects);
+      if (!geometry) return undefined;
+      if (geometry.kind === "polyline") {
+        return geometry.points.slice(1).reduce((sum, point, index) => sum + Math.hypot(point.x - geometry.points[index]!.x, point.y - geometry.points[index]!.y), 0);
+      }
+      let total = 0;
+      let previous = geometry.from;
+      for (let step = 1; step <= 24; step += 1) {
+        const t = step / 24, u = 1 - t;
+        const point = {
+          x: u * u * u * geometry.from.x + 3 * u * u * t * geometry.cp1.x + 3 * u * t * t * geometry.cp2.x + t * t * t * geometry.to.x,
+          y: u * u * u * geometry.from.y + 3 * u * u * t * geometry.cp1.y + 3 * u * t * t * geometry.cp2.y + t * t * t * geometry.to.y,
+        };
+        total += Math.hypot(point.x - previous.x, point.y - previous.y);
+        previous = point;
+      }
+      return total;
+    }
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Dash, draw-on, fill-fade and arrow-marker attributes for an object. Shapes
+ * trace their outline, then fill and label fade in over the second half;
+ * connectors trace their line, then show their arrowheads.
+ */
+function strokeEffects(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): StrokeEffects {
+  const effects: StrokeEffects = { ...NO_EFFECTS };
+  if (object.type === "text" || object.type === "image" || object.type === "group") return effects;
+  const pattern = dashPattern(object.style);
+  const raw = "drawProgress" in object ? object.drawProgress : undefined;
+  const isConnector = object.type === "connector";
+  const progress = raw === undefined ? undefined : isConnector ? clampUnit(raw / SHAFT_SHARE) : clampUnit(raw);
+  const drawing = progress !== undefined && progress < 1;
+  if (progress === 0) effects["stroke-opacity"] = "0";
+
+  if (!drawing) {
+    if (pattern) effects["stroke-dasharray"] = `${formatNumber(pattern[0])} ${formatNumber(pattern[1])}`;
+  } else {
+    const length = strokeLength(object, objects);
+    const usesPathLength = object.type === "path" || object.type === "polygon" || object.type === "polyline" || object.type === "connector";
+    if (pattern && length !== undefined) {
+      effects["stroke-dasharray"] = patternList(pattern, length, progress);
+    } else if (usesPathLength || length === undefined) {
+      effects.pathLength = "1";
+      effects["stroke-dasharray"] = "1";
+      effects["stroke-dashoffset"] = formatNumber(1 - progress);
+    } else {
+      // Basic shapes: absolute lengths, since pathLength support varies on them.
+      effects["stroke-dasharray"] = `${formatNumber(progress * length)} ${formatNumber(length + 1)}`;
+    }
+  }
+
+  if ((object.type === "rect" || object.type === "circle" || object.type === "ellipse") && raw !== undefined && raw < 1) {
+    effects["fill-opacity"] = formatNumber(clampUnit((raw - 0.5) * 2));
+  }
+
+  if (isConnector) {
+    const heads = object.arrowheads ?? "end";
+    const showHeads = raw === undefined || raw >= SHAFT_SHARE;
+    if (showHeads && (heads === "end" || heads === "both")) effects["marker-end"] = "url(#anim8-arrow)";
+    if (showHeads && (heads === "start" || heads === "both")) effects["marker-start"] = "url(#anim8-arrow-start)";
+  }
+  return effects;
+}
+
+function effectAttributes(effects: StrokeEffects): string {
+  return Object.entries(effects)
+    .filter((entry): entry is [string, string] => entry[1] !== null)
+    .map(([name, value]) => ` ${name}="${esc(value)}"`)
+    .join("");
 }
 
 function points(points: readonly { x: number; y: number }[]): string {
@@ -53,63 +177,98 @@ function points(points: readonly { x: number; y: number }[]): string {
 }
 
 function connectorPath(connector: ConnectorObject, objects: ReadonlyMap<string, DrawableObject>): string {
-  const fromObject = objects.get(connector.from.objectId);
-  const toObject = objects.get(connector.to.objectId);
-  if (!fromObject || !toObject) return "";
-  const from = anchorPoint(fromObject, connector.from.anchor, objects);
-  const to = anchorPoint(toObject, connector.to.anchor, objects);
-  if (connector.kind === "routed") {
-    const routed = routeConnector(connector, objects);
-    if (routed.length < 2) return "";
-    return routed.map((point, index) =>
-      `${index === 0 ? "M" : "L"} ${formatNumber(point.x)} ${formatNumber(point.y)}`
-    ).join(" ");
+  const geometry = connectorGeometry(connector, objects);
+  if (!geometry) return "";
+  if (geometry.kind === "cubic") {
+    const { from, cp1, cp2, to } = geometry;
+    return `M ${formatNumber(from.x)} ${formatNumber(from.y)} C ${formatNumber(cp1.x)} ${formatNumber(cp1.y)}, ${formatNumber(cp2.x)} ${formatNumber(cp2.y)}, ${formatNumber(to.x)} ${formatNumber(to.y)}`;
   }
-  if (connector.kind === "curve") {
-    const mx = (from.x + to.x) / 2;
-    return `M ${formatNumber(from.x)} ${formatNumber(from.y)} C ${formatNumber(mx)} ${formatNumber(from.y)}, ${formatNumber(mx)} ${formatNumber(to.y)}, ${formatNumber(to.x)} ${formatNumber(to.y)}`;
-  }
-  if (connector.kind === "orthogonal") {
-    const mx = (from.x + to.x) / 2;
-    return `M ${formatNumber(from.x)} ${formatNumber(from.y)} L ${formatNumber(mx)} ${formatNumber(from.y)} L ${formatNumber(mx)} ${formatNumber(to.y)} L ${formatNumber(to.x)} ${formatNumber(to.y)}`;
-  }
-  return `M ${formatNumber(from.x)} ${formatNumber(from.y)} L ${formatNumber(to.x)} ${formatNumber(to.y)}`;
+  return geometry.points.map((point, index) =>
+    `${index === 0 ? "M" : "L"} ${formatNumber(point.x)} ${formatNumber(point.y)}`
+  ).join(" ");
+}
+
+/** Default UI font stack; scenes can override per object with style.fontFamily. */
+export const SVG_FONT_FAMILY = "Inter, ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif";
+const LABEL_PADDING = 12;
+
+interface LabelLayout { lines: string[]; fontSize: number; lineHeight: number }
+
+/** Wrap and fit a shape's label; standalone text keeps its explicit line breaks. */
+function labelLayout(object: DrawableObject, text: string): LabelLayout {
+  const fontSize = object.style.fontSize ?? 16;
+  const box = object.type === "rect"
+    ? { width: object.width, height: object.height }
+    : object.type === "circle"
+      ? { width: object.radius * Math.SQRT2 + LABEL_PADDING * 2, height: object.radius * Math.SQRT2 + LABEL_PADDING }
+      : object.type === "ellipse"
+        ? { width: object.rx * Math.SQRT2 + LABEL_PADDING * 2, height: object.ry * Math.SQRT2 + LABEL_PADDING }
+        : undefined;
+  if (!box) return { lines: text.split(/\r?\n/), fontSize, lineHeight: fontSize * 1.25 };
+  return fitText(text, {
+    maxWidth: Math.max(1, box.width - LABEL_PADDING * 2),
+    maxHeight: Math.max(1, box.height - LABEL_PADDING),
+    fontSize,
+  });
+}
+
+function fontFamily(style: Style): string {
+  return style.fontFamily ?? SVG_FONT_FAMILY;
+}
+
+function textMarkup(layout: LabelLayout): { y: number; content: string } {
+  const y = -((layout.lines.length - 1) * layout.lineHeight) / 2;
+  if (layout.lines.length === 1) return { y, content: esc(layout.lines[0]!) };
+  return {
+    y,
+    content: layout.lines.map((line, index) =>
+      `<tspan x="0" dy="${index === 0 ? "0" : formatNumber(layout.lineHeight)}">${esc(line)}</tspan>`
+    ).join(""),
+  };
+}
+
+function labelSvg(object: DrawableObject, text: string): string {
+  const layout = labelLayout(object, text);
+  const { y, content } = textMarkup(layout);
+  return `<text x="0" y="${formatNumber(y)}" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-family="${esc(fontFamily(object.style))}" font-size="${formatNumber(layout.fontSize)}">${content}</text>`;
 }
 
 function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): string {
   if (!worldVisible(object, objects)) return "";
   if (object.type === "connector") {
     const d = connectorPath(object, objects);
-    return `<path data-anim8-id="${esc(object.id)}" d="${d}" fill="none" stroke="${esc(object.style.stroke ?? "#1f2937")}" stroke-width="${formatNumber(object.style.strokeWidth ?? 2)}" opacity="${formatNumber(worldOpacity(object, objects))}" marker-end="url(#anim8-arrow)"/>`;
+    return `<path data-anim8-id="${esc(object.id)}" d="${d}" fill="none" stroke="${esc(object.style.stroke ?? "#1f2937")}" stroke-width="${formatNumber(object.style.strokeWidth ?? 2)}" opacity="${formatNumber(worldOpacity(object, objects))}"${effectAttributes(strokeEffects(object, objects))}/>`;
   }
   if (object.type === "group") return "";
   const t = transform(object, objects);
-  const common = `data-anim8-id="${esc(object.id)}" transform="${t}" ${style(object, objects)}`;
+  const common = `data-anim8-id="${esc(object.id)}" transform="${t}" ${style(object, objects)}${effectAttributes(strokeEffects(object, objects))}`;
   switch (object.type) {
     case "rect": {
       const x = -object.width / 2, y = -object.height / 2;
       const r = object.style.radius ?? 10;
-      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>` : "";
+      const text = object.text ? labelSvg(object, object.text) : "";
       return `<g ${common}><rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" rx="${formatNumber(r)}"/>${text}</g>`;
     }
     case "circle": {
-      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>` : "";
+      const text = object.text ? labelSvg(object, object.text) : "";
       return `<g ${common}><circle cx="0" cy="0" r="${formatNumber(object.radius)}"/>${text}</g>`;
     }
     case "ellipse": {
-      const text = object.text ? `<text x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>` : "";
+      const text = object.text ? labelSvg(object, object.text) : "";
       return `<g ${common}><ellipse cx="0" cy="0" rx="${formatNumber(object.rx)}" ry="${formatNumber(object.ry)}"/>${text}</g>`;
     }
     case "polygon":
-      return `<polygon ${common} points="${points(object.points)}"${drawAttributes(object)}/>`;
+      return `<polygon ${common} points="${points(object.points)}"/>`;
     case "polyline":
-      return `<polyline ${common} points="${points(object.points)}"${drawAttributes(object)}/>`;
-    case "text":
-      return `<text data-anim8-id="${esc(object.id)}" transform="${t}" x="0" y="0" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" opacity="${formatNumber(worldOpacity(object, objects))}" font-size="${formatNumber(object.style.fontSize ?? 16)}">${esc(object.text)}</text>`;
+      return `<polyline ${common} points="${points(object.points)}"/>`;
+    case "text": {
+      const { y, content } = textMarkup(labelLayout(object, object.text));
+      return `<text data-anim8-id="${esc(object.id)}" transform="${t}" x="0" y="${formatNumber(y)}" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" opacity="${formatNumber(worldOpacity(object, objects))}" font-family="${esc(fontFamily(object.style))}" font-size="${formatNumber(object.style.fontSize ?? 16)}">${content}</text>`;
+    }
     case "line":
       return `<line ${common} x1="0" y1="0" x2="${formatNumber(object.x2)}" y2="${formatNumber(object.y2)}"/>`;
     case "path":
-      return `<path ${common} d="${esc(formatPathData(object.d))}"${drawAttributes(object)}/>`;
+      return `<path ${common} d="${esc(formatPathData(object.d))}"/>`;
     case "image":
       return `<image ${common} x="${formatNumber(-object.width/2)}" y="${formatNumber(-object.height/2)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" href="${esc(object.href)}"/>`;
   }
@@ -121,7 +280,7 @@ export function renderSvg(frame: EvaluatedScene): string {
   const body = ordered.map(object => objectSvg(object, objects)).join("");
   const bg = frame.scene.background ? `<rect width="100%" height="100%" fill="${esc(frame.scene.background)}"/>` : "";
   const world = `<g data-anim8-camera="world" transform="${cameraTransform(frame)}">${body}</g>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(frame.scene.width)} ${formatNumber(frame.scene.height)}" role="img"><defs><marker id="anim8-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#1f2937"/></marker></defs>${bg}${world}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(frame.scene.width)} ${formatNumber(frame.scene.height)}" role="img"><defs><marker id="anim8-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#1f2937"/></marker><marker id="anim8-arrow-start" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto"><path d="M9,0 L9,6 L0,3 z" fill="#1f2937"/></marker></defs>${bg}${world}</svg>`;
 }
 
 export function renderSceneAt(scene: SceneDocument, time: number): string {
@@ -166,19 +325,11 @@ function syncCommonAttributes(
   setAttribute(element, "opacity", worldOpacity(object, objects));
 }
 
-function syncDrawAttributes(element: SVGElement, object: MountedObject): void {
-  const drawable = object.type === "path" || object.type === "polygon" || object.type === "polyline";
-  if (!drawable || object.drawProgress === undefined) {
-    element.removeAttribute("pathLength");
-    element.removeAttribute("stroke-dasharray");
-    element.removeAttribute("stroke-dashoffset");
-    return;
+function syncStrokeEffects(element: SVGElement, object: MountedObject, objects: ReadonlyMap<string, DrawableObject>): void {
+  for (const [name, value] of Object.entries(strokeEffects(object, objects))) {
+    if (value === null) element.removeAttribute(name);
+    else setAttribute(element, name, value);
   }
-
-  const progress = Math.max(0, Math.min(1, object.drawProgress));
-  setAttribute(element, "pathLength", 1);
-  setAttribute(element, "stroke-dasharray", 1);
-  setAttribute(element, "stroke-dashoffset", 1 - progress);
 }
 
 function syncEmbeddedLabel(
@@ -206,8 +357,28 @@ function syncEmbeddedLabel(
   }
 
   setAttribute(label, "fill", object.style.color ?? "#111827");
-  setAttribute(label, "font-size", object.style.fontSize ?? 16);
-  label.textContent = text;
+  syncTextContent(document, label, object, text);
+}
+
+/** Mirror the static renderer's wrapped label markup on a live text element. */
+function syncTextContent(document: Document, element: SVGElement, object: MountedObject, text: string): void {
+  const layout = labelLayout(object, text);
+  const y = -((layout.lines.length - 1) * layout.lineHeight) / 2;
+  setAttribute(element, "y", y);
+  setAttribute(element, "font-family", fontFamily(object.style));
+  setAttribute(element, "font-size", layout.fontSize);
+  if (layout.lines.length === 1) {
+    element.textContent = layout.lines[0]!;
+    return;
+  }
+  const spans = layout.lines.map((line, index) => {
+    const span = createSvgElement(document, "tspan");
+    setAttribute(span, "x", 0);
+    setAttribute(span, "dy", index === 0 ? 0 : layout.lineHeight);
+    span.textContent = line;
+    return span;
+  });
+  element.replaceChildren(...spans);
 }
 
 function createObjectRecord(document: Document, object: MountedObject): ObjectDomRecord {
@@ -260,11 +431,12 @@ function syncObjectRecord(
     setAttribute(element, "stroke", object.style.stroke ?? "#1f2937");
     setAttribute(element, "stroke-width", object.style.strokeWidth ?? 2);
     setAttribute(element, "opacity", worldOpacity(object, objects));
-    setAttribute(element, "marker-end", "url(#anim8-arrow)");
+    syncStrokeEffects(element, object, objects);
     return;
   }
 
   syncCommonAttributes(record.element, object, objects);
+  syncStrokeEffects(record.element, object, objects);
 
   switch (object.type) {
     case "rect": {
@@ -297,7 +469,6 @@ function syncObjectRecord(
     case "polygon":
     case "polyline":
       setAttribute(record.element, "points", points(object.points));
-      syncDrawAttributes(record.element, object);
       return;
     case "text":
       setAttribute(record.element, "x", 0);
@@ -306,8 +477,7 @@ function syncObjectRecord(
       setAttribute(record.element, "text-anchor", "middle");
       setAttribute(record.element, "fill", object.style.color ?? "#111827");
       setAttribute(record.element, "stroke", "none");
-      setAttribute(record.element, "font-size", object.style.fontSize ?? 16);
-      record.element.textContent = object.text;
+      syncTextContent(document, record.element, object, object.text);
       return;
     case "line":
       setAttribute(record.element, "x1", 0);
@@ -317,7 +487,6 @@ function syncObjectRecord(
       return;
     case "path":
       setAttribute(record.element, "d", formatPathData(object.d));
-      syncDrawAttributes(record.element, object);
       return;
     case "image":
       setAttribute(record.element, "x", -object.width / 2);
@@ -331,19 +500,20 @@ function syncObjectRecord(
 
 function createDefs(document: Document): SVGDefsElement {
   const defs = createSvgElement(document, "defs");
-  const marker = createSvgElement(document, "marker");
-  setAttribute(marker, "id", "anim8-arrow");
-  setAttribute(marker, "markerWidth", 10);
-  setAttribute(marker, "markerHeight", 10);
-  setAttribute(marker, "refX", 8);
-  setAttribute(marker, "refY", 3);
-  setAttribute(marker, "orient", "auto");
-
-  const arrow = createSvgElement(document, "path");
-  setAttribute(arrow, "d", "M0,0 L0,6 L9,3 z");
-  setAttribute(arrow, "fill", "#1f2937");
-  marker.appendChild(arrow);
-  defs.appendChild(marker);
+  for (const [id, refX, d] of [["anim8-arrow", 8, "M0,0 L0,6 L9,3 z"], ["anim8-arrow-start", 1, "M9,0 L9,6 L0,3 z"]] as const) {
+    const marker = createSvgElement(document, "marker");
+    setAttribute(marker, "id", id);
+    setAttribute(marker, "markerWidth", 10);
+    setAttribute(marker, "markerHeight", 10);
+    setAttribute(marker, "refX", refX);
+    setAttribute(marker, "refY", 3);
+    setAttribute(marker, "orient", "auto");
+    const arrow = createSvgElement(document, "path");
+    setAttribute(arrow, "d", d);
+    setAttribute(arrow, "fill", "#1f2937");
+    marker.appendChild(arrow);
+    defs.appendChild(marker);
+  }
   return defs;
 }
 
@@ -403,6 +573,12 @@ function findHydratableSvg(container: Element, frame: EvaluatedScene): {
     if (!document?.createElementNS) return undefined;
     defs = createDefs(document);
     svg.insertBefore(defs, svg.firstChild);
+  } else if (!Array.from(defs.children).some(child => child.getAttribute("id") === "anim8-arrow-start")) {
+    // Markup from earlier versions has only the end marker.
+    const document = container.ownerDocument;
+    const fresh = document ? createDefs(document) : undefined;
+    const start = fresh && Array.from(fresh.children).find(child => child.getAttribute("id") === "anim8-arrow-start");
+    if (start) defs.appendChild(start);
   }
 
   const objects = new Map(frame.objects.map(object => [object.id, object]));

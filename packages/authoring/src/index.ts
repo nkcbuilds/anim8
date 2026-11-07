@@ -1,4 +1,4 @@
-import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
+import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName, isDrawableType } from "@anim8/core";
 
 export interface SceneOptions {
   width?: number;
@@ -294,7 +294,7 @@ export class SceneBuilder {
 
   assertDrawableStroke(id: string, to: number): void {
     const object = this.objectById(id);
-    if (object.type !== "path" && object.type !== "polygon" && object.type !== "polyline") {
+    if (!isDrawableType(object.type)) {
       throw new Error(`Object '${id}' of type '${object.type}' does not expose drawProgress.`);
     }
     if (!Number.isFinite(to) || to < 0 || to > 1) {
@@ -502,11 +502,12 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  connect(from: NodeHandle, to: NodeHandle, options: { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string } = {}): NodeHandle {
+  connect(from: NodeHandle, to: NodeHandle, options: { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string; arrowheads?: ConnectorObject["arrowheads"] } = {}): NodeHandle {
     const id = this.next("connector");
     this.objects.push({
       id, type: "connector", from: { objectId: from.id, ...(options.from ? { anchor: options.from } : {}) }, to: { objectId: to.id, ...(options.to ? { anchor: options.to } : {}) },
       kind: options.kind ?? "straight", ...(options.routing ? { routing: structuredClone(options.routing) } : {}), ...(options.label ? { label: options.label } : {}),
+      ...(options.arrowheads ? { arrowheads: options.arrowheads } : {}),
       transform: defaultTransform(), style: { ...defaultStyle(), fill: "none" }, visible: true, z: this.objects.length,
     });
     return new NodeHandle(id, this);

@@ -1,0 +1,903 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 17
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 304.2,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 112.7 -3 262.9 3 391.6 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "Planning a product launch",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "center",
+      "z": 3,
+      "style": {
+        "fill": "#ffec99",
+        "stroke": "#e8590c",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 20
+      },
+      "text": "Launch plan",
+      "type": "ellipse",
+      "rx": 95,
+      "ry": 41,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 300,
+        "y": 200,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "design",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Design",
+      "type": "rect",
+      "width": 140,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "c_design",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "center"
+      },
+      "to": {
+        "objectId": "design"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 168,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "eng",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Engineering",
+      "type": "rect",
+      "width": 140,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "c_eng",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "center"
+      },
+      "to": {
+        "objectId": "eng"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 700,
+        "y": 200,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "mkt",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Marketing",
+      "type": "rect",
+      "width": 140,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "c_mkt",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "center"
+      },
+      "to": {
+        "objectId": "mkt"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 700,
+        "y": 470,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "sales",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Sales",
+      "type": "rect",
+      "width": 140,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "c_sales",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "center"
+      },
+      "to": {
+        "objectId": "sales"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 300,
+        "y": 470,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "support",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Support",
+      "type": "rect",
+      "width": 140,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "c_support",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "center"
+      },
+      "to": {
+        "objectId": "support"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 95,
+        "y": 160,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "wire",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "text": "Wireframes",
+      "type": "rect",
+      "width": 130,
+      "height": 44,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "l_wire",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "design"
+      },
+      "to": {
+        "objectId": "wire"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 95,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "proto",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "text": "Prototype",
+      "type": "rect",
+      "width": 130,
+      "height": 44,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "l_proto",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "design"
+      },
+      "to": {
+        "objectId": "proto"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 905,
+        "y": 160,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "blog",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "text": "Blog post",
+      "type": "rect",
+      "width": 130,
+      "height": 44,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "l_blog",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "mkt"
+      },
+      "to": {
+        "objectId": "blog"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 905,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "press",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "text": "Press kit",
+      "type": "rect",
+      "width": 130,
+      "height": 44,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "l_press",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "mkt"
+      },
+      "to": {
+        "objectId": "press"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 95,
+        "y": 520,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "faq",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "text": "FAQ",
+      "type": "rect",
+      "width": 130,
+      "height": 44,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "l_faq",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "support"
+      },
+      "to": {
+        "objectId": "faq"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 905,
+        "y": 520,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "pricing",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "text": "Pricing",
+      "type": "rect",
+      "width": 130,
+      "height": 44,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "l_pricing",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "sales"
+      },
+      "to": {
+        "objectId": "pricing"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_center",
+      "type": "draw",
+      "target": "center",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_design",
+      "type": "draw",
+      "target": "design",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_c_design",
+      "type": "draw",
+      "target": "c_design",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_eng",
+      "type": "draw",
+      "target": "eng",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_c_eng",
+      "type": "draw",
+      "target": "c_eng",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_mkt",
+      "type": "draw",
+      "target": "mkt",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_c_mkt",
+      "type": "draw",
+      "target": "c_mkt",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_sales",
+      "type": "draw",
+      "target": "sales",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_c_sales",
+      "type": "draw",
+      "target": "c_sales",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_support",
+      "type": "draw",
+      "target": "support",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_c_support",
+      "type": "draw",
+      "target": "c_support",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_wire",
+      "type": "draw",
+      "target": "wire",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_l_wire",
+      "type": "draw",
+      "target": "l_wire",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_proto",
+      "type": "draw",
+      "target": "proto",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_l_proto",
+      "type": "draw",
+      "target": "l_proto",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_blog",
+      "type": "draw",
+      "target": "blog",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_l_blog",
+      "type": "draw",
+      "target": "l_blog",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_press",
+      "type": "draw",
+      "target": "press",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_l_press",
+      "type": "draw",
+      "target": "l_press",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_faq",
+      "type": "draw",
+      "target": "faq",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_l_faq",
+      "type": "draw",
+      "target": "l_faq",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_pricing",
+      "type": "draw",
+      "target": "pricing",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_l_pricing",
+      "type": "draw",
+      "target": "l_pricing",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}

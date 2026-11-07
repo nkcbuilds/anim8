@@ -1,0 +1,664 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 19
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 225.1,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 160.1 -3 373.6 3 549.7 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "From idea to a thousand customers",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 60,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "axis_a",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 950,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "axis_b",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "axis",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "axis_a"
+      },
+      "to": {
+        "objectId": "axis_b"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 3,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "dot0",
+      "type": "circle",
+      "radius": 10,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 220,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "card0",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "2021\nIdea",
+      "type": "rect",
+      "width": 150,
+      "height": 70,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "tick0",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "card0"
+      },
+      "to": {
+        "objectId": "dot0"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 330,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "dot1",
+      "type": "circle",
+      "radius": 10,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 330,
+        "y": 440,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "card1",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "2022\nPrototype",
+      "type": "rect",
+      "width": 150,
+      "height": 70,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "tick1",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "card1"
+      },
+      "to": {
+        "objectId": "dot1"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 510,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "dot2",
+      "type": "circle",
+      "radius": 10,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 510,
+        "y": 220,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "card2",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "2023\nFirst sale",
+      "type": "rect",
+      "width": 150,
+      "height": 70,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "tick2",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "card2"
+      },
+      "to": {
+        "objectId": "dot2"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 690,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "dot3",
+      "type": "circle",
+      "radius": 10,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 690,
+        "y": 440,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "card3",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "2024\nSeries A",
+      "type": "rect",
+      "width": 150,
+      "height": 70,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "tick3",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "card3"
+      },
+      "to": {
+        "objectId": "dot3"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 870,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "dot4",
+      "type": "circle",
+      "radius": 10,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 870,
+        "y": 220,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "card4",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "2025\n1k customers",
+      "type": "rect",
+      "width": 150,
+      "height": 70,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "tick4",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "card4"
+      },
+      "to": {
+        "objectId": "dot4"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_axis",
+      "type": "draw",
+      "target": "axis",
+      "start": 350,
+      "duration": 800,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_dot0",
+      "type": "draw",
+      "target": "dot0",
+      "start": 1290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_card0",
+      "type": "draw",
+      "target": "card0",
+      "start": 1290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_tick0",
+      "type": "draw",
+      "target": "tick0",
+      "start": 1290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_dot1",
+      "type": "draw",
+      "target": "dot1",
+      "start": 1790,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_card1",
+      "type": "draw",
+      "target": "card1",
+      "start": 1790,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_tick1",
+      "type": "draw",
+      "target": "tick1",
+      "start": 1790,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_dot2",
+      "type": "draw",
+      "target": "dot2",
+      "start": 2290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_card2",
+      "type": "draw",
+      "target": "card2",
+      "start": 2290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_tick2",
+      "type": "draw",
+      "target": "tick2",
+      "start": 2290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_dot3",
+      "type": "draw",
+      "target": "dot3",
+      "start": 2790,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_card3",
+      "type": "draw",
+      "target": "card3",
+      "start": 2790,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_tick3",
+      "type": "draw",
+      "target": "tick3",
+      "start": 2790,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_dot4",
+      "type": "draw",
+      "target": "dot4",
+      "start": 3290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_card4",
+      "type": "draw",
+      "target": "card4",
+      "start": 3290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_tick4",
+      "type": "draw",
+      "target": "tick4",
+      "start": 3290,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}

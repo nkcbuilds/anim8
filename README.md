@@ -54,7 +54,7 @@ Every object keeps a stable identity. The boxes, their text, and attached connec
 | `@anim8/authoring` | Compact TypeScript scene builder |
 | `@anim8/renderer-svg` | Static/headless SVG and browser SVG mounting |
 | `@anim8/sketch` | Deterministic seeded hand-drawn geometry |
-| `@anim8/renderer-sketch` | Static deterministic sketch SVG renderer |
+| `@anim8/renderer-sketch` | Hand-drawn SVG renderer with a bundled OFL font (Virgil) |
 | `@anim8/player` | Play/pause/seek/reverse transport and reactive inputs |
 | `@anim8/web-component` | Accessible framework-independent player element |
 | `@anim8/react` | SSR-safe React component and hook |
@@ -70,6 +70,15 @@ Every object keeps a stable identity. The boxes, their text, and attached connec
 | `@anim8/export` | Optional deterministic SVG frame sequence and GIF/MP4 encoder (Playwright + FFmpeg) |
 
 Optional graph layout engines and heavyweight sketch dependencies are intentionally not part of the standard runtime.
+
+## Visual style
+
+Set `"theme": "sketch"` for hand-drawn explanatory diagrams: rough double-stroked
+outlines, rounded corners, drawn arrowheads, and the bundled Virgil font embedded
+in the SVG so it renders the same everywhere. `@anim8/core` ships a role-based
+palette (`DIAGRAM_ROLES`), outline-bound connectors, deterministic label fitting,
+and `lintDesign`, which flags crowded, overlapping, off-canvas, overflowing or
+off-palette diagrams. See [docs/guides/visual-style.md](docs/guides/visual-style.md).
 
 ## JSON scene format
 
@@ -158,6 +167,8 @@ Research and architectural decisions live in `docs/research` and `docs/architect
 The [teaching scene catalog](examples/catalog/README.md) contains 150 portable and independently validated animations across computing, math/science, and real-world workflows. Each teaches a concept in four narrated, seekable stages. Browse and scrub the full collection with `pnpm catalog:serve` after building; then open `http://127.0.0.1:4178`. Catalog determinism checks run as part of `pnpm check`, and a dedicated Chromium layout pass runs in CI after browser installation.
 
 ## Interactive scene playground
+
+For diagram-specific examples, see the [17-family animated diagram gallery](examples/diagram-gallery/README.md), including DAGs, ER diagrams, sequence diagrams, charts and geometry. After building, run `pnpm gallery:browser` to generate a standalone replayable gallery at `artifacts/gallery/index.html`.
 
 After `pnpm build`, run `pnpm playground` and open `http://127.0.0.1:4179`. The local-only [Anim8 Studio](examples/playground/README.md) includes editable JSON, the 150 example selector, compiler diagnostics, real SVG preview, deterministic time scrubbing, play/pause, import and JSON/SVG downloads. `pnpm playground:browser` qualifies the real Chromium editing and playback flow.
 

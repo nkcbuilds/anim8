@@ -1,0 +1,903 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 13
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 164.6,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 196.5 -3 458.4 3 670.9 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "Signing in exchanges a password for a token",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 110,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "browser",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Browser",
+      "type": "rect",
+      "width": 150,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 140,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "browser_life",
+      "type": "line",
+      "z": 0,
+      "x2": 0,
+      "y2": 420,
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "strokeStyle": "dashed"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 390,
+        "y": 110,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "api",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "API",
+      "type": "rect",
+      "width": 150,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 390,
+        "y": 140,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "api_life",
+      "type": "line",
+      "z": 0,
+      "x2": 0,
+      "y2": 420,
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "strokeStyle": "dashed"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 630,
+        "y": 110,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "auth",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Auth service",
+      "type": "rect",
+      "width": 150,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 630,
+        "y": 140,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "auth_life",
+      "type": "line",
+      "z": 0,
+      "x2": 0,
+      "y2": 420,
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "strokeStyle": "dashed"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 860,
+        "y": 110,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "db",
+      "z": 3,
+      "style": {
+        "fill": "#d0bfff",
+        "stroke": "#6741d9",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Database",
+      "type": "rect",
+      "width": 150,
+      "height": 50,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 860,
+        "y": 140,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "db_life",
+      "type": "line",
+      "z": 0,
+      "x2": 0,
+      "y2": 420,
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "strokeStyle": "dashed"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 390,
+        "y": 345,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "api_act",
+      "type": "rect",
+      "width": 14,
+      "height": 334,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 1.5,
+        "radius": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 630,
+        "y": 344,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "auth_act",
+      "type": "rect",
+      "width": 14,
+      "height": 216,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 1.5,
+        "radius": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 860,
+        "y": 344,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "db_act",
+      "type": "rect",
+      "width": 14,
+      "height": 96,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 1.5,
+        "radius": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 190,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m1_a",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 383,
+        "y": 190,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m1_b",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "m1",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "m1_a"
+      },
+      "to": {
+        "objectId": "m1_b"
+      },
+      "label": "POST /login",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 397,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m2_a",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 623,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m2_b",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "m2",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "m2_a"
+      },
+      "to": {
+        "objectId": "m2_b"
+      },
+      "label": "verify password",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 637,
+        "y": 310,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m3_a",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 853,
+        "y": 310,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m3_b",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "m3",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "m3_a"
+      },
+      "to": {
+        "objectId": "m3_b"
+      },
+      "label": "find user",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 853,
+        "y": 376,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m4_a",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 637,
+        "y": 376,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m4_b",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "m4",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "m4_a"
+      },
+      "to": {
+        "objectId": "m4_b"
+      },
+      "label": "user row",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dashed"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 623,
+        "y": 436,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m5_a",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 397,
+        "y": 436,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m5_b",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "m5",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "m5_a"
+      },
+      "to": {
+        "objectId": "m5_b"
+      },
+      "label": "signed token",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dashed"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 383,
+        "y": 496,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m6_a",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 496,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "m6_b",
+      "type": "circle",
+      "radius": 1,
+      "z": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0
+      }
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "m6",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "m6_a"
+      },
+      "to": {
+        "objectId": "m6_b"
+      },
+      "label": "200 OK + cookie",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16,
+        "strokeStyle": "dashed"
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_browser",
+      "type": "draw",
+      "target": "browser",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_api",
+      "type": "draw",
+      "target": "api",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_auth",
+      "type": "draw",
+      "target": "auth",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_db",
+      "type": "draw",
+      "target": "db",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_browser_life",
+      "type": "draw",
+      "target": "browser_life",
+      "start": 1010,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_api_life",
+      "type": "draw",
+      "target": "api_life",
+      "start": 1010,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_auth_life",
+      "type": "draw",
+      "target": "auth_life",
+      "start": 1010,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_db_life",
+      "type": "draw",
+      "target": "db_life",
+      "start": 1010,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_api_act",
+      "type": "draw",
+      "target": "api_act",
+      "start": 1850,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_m1",
+      "type": "draw",
+      "target": "m1",
+      "start": 1850,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_auth_act",
+      "type": "draw",
+      "target": "auth_act",
+      "start": 2510,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_m2",
+      "type": "draw",
+      "target": "m2",
+      "start": 2510,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_db_act",
+      "type": "draw",
+      "target": "db_act",
+      "start": 3170,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_m3",
+      "type": "draw",
+      "target": "m3",
+      "start": 3170,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_m4",
+      "type": "draw",
+      "target": "m4",
+      "start": 3830,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_m5",
+      "type": "draw",
+      "target": "m5",
+      "start": 4490,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_m6",
+      "type": "draw",
+      "target": "m6",
+      "start": 5150,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}
