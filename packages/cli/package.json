@@ -12,7 +12,8 @@
   "dependencies": {
     "@anim8/compiler": "workspace:*",
     "@anim8/core": "workspace:*",
-    "@anim8/renderer-svg": "workspace:*"
+    "@anim8/renderer-svg": "workspace:*",
+    "@anim8/renderer-sketch": "workspace:*"
   },
   "scripts": {
     "build": "tsup src/cli.ts --format esm --clean",

@@ -1,5 +1,6 @@
 import { applySceneEvent, evaluate, initializeStateMachines, sceneDuration, type EvaluatedScene, type ScalarValue, type SceneDocument } from "@anim8/core";
-import { mountSvg, type SvgMount } from "@anim8/renderer-svg";
+import { mountSvg, renderSvg, type SvgMount } from "@anim8/renderer-svg";
+import { mountSketchSvg, renderSketchMarkup } from "@anim8/renderer-sketch/live";
 
 export type PlayerObjectEventType =
   | "click"
@@ -54,7 +55,7 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
   let localState: Record<string, ScalarValue> = { ...(scene.state ?? {}) };
   let localMachines = initializeStateMachines(scene);
   const duration = sceneDuration(scene);
-  const mount: SvgMount = mountSvg(container, evaluate(scene, time, { inputs, state: localState }));
+  const mount: SvgMount = mountFrame(container, evaluate(scene, time, { inputs, state: localState }));
   const machineTransitions = (scene.stateMachines ?? []).flatMap(machine =>
     machine.states.flatMap(state => state.transitions),
   );
@@ -306,4 +307,28 @@ export class Anim8PlayerElement extends HTMLElementBase {
 
 export function defineAnim8Player(tagName = "anim8-player"): void {
   if (typeof customElements !== "undefined" && !customElements.get(tagName)) customElements.define(tagName, Anim8PlayerElement);
+}
+
+/**
+ * Mount the renderer a scene's theme asks for: hand-drawn for "sketch",
+ * geometric otherwise. Both update incrementally and adopt matching
+ * server-rendered markup from `renderSceneMarkup`.
+ */
+export function mountFrame(container: Element, frame: EvaluatedScene): SvgMount {
+  return frame.scene.theme === "sketch" ? mountSketchSvg(container, frame) : mountSvg(container, frame);
+}
+
+/**
+ * Static SVG for a frame, using the renderer its scene theme asks for. Sketch
+ * markup names the hand-drawn font without embedding it; a mounted player
+ * loads the font. For standalone files use `renderSketchSvg` from
+ * `@anim8/renderer-sketch`, which embeds it.
+ */
+export function renderFrameMarkup(frame: EvaluatedScene): string {
+  return frame.scene.theme === "sketch" ? renderSketchMarkup(frame) : renderSvg(frame);
+}
+
+/** Static SVG for a scene at a time (SSR, no-JS fallbacks), matching what mountPlayer shows. */
+export function renderSceneMarkup(scene: SceneDocument, timeMs: number): string {
+  return renderFrameMarkup(evaluate(scene, timeMs));
 }

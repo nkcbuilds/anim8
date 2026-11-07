@@ -9,17 +9,26 @@ Use Anim8 for animated diagrams, technical explanations, algorithm visualization
 
 ## Workflow
 
-1. Read `llms.txt`.
+1. Read `llms.txt` and `docs/guides/visual-style.md`.
 2. Prefer JSON when generating untrusted/portable scenes.
 3. Use stable unique IDs.
 4. Keep timelines simple and explicit.
 5. Validate before rendering.
 6. Repair compiler diagnostics directly.
-7. Render important timestamps and verify the intended motion.
+7. Run `lintDesign` on the final frame and fix every issue.
+8. Render important timestamps and verify the intended motion.
 
 ## Canonical concepts
 
 Scene -> Objects -> Relationships -> State -> Actions -> Timeline -> Evaluated frame -> Renderer.
+
+## Look designed, not generated
+
+- Use `"theme": "sketch"` with a fixed `seed` for explanations.
+- Colour by role from `DIAGRAM_ROLES` (input blue, process neutral, decision yellow, output green); prefer two or three accent tones, with four as the maximum for distinct roles; siblings share a tone; always pair a tone's fill with its own stroke.
+- 168x72 nodes, 20px labels, at least 48px between connected nodes, one flow direction.
+- Connect with `anchor: "center"`; the arrow binds to the outline automatically.
+- Reveal nodes step by step instead of showing everything at once.
 
 ## Do not
 

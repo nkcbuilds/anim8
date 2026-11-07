@@ -1,3 +1,4 @@
+import { DRAWABLE_TYPES, isDrawableType } from "./types.js";
 import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
 import { styleIssues, styleProperties, textRunIssues } from "./style.js";
 import { morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
@@ -140,7 +141,7 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
       });
     }
 
-    if ((object.type === "path" || object.type === "polygon" || object.type === "polyline") &&
+    if ("drawProgress" in object &&
         object.drawProgress !== undefined &&
         (!Number.isFinite(object.drawProgress) || object.drawProgress < 0 || object.drawProgress > 1)) {
       diagnostics.push({
@@ -297,12 +298,12 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
           message: "Draw target must be a finite number between 0 and 1.",
         });
       }
-      if (target && target.type !== "path" && target.type !== "polygon" && target.type !== "polyline") {
+      if (target && !isDrawableType(target.type)) {
         diagnostics.push({
           code: "UNSUPPORTED_DRAW_TARGET",
           path: `timeline[${index}].target`,
           message: `Object '${target.id}' of type '${target.type}' does not expose drawProgress.`,
-          suggestion: "Use draw on path, polygon, or polyline objects.",
+          suggestion: `Use draw on ${DRAWABLE_TYPES.join(", ")} objects.`,
         });
       }
     }

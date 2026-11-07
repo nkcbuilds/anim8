@@ -4,6 +4,7 @@ import { link, mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { dirname, extname, join, resolve } from "node:path";
 import { evaluate, sceneDuration, type SceneDocument } from "@anim8/core";
 import { renderSvg } from "@anim8/renderer-svg";
+import { renderSketchSvg } from "@anim8/renderer-sketch";
 
 export interface FrameOptions { fps?: number; durationMs?: number; maxFrames?: number }
 export interface VideoOptions extends FrameOptions {
@@ -33,7 +34,9 @@ export function* svgFrames(scene:SceneDocument, options:FrameOptions={}):Generat
   const {fps,durationMs,totalFrames}=bounds(scene,options);
   for(let index=0;index<totalFrames;index++){
     const timeMs=Math.min(durationMs,index*1000/fps);
-    yield {index,timeMs,svg:renderSvg(evaluate(scene,timeMs))};
+    const frame=evaluate(scene,timeMs);
+    // Sketch frames embed their font, so headless capture needs no network or system fonts.
+    yield {index,timeMs,svg:frame.scene.theme==="sketch"?renderSketchSvg(frame):renderSvg(frame)};
   }
 }
 export async function writeSvgFrames(scene:SceneDocument, directory:string, options:FrameOptions={}) {

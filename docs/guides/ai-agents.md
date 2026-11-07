@@ -11,6 +11,12 @@ Anim8 is designed so a capable model can generate valid scenes without knowing r
 5. Render representative timestamps.
 6. Check semantic correctness, not just whether SVG was produced.
 
+## Make it look designed
+
+Read [visual-style.md](visual-style.md) before authoring. It defines the palette
+roles, sizes, spacing and motion rules, and the `lintDesign` check that every
+generated scene should pass.
+
 ## Prefer JSON for generated/untrusted scenes
 
 JSON is easy to validate and does not require evaluating generated code.

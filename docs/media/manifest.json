@@ -1,0 +1,67 @@
+[
+  {
+    "file": "pipeline.gif",
+    "source": "examples/diagram-gallery/dag/scene.json",
+    "sourceSha256": "ee9cf663579ff7b4b2e9bace9078af4c7e273d9e1f5ec2aaadf58a9ee3695dca",
+    "width": 880,
+    "height": 448,
+    "fps": 10,
+    "durationMs": 7450,
+    "posterHoldMs": 1000,
+    "frames": 76,
+    "bytes": 69366,
+    "sha256": "6018a5062216178474b7a9cd00c784a980ebb7b32312bb7f2bfb8e9abdf86d6d"
+  },
+  {
+    "file": "data-structures.gif",
+    "source": "examples/diagram-gallery/data-structures/scene.json",
+    "sourceSha256": "d61fe2b0249b02362cf99ee96ca9b5668c0f5ad1415cb592bdf093f4664e40ff",
+    "width": 600,
+    "height": 360,
+    "fps": 10,
+    "durationMs": 7450,
+    "posterHoldMs": 1000,
+    "frames": 76,
+    "bytes": 46106,
+    "sha256": "a66c1d87db381ecd80017974044fb4fbe574608b6e847d455d491254acf873de"
+  },
+  {
+    "file": "sequence.gif",
+    "source": "examples/diagram-gallery/sequence/scene.json",
+    "sourceSha256": "d8e869780d761a3c86bf2167a56e679e94d9dba1dcf91474f40589042d5b7810",
+    "width": 600,
+    "height": 360,
+    "fps": 10,
+    "durationMs": 7370,
+    "posterHoldMs": 1000,
+    "frames": 75,
+    "bytes": 59005,
+    "sha256": "b7c204c23a0ed409cf607bbd9526636f4e19c38c1d3b00616a50192e2ea7bb3e"
+  },
+  {
+    "file": "merge-sort.gif",
+    "source": "examples/merge-sort-motion/scene.json",
+    "sourceSha256": "bb48e99190526e7de68b1ea238dbe6824293e0e7597ba2795d994b66e8589c33",
+    "width": 640,
+    "height": 480,
+    "fps": 8,
+    "durationMs": 26020,
+    "posterHoldMs": 1000,
+    "frames": 210,
+    "bytes": 291647,
+    "sha256": "4bd058ed1f12784a06c44fc390362c41c9745effbbea9e06713c788e7f372637"
+  },
+  {
+    "file": "styling.gif",
+    "source": "examples/complex-styling/scene.json",
+    "sourceSha256": "d4f2fd0e73b50dc8eb8629a0751484f4e402e1103440fa3901f38ba9175231b7",
+    "width": 640,
+    "height": 373,
+    "fps": 10,
+    "durationMs": 7700,
+    "posterHoldMs": 1000,
+    "frames": 78,
+    "bytes": 80789,
+    "sha256": "01ebe92d454e26193e38ce05a5cdcf7afff27099bd19e2011d686a07b2a85e20"
+  }
+]

@@ -4,7 +4,7 @@ import {
   evaluate,
 } from "@anim8/core";
 import { mountSvg, renderSceneAt } from "@anim8/renderer-svg";
-import { defineAnim8Player, mountPlayer } from "@anim8/player";
+import { defineAnim8Player, mountPlayer, renderSceneMarkup } from "@anim8/player";
 
 const root = document.querySelector("#fixture-root");
 
@@ -458,7 +458,84 @@ async function setupScreenshotFixture() {
   };
 }
 
+function sketchScene() {
+  const scene = motionScene();
+  return {
+    ...scene,
+    scene: { ...scene.scene, theme: "sketch", seed: 7 },
+    objects: [
+      ...scene.objects,
+      { id: "trail", type: "path", d: "M 0 0 C 60 -40 120 40 180 0", drawProgress: 0,
+        transform: { ...defaultTransform(), x: 140, y: 220 },
+        style: { ...defaultStyle(), fill: "none", stroke: "#1971c2", strokeWidth: 2 }, visible: true, z: 2 },
+    ],
+    timeline: [
+      ...scene.timeline,
+      { id: "draw-trail", type: "draw", target: "trail", start: 0, duration: 1000, easing: "linear", to: 1 },
+      { id: "tint-a", type: "fill", target: "a", start: 0, duration: 1000, easing: "linear", to: "#a5d8ff" },
+    ],
+  };
+}
+
+async function sketchPlayer() {
+  reset();
+  const scene = sketchScene();
+  const container = host("sketch-player");
+  const controller = mountPlayer(container, scene, { autoplay: false });
+  controller.seek(0);
+  const svgBefore = container.querySelector("svg");
+  const node = container.querySelector('[data-anim8-id="a"]');
+  const marksBefore = node?.querySelector('[data-sketch-part="outline"]')?.getAttribute("d");
+  const transformBefore = node?.getAttribute("transform");
+  const trailBefore = container.querySelector('[data-anim8-id="trail"] path')?.getAttribute("stroke-dashoffset");
+  node?.setAttribute("tabindex", "0");
+  node?.focus();
+
+  controller.seek(500);
+  await waitAnimationFrames(2);
+  const nodeAfter = container.querySelector('[data-anim8-id="a"]');
+  const result = {
+    svgCount: container.querySelectorAll("svg").length,
+    sameSvg: container.querySelector("svg") === svgBefore,
+    sameNode: nodeAfter === node,
+    focusKept: document.activeElement === node,
+    transformBefore,
+    transformAfter: nodeAfter?.getAttribute("transform"),
+    marksStable: nodeAfter?.querySelector('[data-sketch-part="outline"]')?.getAttribute("d") === marksBefore,
+    roughOutline: Boolean(marksBefore && marksBefore.includes("C")),
+    trailBefore,
+    trailAfter: container.querySelector('[data-anim8-id="trail"] path')?.getAttribute("stroke-dashoffset"),
+    arrowheads: container.querySelectorAll('[data-sketch-part="arrowhead"]').length,
+    fontStyles: document.head.querySelectorAll("style[data-anim8-sketch-font]").length,
+  };
+  await document.fonts.load('20px "Virgil"');
+  result.fontReady = document.fonts.check('20px "Virgil"');
+
+  // A second player shares the single document font rule.
+  const other = mountPlayer(host("sketch-player-2"), scene, { autoplay: false });
+  result.fontStylesAfterSecond = document.head.querySelectorAll("style[data-anim8-sketch-font]").length;
+
+  // Server markup is adopted in place rather than replaced.
+  const ssrHost = host("sketch-ssr");
+  ssrHost.innerHTML = renderSceneMarkup(scene, 0);
+  const ssrNode = ssrHost.querySelector('[data-anim8-id="b"]');
+  const hydrated = mountPlayer(ssrHost, scene, { autoplay: false });
+  result.ssrAdopted = ssrHost.querySelector('[data-anim8-id="b"]') === ssrNode;
+  hydrated.seek(900);
+  result.ssrUpdates = ssrHost.querySelector('[data-anim8-id="a"]')?.getAttribute("transform") !== transformBefore;
+
+  controller.play();
+  await sleep(250);
+  result.playedTo = controller.getTime();
+  controller.destroy();
+  other.destroy();
+  hydrated.destroy();
+  result.childrenAfterDestroy = container.children.length;
+  return result;
+}
+
 window.__anim8Browser = {
+  sketchPlayer,
   svgIdentity,
   playerControls,
   dynamicConnector,

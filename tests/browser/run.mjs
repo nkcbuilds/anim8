@@ -257,6 +257,26 @@ async function runBrowserSuite(browserName, browserType, server) {
       assert.notEqual(result.beforeTransform, result.afterTransform);
     });
 
+    await runCase(caseName("sketch-theme player animates hand-drawn marks in place"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.sketchPlayer());
+      assert.equal(result.svgCount, 1);
+      assert.equal(result.sameSvg, true);
+      assert.equal(result.sameNode, true, "object groups keep identity across frames");
+      assert.equal(result.focusKept, true, "focus survives playback");
+      assert.notEqual(result.transformBefore, result.transformAfter, "objects move");
+      assert.equal(result.roughOutline, true, "rough sketch outline is rendered");
+      assert.equal(result.marksStable, true, "moving objects keep the same marks (no boiling)");
+      assert.notEqual(result.trailBefore, result.trailAfter, "draw reveals strokes over time");
+      assert.ok(result.arrowheads >= 2, "connectors draw arrowheads");
+      assert.equal(result.fontStyles, 1);
+      assert.equal(result.fontReady, true, "bundled font loads");
+      assert.equal(result.fontStylesAfterSecond, 1, "font rule is shared per document");
+      assert.equal(result.ssrAdopted, true, "server markup is adopted");
+      assert.equal(result.ssrUpdates, true);
+      assert.ok(result.playedTo > 0, "play() advances");
+      assert.equal(result.childrenAfterDestroy, 0);
+    });
+
     await runCase(caseName("player play/pause/seek/reverse uses real requestAnimationFrame"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.playerControls());
       assert.equal(result.seekTime, 500);

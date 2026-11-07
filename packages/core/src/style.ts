@@ -3,7 +3,7 @@ import type { LinearGradient, Style, TextRun } from "./types.js";
 
 export const STYLE_LIMITS = { dashEntries: 64, gradientStops: 16, textRuns: 128 } as const;
 export const STYLE_KEYS = [
-  "fill", "stroke", "color", "fontFamily", "strokeWidth", "fontSize", "radius",
+  "fill", "stroke", "color", "fontFamily", "strokeWidth", "fontSize", "radius", "strokeStyle",
   "fillGradient", "strokeGradient", "colorGradient", "strokeDasharray", "strokeDashoffset",
   "strokeLinecap", "strokeLinejoin", "fillOpacity", "strokeOpacity", "fontWeight", "fontStyle",
   "textAnchor", "textStroke", "textStrokeWidth",
@@ -19,6 +19,7 @@ export const isSolidColor = (v: unknown): v is string => typeof v === "string" &
 export function styleIssues(style: Style): { property: string; message: string }[] {
   const issues: { property: string; message: string }[] = [];
   const add = (property: string, message: string) => issues.push({ property, message });
+  if (style.strokeStyle !== undefined && !["solid", "dashed", "dotted"].includes(style.strokeStyle)) add("strokeStyle", "Unsupported strokeStyle.");
   for (const key of ["strokeDashoffset", "fillOpacity", "strokeOpacity", "fontWeight", "textStrokeWidth"] as const) {
     const v = style[key];
     if (v === undefined) continue;

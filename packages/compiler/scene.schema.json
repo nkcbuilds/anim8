@@ -222,6 +222,13 @@
         },
         "radius": {
           "$ref": "#/$defs/boundedNumber"
+        },
+        "strokeStyle": {
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
         }
       }
     },
@@ -309,6 +316,11 @@
                 "text": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -323,6 +335,11 @@
                 "text": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -344,6 +361,11 @@
                 "text": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -417,6 +439,11 @@
                 },
                 "y2": {
                   "$ref": "#/$defs/boundedNumber"
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -496,6 +523,19 @@
                       "maximum": 10000
                     }
                   }
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "arrowheads": {
+                  "enum": [
+                    "end",
+                    "start",
+                    "both",
+                    "none"
+                  ]
                 }
               },
               "allOf": [

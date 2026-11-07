@@ -26,6 +26,7 @@ export interface Transform {
   opacity: number;
 }
 
+export type StrokeStyle = "solid" | "dashed" | "dotted";
 /** Coordinates are fractions of the painted object's bounding box. */
 export interface LinearGradient {
   type: "linear";
@@ -45,6 +46,8 @@ export interface Style {
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
+  /** Line pattern for outlines and connectors. Defaults to solid. */
+  strokeStyle?: StrokeStyle;
   color?: string;
   fontSize?: number;
   fontFamily?: string;
@@ -78,7 +81,15 @@ export interface BaseObject {
   metadata?: Record<string, string | number | boolean | null>;
 }
 
-export interface RectObject extends BaseObject {
+/**
+ * Normalized draw-on progress for closed shapes. The outline is traced first;
+ * fill and label fade in over the second half. Omitted means fully drawn.
+ */
+export interface ShapeDrawProgress {
+  drawProgress?: number;
+}
+
+export interface RectObject extends BaseObject, ShapeDrawProgress {
   type: "rect";
   width: number;
   height: number;
@@ -86,14 +97,14 @@ export interface RectObject extends BaseObject {
   textRuns?: TextRun[];
 }
 
-export interface CircleObject extends BaseObject {
+export interface CircleObject extends BaseObject, ShapeDrawProgress {
   type: "circle";
   radius: number;
   text?: string;
   textRuns?: TextRun[];
 }
 
-export interface EllipseObject extends BaseObject {
+export interface EllipseObject extends BaseObject, ShapeDrawProgress {
   type: "ellipse";
   rx: number;
   ry: number;
@@ -128,6 +139,7 @@ export interface LineObject extends BaseObject {
   type: "line";
   x2: number;
   y2: number;
+  drawProgress?: number;
 }
 
 export interface PathObject extends BaseObject {
@@ -160,6 +172,19 @@ export interface ConnectorObject extends BaseObject {
   /** Optional deterministic routing parameters used by routed connectors. */
   routing?: ConnectorRouting;
   label?: string;
+  /** Which ends get an arrowhead. Defaults to "end". */
+  arrowheads?: ConnectorArrowheads;
+  /** Draw-on progress: the line is traced first, then its arrowheads appear. */
+  drawProgress?: number;
+}
+
+export type ConnectorArrowheads = "end" | "start" | "both" | "none";
+
+/** Object types whose strokes can be revealed with a `draw` action. */
+export const DRAWABLE_TYPES = ["path", "polygon", "polyline", "rect", "circle", "ellipse", "line", "connector"] as const;
+
+export function isDrawableType(type: string): boolean {
+  return (DRAWABLE_TYPES as readonly string[]).includes(type);
 }
 
 export interface ImageObject extends BaseObject {

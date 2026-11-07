@@ -8,7 +8,9 @@
 | Math and science | 50 | Calculus, probability, photosynthesis, water cycle, electric circuits |
 | Workflows | 50 | Checkout, incident response, fulfillment, shipping, budgets, user onboarding |
 
-Every example contains a **versioned, portable `SceneDocument`**, four subject-specific steps, explicit timeline markers, on-screen instructional text, and deterministic animations. The 150 scenes span **21 diagram topologies** and exercise move, followPath, draw, resize, scale, fill, stroke, and visibility actions.
+Every example contains a **versioned, portable `SceneDocument`**, four subject-specific steps, explicit timeline markers, on-screen instructional text, and deterministic animations. The 150 scenes span **21 diagram topologies** and exercise move, followPath, draw, resize, scale, opacity, fill, stroke, and visibility actions.
+
+All scenes use the hand-drawn `sketch` theme and follow the [visual style guide](../../docs/guides/visual-style.md). Colour encodes each node's role in the flow (start blue, intermediate neutral, gate yellow, result green, with siblings sharing a tone). Nodes are revealed one teaching step at a time, a token travels the active connection, and every layout passes `lintDesign`.
 
 These are **curriculum-oriented diagram explanations** rather than 150 bespoke hand-illustrated animations. Anim8's standalone showcase examples under `examples/` demonstrate additional behaviors (morph, camera, interactivity, sketch rendering, richer layouts, and so on).
 
@@ -47,7 +49,7 @@ Regenerate deterministic, checked-in `scene.json` files and `index.json`:
 pnpm catalog:generate
 ```
 
-This is an explicit generation step; it is not part of normal builds/tests. CI runs `pnpm catalog:check` to compare every checked-in scene and the manifest byte-for-byte against the deterministic generator without rewriting files.
+The generator reads font metrics and connector geometry from the built packages, so run `pnpm build` first. This is an explicit generation step; it is not part of normal builds/tests. CI runs `pnpm catalog:check` to compare every checked-in scene and the manifest byte-for-byte against the deterministic generator without rewriting files.
 
 ## Qualification
 
@@ -66,6 +68,6 @@ ANIM8_CATALOG_SCREENSHOTS=1 pnpm catalog:browser
 
 (On PowerShell: `$env:ANIM8_CATALOG_SCREENSHOTS='1'; pnpm catalog:browser`.) These untracked images are written under `.bench/catalog-visual/`.
 
-The catalog validator checks declared coverage, unique topics/narratives/scenes, round-trip compilation, expected step activation, finite scene geometry, bounded SVG serialization, seek/reverse independence, and negative compiler controls. Chromium qualification additionally checks that visible text fits inside the canvas and the teaching/header labels do not overlap the diagram.
+The catalog validator checks the design lint (spacing, connector length, label fit, palette discipline), declared coverage, unique topics/narratives/scenes, round-trip compilation, expected step activation, finite scene geometry, bounded SVG serialization, seek/reverse independence, and negative compiler controls. Chromium qualification additionally checks, with the embedded font loaded, that visible text fits inside the canvas, every node label stays inside its own shape, and the teaching/header labels do not overlap the diagram.
 
 **Scope:** These tests verify the authored library scenes and browser behavior. They do not prove that an external model can reliably generate scenes; that requires running the provider-neutral model benchmark with real external models. Nor do they replace human review of pedagogical accuracy or a full accessibility audit.

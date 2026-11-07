@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { compileJson } from "../../packages/compiler/dist/index.js";
 import { evaluate } from "../../packages/core/dist/index.js";
 import { renderSvg } from "../../packages/renderer-svg/dist/index.js";
+import { renderSketchSvg } from "../../packages/renderer-sketch/dist/index.js";
 
 const here=dirname(fileURLToPath(import.meta.url));
 const manifest=JSON.parse(readFileSync(join(here,"index.json"),"utf8"));
@@ -56,7 +57,7 @@ const server=createServer((req,res)=>{
         respond(res,400,"text/plain; charset=utf-8","Invalid time (0-3200 ms)");
         return;
       }
-      respond(res,200,"image/svg+xml; charset=utf-8",renderSvg(evaluate(scene,t)));
+      respond(res,200,"image/svg+xml; charset=utf-8",(frame=>frame.scene.theme==="sketch"?renderSketchSvg(frame):renderSvg(frame))(evaluate(scene,t)));
       return;
     }
     respond(res,404,"text/plain; charset=utf-8","Not found");

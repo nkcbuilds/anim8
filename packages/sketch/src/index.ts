@@ -138,6 +138,69 @@ function normalizedContext(context: SketchContext): Required<SketchContext> {
   };
 }
 
+/** Maximum endpoint/control displacement for long strokes at roughness 1, in px. */
+const MAX_RANDOMNESS_OFFSET = 2;
+
+interface BowedSegment {
+  start: SketchPoint;
+  cp1: SketchPoint;
+  cp2: SketchPoint;
+  end: SketchPoint;
+}
+
+/**
+ * Displacement budget for a stroke of the given length. Short strokes get a
+ * proportionally smaller budget so tiny marks (arrowheads, ticks) stay legible.
+ */
+function strokeOffset(length: number, context: Required<SketchContext>, pass: number): number {
+  let offset = MAX_RANDOMNESS_OFFSET;
+  if (offset * offset * 100 > length * length) offset = length / 10;
+  // The overdraw pass hugs the first stroke so the pair reads as one line.
+  return (pass === 0 ? offset : offset / 2) * context.roughness;
+}
+
+/**
+ * One hand-drawn cubic between two points. The curve diverges from the chord at
+ * a random 20-40% point and bows perpendicular to it, which is what makes a
+ * stroke read as drawn rather than plotted. Endpoints are supplied by the
+ * caller so continuous outlines can share vertex jitter between segments.
+ */
+function bowedSegment(
+  from: SketchPoint,
+  to: SketchPoint,
+  start: SketchPoint,
+  end: SketchPoint,
+  context: Required<SketchContext>,
+  passKey: string,
+  pass: number,
+): BowedSegment {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const length = Math.hypot(dx, dy);
+  if (length === 0) return { start, cp1: start, cp2: end, end };
+
+  const amount = strokeOffset(length, context, pass);
+  const diverge = 0.2 + (sketchJitter(context.seed, context.objectId, `${passKey}:diverge`, 0.5) + 0.5) * 0.2;
+  const bowBase = (context.bowing * MAX_RANDOMNESS_OFFSET * length) / 200;
+  const bow = bowBase + sketchJitter(context.seed, context.objectId, `${passKey}:bow`, bowBase * context.roughness);
+  const nx = -dy / length;
+  const ny = dx / length;
+
+  const cp1 = jitterPoint(
+    { x: from.x + dx * diverge + nx * bow, y: from.y + dy * diverge + ny * bow },
+    context,
+    `${passKey}:cp1`,
+    amount,
+  );
+  const cp2 = jitterPoint(
+    { x: from.x + dx * 2 * diverge + nx * bow, y: from.y + dy * 2 * diverge + ny * bow },
+    context,
+    `${passKey}:cp2`,
+    amount,
+  );
+  return { start, cp1, cp2, end };
+}
+
 function linePass(
   from: SketchPoint,
   to: SketchPoint,
@@ -146,40 +209,14 @@ function linePass(
   pass: number,
 ): SketchPath {
   const passKey = `${key}:pass:${pass}`;
-  const endpointAmount = context.roughness * 0.35;
-  const start = jitterPoint(from, context, `${passKey}:start`, endpointAmount);
-  const end = jitterPoint(to, context, `${passKey}:end`, endpointAmount);
-
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  const length = Math.hypot(dx, dy);
-  if (length === 0) {
-    return { commands: [{ type: "M", to: start }, { type: "L", to: end }] };
-  }
-
-  const nx = -dy / length;
-  const ny = dx / length;
-  const bendLimit = Math.min(length * 0.03, context.roughness * 4);
-  const bend =
-    sketchJitter(context.seed, context.objectId, `${passKey}:bend`, bendLimit) *
-    context.bowing;
-
-  const cpNoise = context.roughness * 0.6;
-  const cp1Base = {
-    x: from.x + dx / 3 + nx * bend,
-    y: from.y + dy / 3 + ny * bend,
-  };
-  const cp2Base = {
-    x: from.x + (dx * 2) / 3 + nx * bend,
-    y: from.y + (dy * 2) / 3 + ny * bend,
-  };
-  const cp1 = jitterPoint(cp1Base, context, `${passKey}:cp1`, cpNoise);
-  const cp2 = jitterPoint(cp2Base, context, `${passKey}:cp2`, cpNoise);
-
+  const amount = strokeOffset(Math.hypot(to.x - from.x, to.y - from.y), context, pass);
+  const start = jitterPoint(from, context, `${passKey}:start`, amount);
+  const end = jitterPoint(to, context, `${passKey}:end`, amount);
+  const segment = bowedSegment(from, to, start, end, context, passKey, pass);
   return {
     commands: [
-      { type: "M", to: start },
-      { type: "C", cp1, cp2, to: end },
+      { type: "M", to: segment.start },
+      { type: "C", cp1: segment.cp1, cp2: segment.cp2, to: segment.end },
     ],
   };
 }
@@ -240,13 +277,112 @@ export function sketchRectangle(
   return sketchPolyline(points, context, { closed: true, key });
 }
 
-function ellipsePoint(cx: number, cy: number, rx: number, ry: number, angle: number): SketchPoint {
-  return { x: cx + Math.cos(angle) * rx, y: cy + Math.sin(angle) * ry };
+/**
+ * Rounded rectangle as one continuous stroke per pass, so it can double as the
+ * fill outline. Corners are cubic quarter-arcs; edges are bowed segments.
+ * Vertex jitter is keyed per corner endpoint, keeping the outline closed.
+ */
+export function sketchRoundedRectangle(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+  context: SketchContext,
+  key = "rounded-rect",
+): readonly SketchPath[] {
+  const normalized = normalizedContext(context);
+  if (![x, y, width, height, radius].every(Number.isFinite) || width < 0 || height < 0) {
+    throw new RangeError("Sketch rectangle values must be finite and size non-negative.");
+  }
+  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+  if (r === 0) return sketchRectangle(x, y, width, height, context, key);
+
+  const right = x + width;
+  const bottom = y + height;
+  // Edge endpoints clockwise from the top edge; corner k joins edge k to k+1.
+  const edges: readonly [SketchPoint, SketchPoint][] = [
+    [{ x: x + r, y }, { x: right - r, y }],
+    [{ x: right, y: y + r }, { x: right, y: bottom - r }],
+    [{ x: right - r, y: bottom }, { x: x + r, y: bottom }],
+    [{ x, y: bottom - r }, { x, y: y + r }],
+  ];
+  const corners: readonly SketchPoint[] = [
+    { x: right, y },
+    { x: right, y: bottom },
+    { x, y: bottom },
+    { x, y },
+  ];
+
+  const paths: SketchPath[] = [];
+  for (let pass = 0; pass < normalized.passes; pass += 1) {
+    const passKey = `${key}:pass:${pass}`;
+    const vertexAmount = strokeOffset(Math.min(width, height), normalized, pass) * 0.6;
+    const vertex = (edge: number, end: 0 | 1) =>
+      jitterPoint(edges[edge]![end], normalized, `${passKey}:v:${edge}:${end}`, vertexAmount);
+
+    const first = vertex(0, 0);
+    const commands: SketchPathCommand[] = [{ type: "M", to: first }];
+    for (let edge = 0; edge < 4; edge += 1) {
+      const [from, to] = edges[edge]!;
+      const start = edge === 0 ? first : vertex(edge, 0);
+      const end = vertex(edge, 1);
+      const segment = bowedSegment(from, to, start, end, normalized, `${passKey}:edge:${edge}`, pass);
+      commands.push({ type: "C", cp1: segment.cp1, cp2: segment.cp2, to: segment.end });
+
+      const next = (edge + 1) % 4;
+      const corner = corners[edge]!;
+      const cornerEnd = next === 0 ? first : vertex(next, 0);
+      const cornerAmount = vertexAmount * 0.5;
+      commands.push({
+        type: "C",
+        cp1: jitterPoint(
+          { x: end.x + (corner.x - end.x) * ELLIPSE_KAPPA, y: end.y + (corner.y - end.y) * ELLIPSE_KAPPA },
+          normalized,
+          `${passKey}:corner:${edge}:cp1`,
+          cornerAmount,
+        ),
+        cp2: jitterPoint(
+          { x: cornerEnd.x + (corner.x - cornerEnd.x) * ELLIPSE_KAPPA, y: cornerEnd.y + (corner.y - cornerEnd.y) * ELLIPSE_KAPPA },
+          normalized,
+          `${passKey}:corner:${edge}:cp2`,
+          cornerAmount,
+        ),
+        to: cornerEnd,
+      });
+    }
+    paths.push({ commands });
+  }
+  return paths;
 }
 
 /**
- * Four cubic segments per pass, with deterministic local perturbation.
- * This is intentionally geometry-only; stroke color/width stay renderer-owned.
+ * Two short strokes forming an open arrowhead at `tip`, pointing along the
+ * direction from `tail` to `tip`.
+ */
+export function sketchArrowhead(
+  tail: SketchPoint,
+  tip: SketchPoint,
+  context: SketchContext,
+  options: { size?: number; spread?: number; key?: string } = {},
+): readonly SketchPath[] {
+  const size = options.size ?? 14;
+  const spread = options.spread ?? Math.PI / 7.5;
+  const key = options.key ?? "arrowhead";
+  const angle = Math.atan2(tip.y - tail.y, tip.x - tail.x);
+  const wing = (sign: number): SketchPoint => ({
+    x: tip.x - size * Math.cos(angle + sign * spread),
+    y: tip.y - size * Math.sin(angle + sign * spread),
+  });
+  return [
+    ...sketchLine(tip, wing(-1), context, `${key}:left`),
+    ...sketchLine(tip, wing(1), context, `${key}:right`),
+  ];
+}
+
+/**
+ * Hand-drawn ellipse: a Catmull-Rom loop through radially jittered points that
+ * starts at a seeded angle and overshoots its own start, like a pen stroke.
  */
 export function sketchEllipse(
   cx: number,
@@ -261,46 +397,43 @@ export function sketchEllipse(
     throw new RangeError("Sketch ellipse values must be finite and radii non-negative.");
   }
 
+  const perimeter = Math.PI * (rx + ry);
+  const count = Math.max(8, Math.min(18, Math.ceil(perimeter / 40)));
   const paths: SketchPath[] = [];
-  const pointAmount = normalized.roughness * 0.35;
-  const controlAmount = normalized.roughness * 0.55;
 
   for (let pass = 0; pass < normalized.passes; pass += 1) {
     const passKey = `${key}:pass:${pass}`;
-    const anchors = Array.from({ length: 4 }, (_, index) =>
-      jitterPoint(
-        ellipsePoint(cx, cy, rx, ry, (index * TAU) / 4),
-        normalized,
-        `${passKey}:anchor:${index}`,
-        pointAmount,
-      ),
-    );
+    const radial = Math.min(Math.min(rx, ry) * 0.06, normalized.roughness * (pass === 0 ? 1.6 : 0.9));
+    const startAngle = (sketchJitter(normalized.seed, normalized.objectId, `${passKey}:start`, 0.5) + 0.5) * TAU;
+    const overshoot = 0.18 + (sketchJitter(normalized.seed, normalized.objectId, `${passKey}:overshoot`, 0.5) + 0.5) * 0.22;
+    const step = TAU / count;
 
-    const commands: SketchPathCommand[] = [{ type: "M", to: anchors[0]! }];
-
-    for (let segment = 0; segment < 4; segment += 1) {
-      const angle = (segment * TAU) / 4;
-      const nextAngle = ((segment + 1) * TAU) / 4;
-      const start = anchors[segment]!;
-      const end = anchors[(segment + 1) % 4]!;
-
-      const cp1Base = {
-        x: start.x - Math.sin(angle) * rx * ELLIPSE_KAPPA,
-        y: start.y + Math.cos(angle) * ry * ELLIPSE_KAPPA,
-      };
-      const cp2Base = {
-        x: end.x + Math.sin(nextAngle) * rx * ELLIPSE_KAPPA,
-        y: end.y - Math.cos(nextAngle) * ry * ELLIPSE_KAPPA,
-      };
-
-      commands.push({
-        type: "C",
-        cp1: jitterPoint(cp1Base, normalized, `${passKey}:cp1:${segment}`, controlAmount),
-        cp2: jitterPoint(cp2Base, normalized, `${passKey}:cp2:${segment}`, controlAmount),
-        to: end,
+    const points: SketchPoint[] = [];
+    // One extra point on each side feeds the Catmull-Rom tangents.
+    for (let index = -1; index <= count + 2; index += 1) {
+      const angle = startAngle + index * step + (index > count ? (overshoot - step) * (index - count) : 0);
+      const wobble = index >= 0 && index < count
+        ? sketchJitter(normalized.seed, normalized.objectId, `${passKey}:r:${index}`, radial)
+        : sketchJitter(normalized.seed, normalized.objectId, `${passKey}:r:${((index % count) + count) % count}`, radial);
+      points.push({
+        x: cx + Math.cos(angle) * (rx + wobble),
+        y: cy + Math.sin(angle) * (ry + wobble),
       });
     }
 
+    const commands: SketchPathCommand[] = [{ type: "M", to: points[1]! }];
+    for (let index = 1; index < points.length - 2; index += 1) {
+      const p0 = points[index - 1]!;
+      const p1 = points[index]!;
+      const p2 = points[index + 1]!;
+      const p3 = points[index + 2]!;
+      commands.push({
+        type: "C",
+        cp1: { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 },
+        cp2: { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 },
+        to: p2,
+      });
+    }
     paths.push({ commands });
   }
 

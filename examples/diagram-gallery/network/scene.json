@@ -1,0 +1,720 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 27
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 218.8,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 163.9 -3 382.5 3 562.4 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "Friends of friends form a small world",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 180,
+        "y": 200,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "ana",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Ana",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 360,
+        "y": 140,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "ben",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Ben",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 330,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "cy",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Cy",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 540,
+        "y": 250,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "dee",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Dee",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 520,
+        "y": 450,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "eli",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Eli",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 720,
+        "y": 160,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "fay",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Fay",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 740,
+        "y": 380,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "gus",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Gus",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 880,
+        "y": 270,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "hal",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Hal",
+      "type": "circle",
+      "radius": 36,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k0",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "ana"
+      },
+      "to": {
+        "objectId": "ben"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k1",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "ana"
+      },
+      "to": {
+        "objectId": "cy"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1971c2",
+        "strokeWidth": 3,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k2",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "ben"
+      },
+      "to": {
+        "objectId": "dee"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k3",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "cy"
+      },
+      "to": {
+        "objectId": "dee"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1971c2",
+        "strokeWidth": 3,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k4",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "cy"
+      },
+      "to": {
+        "objectId": "eli"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k5",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "dee"
+      },
+      "to": {
+        "objectId": "fay"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1971c2",
+        "strokeWidth": 3,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k6",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "dee"
+      },
+      "to": {
+        "objectId": "gus"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k7",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "eli"
+      },
+      "to": {
+        "objectId": "gus"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k8",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "fay"
+      },
+      "to": {
+        "objectId": "hal"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1971c2",
+        "strokeWidth": 3,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "k9",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "gus"
+      },
+      "to": {
+        "objectId": "hal"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#868e96",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_ana",
+      "type": "draw",
+      "target": "ana",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_ben",
+      "type": "draw",
+      "target": "ben",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_cy",
+      "type": "draw",
+      "target": "cy",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_dee",
+      "type": "draw",
+      "target": "dee",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_eli",
+      "type": "draw",
+      "target": "eli",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_fay",
+      "type": "draw",
+      "target": "fay",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_gus",
+      "type": "draw",
+      "target": "gus",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_hal",
+      "type": "draw",
+      "target": "hal",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k0",
+      "type": "draw",
+      "target": "k0",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k1",
+      "type": "draw",
+      "target": "k1",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k2",
+      "type": "draw",
+      "target": "k2",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k3",
+      "type": "draw",
+      "target": "k3",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k4",
+      "type": "draw",
+      "target": "k4",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k5",
+      "type": "draw",
+      "target": "k5",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k6",
+      "type": "draw",
+      "target": "k6",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k7",
+      "type": "draw",
+      "target": "k7",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k8",
+      "type": "draw",
+      "target": "k8",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_k9",
+      "type": "draw",
+      "target": "k9",
+      "start": 990,
+      "duration": 600,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}

@@ -8,6 +8,7 @@ Canonical docs:
 - docs/reference/timeline.md
 - docs/security.md
 - docs/guides/ai-agents.md
+- docs/guides/visual-style.md (palette, sizes, spacing, motion; read before authoring)
 - docs/guides/accessibility.md
 - packages/compiler/scene.schema.json
 
@@ -22,6 +23,10 @@ Rules for generated scenes:
 - Avoid overlapping actions that write the same property.
 - Use explicit points for followPath; do not encode arbitrary executable path callbacks.
 - Use state/bindings only through the documented safe expression AST.
+- Use theme "sketch" with a fixed seed for explanatory diagrams.
+- Colour by role (DIAGRAM_ROLES): input blue, process neutral, decision yellow, output green, risk red, store violet, external teal. Prefer two or three accent tones; maximum four for distinct roles. Pair each tone's fill with its own stroke.
+- Use anchor "center" for connectors; they bind to shape outlines with a visible arrowhead.
+- Run lintDesign(evaluate(scene, end), { measure: measureSketchText }) and fix every issue before rendering.
 
 Current core actions:
 - move

@@ -237,8 +237,17 @@ function applyAction(state: Map<string, DrawableObject>, action: ObjectAction, t
       }
       break;
     case "draw":
-      if (target.type === "path" || target.type === "polygon" || target.type === "polyline") {
-        target.drawProgress = lerp(target.drawProgress ?? 1, action.to, progress);
+      switch (target.type) {
+        case "path":
+        case "polygon":
+        case "polyline":
+        case "rect":
+        case "circle":
+        case "ellipse":
+        case "line":
+        case "connector":
+          target.drawProgress = lerp(target.drawProgress ?? 1, action.to, progress);
+          break;
       }
       break;
     case "morph":
