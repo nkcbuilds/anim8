@@ -28,19 +28,20 @@ let fontCss: Promise<string> | undefined;
 
 /** Load the font face lazily; bundlers emit the ~75 KB font as its own chunk. */
 function loadFontCss(): Promise<string> {
-  fontCss ??= import("./font.js").then(module => module.sketchFontFaceCss());
+  fontCss ??= import("./font.js").then(module => module.sketchFontFaceCss()).catch(error => { fontCss = undefined; throw error; });
   return fontCss;
 }
 
-function ensureDocumentFont(document: Document): boolean {
+function ensureDocumentFont(document: Document): HTMLStyleElement | undefined {
   const head = document.head;
-  if (!head || typeof head.querySelector !== "function") return false;
-  if (head.querySelector(`style[${FONT_STYLE_ATTRIBUTE}]`)) return true;
+  if (!head || typeof head.querySelector !== "function") return undefined;
+  const existing = head.querySelector<HTMLStyleElement>(`style[${FONT_STYLE_ATTRIBUTE}]`);
+  if (existing) return existing;
   const style = document.createElement("style");
   style.setAttribute(FONT_STYLE_ATTRIBUTE, "");
   head.appendChild(style);
   void loadFontCss().then(css => { style.textContent = css; }, () => { style.remove(); });
-  return true;
+  return style;
 }
 
 /**
@@ -67,7 +68,7 @@ export function mountSketchSvg(container: Element, frame: EvaluatedScene, option
     return { update, destroy: () => { renderer.clear(); host.innerHTML = ""; } };
   }
 
-  let fontInDocument = false;
+  let documentFont: HTMLStyleElement | undefined;
   const records = new Map<string, GroupRecord>();
   const scratch = document.createElementNS(SVG_NS, "g") as SVGGElement;
 
@@ -108,16 +109,19 @@ export function mountSketchSvg(container: Element, frame: EvaluatedScene, option
   }
 
   const syncFont = (parts: SketchFrameMarkup) => {
-    if (fontInDocument || !parts.usesBundledFont || fontStyle) return;
-    if ((options.font ?? "document") === "document" && ensureDocumentFont(document)) {
-      fontInDocument = true;
-      return;
+    if (!parts.usesBundledFont || fontStyle || documentFont?.isConnected) return;
+    if ((options.font ?? "document") === "document") {
+      documentFont = ensureDocumentFont(document);
+      if (documentFont) return;
     }
     const defs = document.createElementNS(SVG_NS, "defs");
     const style = document.createElementNS(SVG_NS, "style") as SVGStyleElement;
     fontStyle = style;
     defs.appendChild(style);
-    void loadFontCss().then(css => { style.textContent = css; }, () => undefined);
+    void loadFontCss().then(css => { style.textContent = css; }, () => {
+      defs.remove();
+      if (fontStyle === style) fontStyle = undefined;
+    });
     svg.insertBefore(defs, svg.firstChild);
   };
 

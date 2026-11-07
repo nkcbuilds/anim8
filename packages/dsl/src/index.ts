@@ -3,6 +3,7 @@ import {
   defaultStyle,
   defaultTransform,
   evaluate,
+  VALIDATION_LIMITS,
   type Action,
   type DrawableObject,
   type Marker,
@@ -819,6 +820,18 @@ function parseCommand(state: ParseState, tokens: Token[], line: number): void {
 }
 
 export function compile(source: string): DslCompileResult {
+  try { return parseWithinBudget(source); }
+  catch (error) {
+    if (!(error instanceof DslDiagnosticLimit)) throw error;
+    return { ok: false, diagnostics: error.diagnostics };
+  }
+}
+
+class DslDiagnosticLimit extends Error {
+  constructor(readonly diagnostics: DslDiagnostic[]) { super("DSL diagnostic limit reached."); }
+}
+
+function parseWithinBudget(source: string): DslCompileResult {
   if (new TextEncoder().encode(source).length > COMPILER_LIMITS.sourceBytes) {
     return { ok: false, diagnostics: [{ code: "LIMIT_SOURCE_BYTES", message: "DSL source exceeds the compiler source-size limit.", line: 1, column: 1 }] };
   }
@@ -839,6 +852,17 @@ export function compile(source: string): DslCompileResult {
     markerCounter: 0,
     diagnostics: [],
   };
+
+  const diagnostics = state.diagnostics;
+  Object.defineProperty(diagnostics, "push", { value: (...items: DslDiagnostic[]) => {
+    if (diagnostics.length + items.length >= VALIDATION_LIMITS.diagnostics) {
+      Array.prototype.push.apply(diagnostics, items.slice(0, VALIDATION_LIMITS.diagnostics - diagnostics.length - 1));
+      const location = items[0] ?? { line: 1, column: 1 };
+      Array.prototype.push.call(diagnostics, { code: "LIMIT_DIAGNOSTICS", message: "Parsing stopped after reaching the diagnostic limit.", line: location.line, column: location.column });
+      throw new DslDiagnosticLimit([...diagnostics]);
+    }
+    return Array.prototype.push.apply(diagnostics, items);
+  } });
 
   const lines = source.replace(/^\uFEFF/, "").split(/\r?\n/);
   for (let index = 0; index < lines.length; index += 1) {
@@ -865,7 +889,7 @@ export function compile(source: string): DslCompileResult {
   }
 
   if (state.diagnostics.length > 0) {
-    return { ok: false, diagnostics: state.diagnostics };
+    return { ok: false, diagnostics: [...state.diagnostics] };
   }
 
   const result = compileDocument(currentScene(state));

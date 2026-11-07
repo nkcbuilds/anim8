@@ -17,11 +17,15 @@ describe("styling authoring", () => {
   });
   it("rolls back an invalid keyframe sequence instead of leaving partially scheduled actions", () => {
     const s = scene(), box = s.box("Node");
+    const [previous] = s.sequence(box.moveTo({ x: 10, y: 0 }, { duration: 100 }));
     const before = s.toJSON();
     expect(() => s.keyframes(box, [{ offset: 0.5, position: { x: 50, y: 0 } }, { offset: 0.7, style: { strokeOpacity: 2 } }], { duration: 1000 })).toThrow();
     expect(s.toJSON()).toEqual(before);
     expect(() => s.keyframes(box, [{ offset: 0.5, position: { x: 50, y: 0 } }], { duration: 1000 })).toThrow();
     expect(s.toJSON()).toEqual(before);
+    const [next] = s.sequence(box.moveTo({ x: 20, y: 0 }, { duration: 100 }));
+    expect(Number(next!.split("_").at(-1))).toBe(Number(previous!.split("_").at(-1)) + 1);
+    expect(s.toJSON().timeline.at(-1)?.start).toBe(100);
   });
   it("authors a scene font and keeps it when cancelling an unfinished font change", () => {
     const s = scene({ theme: "sketch", fontFamily: '"Brand Font", sans-serif' });

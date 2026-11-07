@@ -180,6 +180,28 @@ describe("player declarative interactions", () => {
     expect(callbacks.size).toBe(1);
     controller.destroy();
   });
+
+  it("stops a failed frame and can resume after the runtime input is corrected", () => {
+    const document = scene();
+    document.timeline = [{ id: "move", type: "move", target: "node", start: 0, duration: 1000, to: { x: 100, y: 0 } }];
+    document.bindings = [{ id: "opacity", target: { objectId: "node", property: "opacity" }, expression: { kind: "op", op: "mul", args: [{ kind: "get", path: "time" }, { kind: "get", path: "inputs.factor" }] } }];
+    const callbacks = new Map<number, FrameRequestCallback>();
+    let id = 0;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => { callbacks.set(++id, callback); return id; });
+    vi.stubGlobal("cancelAnimationFrame", (key: number) => callbacks.delete(key));
+    const advance = (timestamp: number) => { const [key, callback] = callbacks.entries().next().value!; callbacks.delete(key); callback(timestamp); };
+    const controller = mountPlayer(new FakeElement() as unknown as Element, document);
+    controller.setInput("factor", 1e100);
+    controller.play(); advance(0);
+    expect(() => advance(100)).toThrow(/World opacity/);
+    expect(controller.isPlaying()).toBe(false);
+    expect(callbacks.size).toBe(0);
+    controller.setInput("factor", 0.001);
+    controller.play(); advance(200); advance(250);
+    expect(controller.getTime()).toBe(150);
+    expect(controller.isPlaying()).toBe(true);
+    controller.destroy();
+  });
   beforeEach(() => {
     renderer.update.mockClear();
     renderer.destroy.mockClear();

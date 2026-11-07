@@ -12,6 +12,14 @@ const hierarchy = (scale: number) => ({
 });
 
 describe("resource safety across compiler and evaluator", () => {
+  it("indexes disjoint binding/action targets and budgets dense same-target scans", () => {
+    const timeline = Array.from({ length: 1500 }, (_, i) => move(i, i, 1));
+    const bindings = Array.from({ length: 1500 }, (_, i) => ({ id: "b" + i, target: { objectId: "b", property: "rotation" }, expression: { kind: "literal", value: 0 } }));
+    const input = { ...base(), objects: [{ id: "a", type: "rect" }, { id: "b", type: "rect" }], timeline, bindings };
+    expect(compile(input).ok).toBe(true);
+    for (const binding of bindings) binding.target.objectId = "a";
+    expect(compile(input).diagnostics).toContainEqual(expect.objectContaining({ code: "LIMIT_VALIDATION_WORK" }));
+  });
   it("bounds conflict diagnostics and returns deterministic ordinary arrays", () => {
     const document = { ...base(), timeline: Array.from({ length: 200 }, (_, index) => move(index)) };
     const first = compile(document), second = compile(document);

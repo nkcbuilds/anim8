@@ -9,6 +9,16 @@ const document = (): SceneDocument => ({ version: "1.0", scene: { width: 600, he
   { id: "edge", type: "connector", from: { objectId: "a" }, to: { objectId: "b" }, kind: "straight", label: "Link", style: defaultStyle(), transform: defaultTransform(), visible: true, z: 2 },
 ] });
 
+it("preserves uncached errors when non-finite style values change", () => {
+  const renderer = createSketchFrameRenderer();
+  const frame = evaluate(document(), 0);
+  frame.objects[0]!.style.strokeWidth = NaN;
+  renderer.render(frame);
+  frame.objects[0]!.style.strokeWidth = Infinity;
+  expect(() => renderSketchFrame(frame)).toThrow(RangeError);
+  expect(() => renderer.render(frame)).toThrow(RangeError);
+});
+
 it("reuses marks across transform-only updates and clears retained bodies on destroy", () => {
   const spy = vi.spyOn(sketch, "sketchRoundedRectangle");
   const renderer = createSketchFrameRenderer(), source = document();

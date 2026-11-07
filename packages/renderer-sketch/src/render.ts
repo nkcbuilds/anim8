@@ -303,7 +303,7 @@ function renderSketchText(
 ): string {
   const color = escapeXml(style.color ?? DEFAULT_TEXT);
   const custom = style.fontFamily !== undefined;
-  if (!custom) usage.bundledFont = true;
+  if (!custom || style.fontFamily!.split(",").some(family => /^(?:Virgil|"Virgil"|'Virgil')$/i.test(family.trim()))) usage.bundledFont = true;
   const family = escapeXml(custom ? style.fontFamily! : SKETCH_FONT_FAMILY);
   const requested = style.fontSize ?? DEFAULT_FONT_SIZE;
 
@@ -611,7 +611,8 @@ function renderFrame(frame: EvaluatedScene, bodies?: Map<string, CachedBody>): S
     // Connector bodies depend on the entire graph and label background. Other
     // bodies use local geometry/style; world transforms live on their outer group.
     const cacheable = bodies && object.type !== "connector" && object.type !== "group" && worldVisible(object, objects);
-    const key = cacheable ? JSON.stringify([seed, { ...object, transform: undefined, parentId: undefined, z: undefined, visible: undefined }]) : undefined;
+    const key = cacheable ? JSON.stringify([seed, { ...object, transform: undefined, parentId: undefined, z: undefined, visible: undefined }], (_key, value: unknown) =>
+      typeof value === "number" && !Number.isFinite(value) ? { nonFiniteNumber: String(value) } : value) : undefined;
     const cached = key === undefined ? undefined : bodies?.get(object.id);
     let markup: SketchObjectMarkup | null;
     if (cached && cached.key === key) {

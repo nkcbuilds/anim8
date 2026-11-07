@@ -35,7 +35,10 @@ function runBuilds() {
 
   const args = [
     "--filter", "@anim8/core",
+    "--filter", "@anim8/compiler",
     "--filter", "@anim8/a11y",
+    "--filter", "@anim8/sketch",
+    "--filter", "@anim8/renderer-sketch",
     "--filter", "@anim8/renderer-svg",
     "--filter", "@anim8/player",
     "--filter", "@anim8/react",
@@ -77,7 +80,10 @@ function runBuilds() {
 function assertBuiltOutputs() {
   for (const relative of [
     "packages/core/dist/index.js",
+    "packages/compiler/dist/index.js",
     "packages/a11y/dist/index.js",
+    "packages/sketch/dist/index.js",
+    "packages/renderer-sketch/dist/live.js",
     "packages/renderer-svg/dist/index.js",
     "packages/player/dist/index.js",
     "packages/react/dist/index.js",
@@ -431,7 +437,11 @@ async function runBrowserSuite(browserName, browserType, server) {
     await runCase(caseName("playback retains keyboard focus and source changes discard pending loads"), async () => {
       const result = await page.evaluate(() => globalThis.__anim8Browser.focusAndSourceRaces());
       for (const focus of result.focus) { assert.equal(focus.focused, true, focus.theme); assert.equal(focus.blurs, 0, focus.theme); }
-      for (const race of result.races) { assert.equal(race.aborted, true); assert.equal(race.label, race.action === "remove" ? null : "new", `${race.tag}: ${race.action}`); }
+      for (const race of result.races) {
+        assert.equal(race.aborted, true);
+        assert.equal(race.label, race.action === "remove" ? null : race.action === "assigned" ? "manual" : "new", `${race.tag}: ${race.action}`);
+        if (race.requests) assert.equal(race.requests, race.action === "assigned" ? 1 : 2);
+      }
     });
 
     await runCase(caseName("React SSR markup hydrates without replacement or recoverable errors"), async () => {
@@ -455,10 +465,12 @@ async function runBrowserSuite(browserName, browserType, server) {
     await runCase(caseName("framework updates preserve controller state and keep Vue's visible SVG moving"), async () => {
       const results = await page.evaluate(() => globalThis.FRAMEWORK_LIFECYCLE());
       for (const result of results) {
-        if (result.framework) assert.deepEqual(result.stable, [true, true, true], result.framework);
+        if (result.concurrent) assert.deepEqual(result.events, ["committed", "committed", "latest"]);
+        else if (result.framework) assert.deepEqual(result.stable, [true, true, true], result.framework);
         else { assert.ok(result.frameTime > 0, result.theme); assert.ok(Math.abs(result.visibleX - result.frameX) < 0.0001, result.theme); }
       }
     });
+    assert.equal(pageErrors.length, 0, pageErrors.map(error => error.message).join("\n"));
     const caseCount = browserName === "chromium" ? 18 : 17;
     console.log(`PASS browser harness (${browserName}, ${caseCount} cases)`);
     return true;

@@ -6,11 +6,13 @@ const scene = (style: unknown = {}, extra = {}, timeline: unknown[] = []) => ({ 
 describe("extended styling compilation", () => {
   it("preserves a scene font through JSON round trips without baking it into objects", () => {
     const input = scene({ fontFamily: "monospace" });
+    input.objects.push({ id: "inherited", type: "rect", style: {}, text: "Inherited" });
     const metadata = { ...input.scene, fontFamily: '"Developer Font", sans-serif' };
     const result = compile({ ...input, scene: metadata });
     expect(result.diagnostics).toEqual([]);
     expect(result.scene?.scene.fontFamily).toBe(metadata.fontFamily);
     expect(result.scene?.objects[0]!.style.fontFamily).toBe("monospace");
+    expect(result.scene?.objects[1]!.style.fontFamily).toBeUndefined();
     expect(compile(JSON.parse(JSON.stringify(result.scene))).scene).toEqual(result.scene);
   });
   it.each(["", " \n ", "x".repeat(513), 123, null, {}])("rejects invalid scene font %j", fontFamily => {

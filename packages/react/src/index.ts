@@ -2,6 +2,7 @@ import { describeScene, type DescribeSceneOptions } from "@anim8/a11y";
 import {
   createElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   type HTMLAttributes,
   type RefObject,
@@ -38,6 +39,8 @@ function normalizedInitialTime(value: number | undefined): number {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 0;
 }
 
+const useCommitEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 export function useAnim8Player(
   scene: Anim8Scene,
   options: UseAnim8PlayerOptions = {},
@@ -45,9 +48,11 @@ export function useAnim8Player(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const controllerRef = useRef<PlayerController | null>(null);
   const onFrameRef = useRef(options.onFrame);
-  onFrameRef.current = options.onFrame;
   const onObjectEventRef = useRef(options.onObjectEvent);
-  onObjectEventRef.current = options.onObjectEvent;
+  useCommitEffect(() => {
+    onFrameRef.current = options.onFrame;
+    onObjectEventRef.current = options.onObjectEvent;
+  });
   const handlesObjectEvents = Boolean(options.onObjectEvent);
 
   const {

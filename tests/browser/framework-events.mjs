@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, Suspense, startTransition } from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { createApp, defineComponent, h, nextTick, shallowRef } from "vue";
@@ -89,6 +89,31 @@ window.FRAMEWORK_LIFECYCLE = async () => {
       }
       results.push({ framework, stable });
     } finally { destroy(); host.remove(); }
+  }
+  // Suspended renders must never publish their callback refs to the live player.
+  {
+    const host = window.document.createElement("div"); window.document.body.append(host);
+    const root = createRoot(host), events = [], blocked = new Promise(() => {});
+    let attempted = false;
+    function Probe({ callback, suspend }) {
+      const refs = useReactPlayer(document, { onObjectEvent: callback });
+      if (suspend) { attempted = true; throw blocked; }
+      return createElement("div", { ref: refs.containerRef });
+    }
+    const render = (callback, suspend = false) => root.render(createElement(Suspense, { fallback: "Pending" }, createElement(Probe, { callback, suspend })));
+    try {
+      const committed = () => events.push("committed");
+      flushSync(() => render(committed)); await settle();
+      for (const callback of [() => events.push("uncommitted"), undefined]) {
+        attempted = false;
+        startTransition(() => render(callback, true));
+        for (let i = 0; i < 30 && !attempted; i++) await settle();
+        if (!attempted) throw new Error("React did not attempt the suspended transition");
+        click(host);
+      }
+      flushSync(() => render(() => events.push("latest"))); await settle(); click(host);
+      results.push({ concurrent: true, events });
+    } finally { root.unmount(); host.remove(); }
   }
   // Exercise the actual Vue component's innerHTML patching during scene replacement.
   for (const theme of ["clean", "sketch"]) {

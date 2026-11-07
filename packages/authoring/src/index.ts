@@ -632,11 +632,11 @@ export class SceneBuilder {
    * offset 0 is allowed to intentionally establish an immediate value.
    */
   keyframes(target: NodeHandle, frames: readonly Keyframe[], options: KeyframeOptions): string[] {
-    const timeline = structuredClone(this.timeline), cursor = this.cursor, counter = this.idCounter;
+    const length = this.timeline.length, cursor = this.cursor, counter = this.idCounter;
     try {
       return this.buildKeyframes(target, frames, options);
     } catch (error) {
-      this.timeline = timeline;
+      this.timeline.length = length;
       this.cursor = cursor;
       this.idCounter = counter;
       throw error;

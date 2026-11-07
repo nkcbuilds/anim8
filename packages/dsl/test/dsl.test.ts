@@ -175,4 +175,15 @@ box a "unterminated at 0 0
       expect.objectContaining({ code: "SCENE_REQUIRED", line: 1, column: 1 }),
     ]);
   });
+
+  it("bounds parser and tokenizer diagnostics before compiling a document", () => {
+    for (const command of ["invalid", 'box a "unterminated']) {
+      const result = compile("scene 640 360\n" + (command + "\n").repeat(100_000));
+      expect(result.ok).toBe(false);
+      expect(result.diagnostics).toHaveLength(256);
+      expect(result.diagnostics.at(-1)?.code).toBe("LIMIT_DIAGNOSTICS");
+      expect(result.diagnostics.at(-1)?.line).toBe(257);
+      expect(Object.hasOwn(result.diagnostics, "push")).toBe(false);
+    }
+  });
 });

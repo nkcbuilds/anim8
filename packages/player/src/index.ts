@@ -198,7 +198,8 @@ export function mountPlayer(container: Element, scene: SceneDocument, options: P
       else { time = 0; playing = false; }
     }
 
-    render();
+    try { render(); }
+    catch (error) { playing = false; stopRaf(); throw error; }
     if (playing && !raf && !ownerDocument?.hidden && typeof requestAnimationFrame !== "undefined") {
       raf = requestAnimationFrame(tick);
     }
@@ -297,8 +298,10 @@ export class Anim8PlayerElement extends HTMLElementBase {
   #scene: SceneDocument | undefined;
   #loadSerial = 0;
   #loadAbort: AbortController | undefined;
+  #sourceToLoad: string | undefined;
 
   set scene(value: SceneDocument | undefined) {
+    this.#sourceToLoad = undefined;
     this.#loadSerial++;
     this.#loadAbort?.abort();
     this.#scene = value;
@@ -328,7 +331,7 @@ export class Anim8PlayerElement extends HTMLElementBase {
   }
 
   async connectedCallback(): Promise<void> {
-    if (!this.#scene) {
+    if (!this.#scene || this.#sourceToLoad) {
       const src = this.getAttribute("src");
       if (src && typeof fetch !== "undefined") {
         await this.#loadScene(src);
@@ -342,10 +345,12 @@ export class Anim8PlayerElement extends HTMLElementBase {
     if (name !== "src" || previous === next) return;
     this.#loadSerial++;
     this.#loadAbort?.abort();
+    this.#sourceToLoad = next ?? undefined;
     if (next && this.isConnected) void this.#loadScene(next);
   }
 
   async #loadScene(src: string): Promise<void> {
+    this.#sourceToLoad = src;
     if (typeof fetch === "undefined") return;
     const serial = ++this.#loadSerial;
     this.#loadAbort?.abort();
@@ -355,6 +360,7 @@ export class Anim8PlayerElement extends HTMLElementBase {
       const loaded = await readSceneResponse(await fetch(src, { signal: abort.signal }));
       if (serial !== this.#loadSerial || !this.isConnected || this.getAttribute("src") !== src) return;
       this.#scene = loaded;
+      this.#sourceToLoad = undefined;
       this.#mount();
     } catch (error) {
       if (abort.signal.aborted || serial !== this.#loadSerial) return;

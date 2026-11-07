@@ -162,6 +162,7 @@ export class Anim8WebComponent extends HTMLElementBase {
   #domBound = false;
   #loadSerial = 0;
   #loadAbort: AbortController | undefined;
+  #sourceToLoad: string | undefined;
 
   constructor() {
     super();
@@ -172,6 +173,7 @@ export class Anim8WebComponent extends HTMLElementBase {
   }
 
   set scene(value: SceneDocument | undefined) {
+    this.#sourceToLoad = undefined;
     this.#loadSerial += 1;
     this.#loadAbort?.abort();
     this.#scene = value;
@@ -232,7 +234,7 @@ export class Anim8WebComponent extends HTMLElementBase {
     if (!this.#bindDom()) return;
     this.#installReducedMotionListener();
 
-    if (this.#scene) {
+    if (this.#scene && !this.#sourceToLoad) {
       this.#mount(false, true);
       return;
     }
@@ -252,15 +254,17 @@ export class Anim8WebComponent extends HTMLElementBase {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    if (oldValue === newValue || !this.isConnected) return;
+    if (oldValue === newValue) return;
 
     if (name === "src") {
       this.#loadSerial++;
       this.#loadAbort?.abort();
-      if (newValue) void this.#loadScene(newValue);
+      this.#sourceToLoad = newValue ?? undefined;
+      if (newValue && this.isConnected) void this.#loadScene(newValue);
       return;
     }
 
+    if (!this.isConnected) return;
     if (!this.#controller) return;
 
     if (name === "autoplay") {
@@ -456,6 +460,7 @@ export class Anim8WebComponent extends HTMLElementBase {
   };
 
   async #loadScene(src: string): Promise<void> {
+    this.#sourceToLoad = src;
     if (typeof fetch !== "function") return;
 
     const serial = ++this.#loadSerial;
@@ -465,9 +470,10 @@ export class Anim8WebComponent extends HTMLElementBase {
 
     try {
       const scene = await readSceneResponse(await fetch(src, abort ? { signal: abort.signal } : undefined));
-      if (serial !== this.#loadSerial || !this.isConnected) return;
+      if (serial !== this.#loadSerial || !this.isConnected || this.getAttribute("src") !== src) return;
 
       this.#scene = scene;
+      this.#sourceToLoad = undefined;
       this.#mount(false, true);
     } catch (error) {
       if (abort?.signal.aborted || serial !== this.#loadSerial) return;

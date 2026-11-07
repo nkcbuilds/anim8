@@ -1446,6 +1446,14 @@ function validateBindings(
   diagnostics: Diagnostic[],
 ): void {
   const ids = new Set<string>();
+  const actionsByTarget = new Map<string, Action[]>();
+  for (const action of timeline) {
+    consumeValidationWork(diagnostics);
+    if (action.type === "camera") continue;
+    const actions = actionsByTarget.get(action.target) ?? [];
+    actions.push(action);
+    actionsByTarget.set(action.target, actions);
+  }
   bindings.forEach((binding, index) => {
     if (ids.has(binding.id)) diagnostic(diagnostics, "DUPLICATE_BINDING_ID", `bindings[${index}].id`, `Binding '${binding.id}' is duplicated.`);
     ids.add(binding.id);
@@ -1457,7 +1465,8 @@ function validateBindings(
     if (binding.target.property === "text" && target.type !== "text" && target.type !== "rect" && target.type !== "circle" && target.type !== "ellipse") {
       diagnostic(diagnostics, "INVALID_BINDING_PROPERTY", `bindings[${index}].target.property`, `Object type '${target.type}' does not expose text.`);
     }
-    for (const action of timeline) {
+    for (const action of actionsByTarget.get(binding.target.objectId) ?? []) {
+      consumeValidationWork(diagnostics);
       if (action.type !== "camera" && action.target === binding.target.objectId && actionProperties(action).includes(binding.target.property)) {
         diagnostic(
           diagnostics,

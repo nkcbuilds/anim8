@@ -652,6 +652,25 @@ async function focusAndSourceRaces() {
         races.push({ tag, action, aborted: signal.aborted, label: element.scene?.objects[0]?.text ?? null });
         element.remove();
       }
+      for (const action of ["reconnect", "assigned"]) {
+        const pending = [], signals = [];
+        window.fetch = (_url, options) => {
+          signals.push(options.signal);
+          return new Promise(resolve => pending.push(resolve));
+        };
+        const assigned = text => ({ ...source(text), objects: source(text).objects.map(o => ({ ...o, width: 100, height: 50, style: defaultStyle(), transform: defaultTransform(), visible: true, z: 0 })) });
+        const element = document.createElement(tag);
+        element.scene = assigned("cached"); root.append(element);
+        element.setAttribute("src", "https://anim8.invalid/slow.json");
+        element.remove();
+        if (action === "assigned") element.scene = assigned("manual");
+        root.append(element);
+        const requests = pending.length;
+        for (const resolve of pending) resolve(new Response(JSON.stringify(source("new"))));
+        for (let i = 0; i < 6; i++) await waitAnimationFrames(2);
+        races.push({ tag, action, requests, aborted: signals[0].aborted, label: element.scene?.objects[0]?.text ?? null });
+        element.remove();
+      }
     }
   } finally { window.fetch = originalFetch; }
   return { focus, races };
