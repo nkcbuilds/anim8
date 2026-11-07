@@ -75,6 +75,23 @@ describe("connectorGeometry", () => {
 describe("text layout", () => {
   const measure = (text: string, size: number) => text.length * size * 0.5;
 
+  it("bounds measurements for large fonts while keeping the largest fitting size", () => {
+    let calls = 0;
+    const fit = fitText("x", { fontSize: 1_000_000, maxWidth: 750_000, measure: (_text, size) => { calls++; return size; } });
+    expect(fit.fontSize).toBe(750_000);
+    expect(fit.overflow).toBe(false);
+    expect(calls).toBeLessThan(200);
+    calls = 0;
+    expect(fitText("x", { fontSize: 1_000_000, maxWidth: 1, measure: () => { calls++; return 10; } }).overflow).toBe(true);
+    expect(calls).toBeLessThan(200);
+  });
+
+  it.each([NaN, Infinity, -Infinity])("rejects nonfinite fitting dimensions %s", value => {
+    expect(() => fitText("x", { fontSize: value, maxWidth: 20 })).toThrow(RangeError);
+    expect(() => fitText("x", { fontSize: 20, maxWidth: value })).toThrow(RangeError);
+    expect(() => fitText("x", { fontSize: 20, maxWidth: 20, minFontSize: value })).toThrow(RangeError);
+  });
+
   it("wraps on words and keeps explicit newlines", () => {
     expect(wrapTextLines("one two three four", 50, 10, measure)).toEqual(["one two", "three four"]);
     expect(wrapTextLines("a\nb", 500, 10, measure)).toEqual(["a", "b"]);

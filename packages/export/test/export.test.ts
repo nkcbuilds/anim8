@@ -16,6 +16,15 @@ function scene(){
  return res.scene;
 }
 describe("deterministic export",()=>{
+ it.each(["clean", "sketch"] as const)("preserves a custom scene font in every %s SVG frame",theme=>{
+  const document=scene();
+  document.scene.theme=theme;
+  document.scene.fontFamily='"Brand Font", serif';
+  for(const frame of svgFrames(document,{fps:20,durationMs:100})){
+   expect(frame.svg).toContain('font-family="&quot;Brand Font&quot;, serif"');
+   expect(frame.svg).not.toContain("@font-face");
+  }
+ });
  it("creates reproducible endpoints and does not depend on evaluation order",()=>{
   const a=[...svgFrames(scene(),{fps:20,durationMs:100})];
   const b=[...svgFrames(scene(),{fps:20,durationMs:100})];

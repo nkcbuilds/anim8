@@ -24,7 +24,8 @@ function readPath(path: string, env: ExpressionEnvironment): ScalarValue | undef
   const match = /^(inputs|state)\.([A-Za-z_][A-Za-z0-9_]*)$/.exec(path);
   if (!match) return undefined;
   const [, root, key] = match;
-  return root === "inputs" ? env.inputs?.[key!] : env.state?.[key!];
+  const values = root === "inputs" ? env.inputs : env.state;
+  return values && Object.prototype.hasOwnProperty.call(values, key!) ? values[key!] : undefined;
 }
 
 export function evaluateExpression(
@@ -37,23 +38,27 @@ export function evaluateExpression(
   const maxStringLength = limits.maxStringLength ?? 32768;
   let nodes = 0;
 
+  const scalar = (value: unknown): ExpressionResult => {
+    if (typeof value === "number" && !Number.isFinite(value)) return { ok: false, code: "EXPR_NON_FINITE", message: "Expression values must be finite." };
+    if (typeof value === "string" && value.length > maxStringLength) return { ok: false, code: "EXPR_STRING_LIMIT", message: `Expression string exceeds ${maxStringLength} characters.` };
+    if (value === null || typeof value === "string" || typeof value === "boolean" || typeof value === "number") return { ok: true, value };
+    return { ok: false, code: "EXPR_TYPE", message: "Expression values must be scalars." };
+  };
+
   const visit = (expr: Expression, depth: number): ExpressionResult => {
     nodes += 1;
     if (nodes > maxNodes) return { ok: false, code: "EXPR_NODE_LIMIT", message: `Expression exceeds ${maxNodes} nodes.` };
     if (depth > maxDepth) return { ok: false, code: "EXPR_DEPTH_LIMIT", message: `Expression exceeds depth ${maxDepth}.` };
 
     if (expr.kind === "literal") {
-      if (typeof expr.value === "string" && expr.value.length > maxStringLength) {
-        return { ok: false, code: "EXPR_STRING_LIMIT", message: `Expression string exceeds ${maxStringLength} characters.` };
-      }
-      return { ok: true, value: expr.value };
+      return scalar(expr.value);
     }
 
     if (expr.kind === "get") {
       const value = readPath(expr.path, env);
       return value === undefined
         ? { ok: false, code: "EXPR_UNKNOWN_PATH", message: `Unknown expression path '${expr.path}'.` }
-        : { ok: true, value };
+        : scalar(value);
     }
 
     const values: ScalarValue[] = [];

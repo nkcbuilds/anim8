@@ -1,5 +1,5 @@
 import type { EvaluatedScene } from "@anim8/core";
-import { composeSketchSvg, renderSketchFrame, type SketchFrameMarkup } from "./render.js";
+import { composeSketchSvg, createSketchFrameRenderer, renderSketchFrame, type SketchFrameMarkup } from "./render.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const FONT_STYLE_ATTRIBUTE = "data-anim8-sketch-font";
@@ -28,19 +28,20 @@ let fontCss: Promise<string> | undefined;
 
 /** Load the font face lazily; bundlers emit the ~75 KB font as its own chunk. */
 function loadFontCss(): Promise<string> {
-  fontCss ??= import("./font.js").then(module => module.sketchFontFaceCss());
+  fontCss ??= import("./font.js").then(module => module.sketchFontFaceCss()).catch(error => { fontCss = undefined; throw error; });
   return fontCss;
 }
 
-function ensureDocumentFont(document: Document): boolean {
+function ensureDocumentFont(document: Document): HTMLStyleElement | undefined {
   const head = document.head;
-  if (!head || typeof head.querySelector !== "function") return false;
-  if (head.querySelector(`style[${FONT_STYLE_ATTRIBUTE}]`)) return true;
+  if (!head || typeof head.querySelector !== "function") return undefined;
+  const existing = head.querySelector<HTMLStyleElement>(`style[${FONT_STYLE_ATTRIBUTE}]`);
+  if (existing) return existing;
   const style = document.createElement("style");
   style.setAttribute(FONT_STYLE_ATTRIBUTE, "");
   head.appendChild(style);
   void loadFontCss().then(css => { style.textContent = css; }, () => { style.remove(); });
-  return true;
+  return style;
 }
 
 /**
@@ -52,21 +53,22 @@ function ensureDocumentFont(document: Document): boolean {
  * focus, tabindex and listeners on object elements survive playback. An
  * existing server-rendered sketch SVG in the container is adopted, not replaced.
  *
- * The bundled font is loaded on first mount and injected once; until it
+ * The bundled font is loaded when first needed and injected once; until it
  * arrives (a moment, from a local chunk) text uses the fallback font.
  */
 export function mountSketchSvg(container: Element, frame: EvaluatedScene, options: SketchMountOptions = {}): SketchMount {
+  const renderer = createSketchFrameRenderer();
   const document = container.ownerDocument ?? (globalThis as { document?: Document }).document;
 
   // Hosts without a real SVG DOM fall back to string rendering.
   if (!document?.createElementNS || typeof container.replaceChildren !== "function") {
     const host = container as Element & { innerHTML: string };
-    const update = (next: EvaluatedScene) => { host.innerHTML = composeSketchSvg(renderSketchFrame(next)); };
+    const update = (next: EvaluatedScene) => { host.innerHTML = composeSketchSvg(renderer.render(next)); };
     update(frame);
-    return { update, destroy: () => { host.innerHTML = ""; } };
+    return { update, destroy: () => { renderer.clear(); host.innerHTML = ""; } };
   }
 
-  const fontInDocument = (options.font ?? "document") === "document" && ensureDocumentFont(document);
+  let documentFont: HTMLStyleElement | undefined;
   const records = new Map<string, GroupRecord>();
   const scratch = document.createElementNS(SVG_NS, "g") as SVGGElement;
 
@@ -107,12 +109,19 @@ export function mountSketchSvg(container: Element, frame: EvaluatedScene, option
   }
 
   const syncFont = (parts: SketchFrameMarkup) => {
-    if (fontInDocument || !parts.usesBundledFont || fontStyle) return;
+    if (!parts.usesBundledFont || fontStyle || documentFont?.isConnected) return;
+    if ((options.font ?? "document") === "document") {
+      documentFont = ensureDocumentFont(document);
+      if (documentFont) return;
+    }
     const defs = document.createElementNS(SVG_NS, "defs");
     const style = document.createElementNS(SVG_NS, "style") as SVGStyleElement;
     fontStyle = style;
     defs.appendChild(style);
-    void loadFontCss().then(css => { style.textContent = css; }, () => undefined);
+    void loadFontCss().then(css => { style.textContent = css; }, () => {
+      defs.remove();
+      if (fontStyle === style) fontStyle = undefined;
+    });
     svg.insertBefore(defs, svg.firstChild);
   };
 
@@ -135,7 +144,7 @@ export function mountSketchSvg(container: Element, frame: EvaluatedScene, option
   let resourceMarkup: string | undefined;
   let resources = svg.querySelector('defs[data-anim8-sketch-resources]');
   const update = (next: EvaluatedScene) => {
-    const parts = renderSketchFrame(next);
+    const parts = renderer.render(next);
     if (parts.definitions !== resourceMarkup) {
       resources ??= document.createElementNS(SVG_NS, "defs");
       resources.setAttribute("data-anim8-sketch-resources", "");
@@ -189,6 +198,7 @@ export function mountSketchSvg(container: Element, frame: EvaluatedScene, option
   return {
     update,
     destroy: () => {
+      renderer.clear();
       records.clear();
       container.replaceChildren();
     },

@@ -632,6 +632,12 @@ describe("@anim8/renderer-sketch", () => {
 
     const custom: SceneDocument = { ...withText, objects: withText.objects.map(o => ({ ...o, style: { ...o.style, fontFamily: "Georgia" } })) };
     expect(renderSketchSceneAt(custom, 0)).not.toContain("@font-face");
+    for (const fontFamily of ["Virgil", '"virgil", serif', "Georgia, 'Virgil', cursive"]) {
+      const explicit = { ...withText, scene: { ...withText.scene, fontFamily } };
+      expect(renderSketchSceneAt(explicit, 0)).toContain("@font-face");
+    }
+    custom.scene.fontFamily = "NotVirgil";
+    expect(renderSketchSceneAt(custom, 0)).not.toContain("@font-face");
     expect(sketchFontFaceCss()).toContain('font-family:"Virgil"');
   });
 

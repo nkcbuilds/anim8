@@ -4,6 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve: {
     alias: {
+      "@anim8/compiler": fileURLToPath(new URL("../compiler/src/index.ts", import.meta.url)),
       "@anim8/core": fileURLToPath(new URL("../core/src/index.ts", import.meta.url)),
       "@anim8/renderer-svg": fileURLToPath(new URL("../renderer-svg/src/index.ts", import.meta.url)),
       "@anim8/renderer-sketch/live": fileURLToPath(new URL("../renderer-sketch/src/live.ts", import.meta.url)),

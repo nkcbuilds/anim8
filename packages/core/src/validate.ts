@@ -2,6 +2,8 @@ import { DRAWABLE_TYPES, isDrawableType } from "./types.js";
 import { STATE_NUMBER_LIMIT, STATE_STRING_LIMIT } from "./interactions.js";
 import { styleIssues, styleProperties, textRunIssues } from "./style.js";
 import { morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
+import { assertWorldTransforms } from "./geometry.js";
+import { createDiagnosticCollector, consumeValidationWork, ValidationBudgetExceeded } from "./validation-budget.js";
 import type { Action, ScalarValue, SceneDocument, StateAction } from "./types.js";
 
 export interface Diagnostic {
@@ -92,7 +94,20 @@ function validateStateActionAtPath(
 }
 
 export function validateScene(scene: SceneDocument): Diagnostic[] {
-  const diagnostics: Diagnostic[] = [];
+  const diagnostics = createDiagnosticCollector();
+  try { validateWithinBudget(scene, diagnostics); }
+  catch (error) { if (!(error instanceof ValidationBudgetExceeded)) throw error; }
+  return [...diagnostics];
+}
+
+function validateWithinBudget(scene: SceneDocument, diagnostics: Diagnostic[]): void {
+  try { assertWorldTransforms(new Map(scene.objects.map(object => [object.id, object]))); }
+  catch (error) { diagnostics.push({ code: "INVALID_WORLD_TRANSFORM", path: "objects", message: error instanceof Error ? error.message : "Unsupported world transform." }); }
+
+  const family = scene.scene.fontFamily;
+  if (family !== undefined && (typeof family !== "string" || !family.trim() || family.length > 512)) {
+    diagnostics.push({ code: "INVALID_FONT_FAMILY", path: "scene.fontFamily", message: "fontFamily must be a nonempty CSS font-family stack of at most 512 characters." });
+  }
 
   if (scene.scene.camera) {
     const { x, y, zoom } = scene.scene.camera;
@@ -585,16 +600,23 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
     }
   });
 
-  const actions = scene.timeline;
-  for (let i = 0; i < actions.length; i++) {
-    const a = actions[i]!;
-    for (let j = i + 1; j < actions.length; j++) {
-      const b = actions[j]!;
-      const overlap = a.start < b.start + b.duration && b.start < a.start + a.duration;
-      if (!overlap) continue;
-
-      if (a.type === "camera" || b.type === "camera") {
-        if (a.type !== "camera" || b.type !== "camera") continue;
+  const targets = new Map<string, { action: Action; index: number }[]>();
+  scene.timeline.forEach((action, index) => {
+    const key = action.type === "camera" ? "camera" : `object:${action.target}`;
+    const group = targets.get(key) ?? [];
+    group.push({ action, index }); targets.set(key, group);
+  });
+  for (const entries of targets.values()) {
+    entries.sort((a, b) => a.action.start - b.action.start || a.index - b.index);
+    for (let i = 0; i < entries.length; i++) {
+      const a = entries[i]!.action;
+      for (let k = i + 1; k < entries.length; k++) {
+        const b = entries[k]!.action;
+        if (b.start >= a.start + a.duration) break;
+        consumeValidationWork(diagnostics);
+        const j = Math.max(entries[i]!.index, entries[k]!.index);
+        const overlap = a.start < b.start + b.duration && b.start < a.start + a.duration;
+        if (!overlap) continue;
         const conflicts = props(a).filter(p => props(b).includes(p));
         const laterInterrupts =
           conflicts.length > 0 &&
@@ -602,25 +624,12 @@ export function validateScene(scene: SceneDocument): Diagnostic[] {
         if (conflicts.length && !laterInterrupts) diagnostics.push({
           code: "OVERLAPPING_PROPERTY_ACTIONS",
           path: `timeline[${j}]`,
-          message: `Actions '${a.id}' and '${b.id}' overlap on ${conflicts.join(", ")}.`,
-          suggestion: "Sequence the camera actions, animate distinct camera properties, or mark the later action interrupt: true.",
+          message: `Actions '${a.id}' and '${b.id}' overlap on ${conflicts.join(", ")}${a.type === "camera" ? "." : ` for object '${a.target}'.`}`,
+          suggestion: a.type === "camera"
+            ? "Sequence the camera actions, animate distinct camera properties, or mark the later action interrupt: true."
+            : "Sequence the actions, animate distinct properties, or mark the later action interrupt: true.",
         });
-        continue;
       }
-
-      if (a.target !== b.target) continue;
-      const conflicts = props(a).filter(p => props(b).includes(p));
-      const laterInterrupts =
-        conflicts.length > 0 &&
-        ((b.start > a.start && b.interrupt === true) || (a.start > b.start && a.interrupt === true));
-      if (conflicts.length && !laterInterrupts) diagnostics.push({
-        code: "OVERLAPPING_PROPERTY_ACTIONS",
-        path: `timeline[${j}]`,
-        message: `Actions '${a.id}' and '${b.id}' overlap on ${conflicts.join(", ")} for object '${a.target}'.`,
-        suggestion: "Sequence the actions, animate distinct properties, or mark the later action interrupt: true.",
-      });
     }
   }
-
-  return diagnostics;
 }

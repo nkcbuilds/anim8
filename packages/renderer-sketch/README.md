@@ -6,6 +6,11 @@ font bytes up front. `pnpm bundle:check` measures the standard runtime's entry
 and every static dependency against the 35 KiB gzip startup ceiling, and reports
 lazy and total bytes separately.
 
+Mounted playback retains one current body of marks per object. Transform-only
+updates reuse that body; geometry, style, text/font, draw progress and seed changes
+invalidate it. Connectors are recomputed from the evaluated graph. Removed objects
+are pruned and destroy clears the cache. Static rendering remains uncached.
+
 Deterministic hand-drawn SVG renderer for Anim8 scenes.
 
 This package is part of the [Anim8](https://github.com/nkcbuilds/anim8) monorepo. Anim8 is a deterministic, model-first 2D animation library for diagrams and technical explanations.
@@ -25,7 +30,7 @@ What you get:
 - Double-stroked, bowed lines whose wobble is seeded by `scene.seed` and the object id, so marks never "boil" between frames or renders.
 - Rounded rectangles (25% of the short side, capped at 32px, or `style.radius`), overshooting ellipses, and fills that follow the rough outline.
 - Drawn arrowheads on connectors. Centre-anchored connectors stop 6px short of the shapes they join.
-- Labels wrapped to their shape and shrunk (down to 70%) to fit, using the font's real advance widths. No DOM is needed.
+- Labels wrapped to their shape and shrunk (down to 70%) to fit, using Virgil's real advance widths or estimated widths for custom fonts. No DOM is needed.
 
 ## Font
 
@@ -36,7 +41,9 @@ Text uses **Virgil** by Ellinor Rapp, bundled unmodified under the [SIL Open Fon
 | `font: "embed"` (default) | Inlines the font (~75 KB) once per SVG, so the file renders identically in any viewer, export or image conversion. Omitted when no text uses the bundled font. |
 | `font: "reference"` | Only names the font family. Load it once on the page with `sketchFontFaceCss()` to avoid repeating it for every frame. |
 
-Set `style.fontFamily` on an object to use another font. Documents you render are not subject to the font license; redistributing the font file or this package is, so keep `assets/Virgil-LICENSE.md` alongside it. The font is shipped as-is and is not subset or renamed. To regenerate `src/font-data.ts`, run `python -I packages/renderer-sketch/scripts/embed-font.py` (requires `fonttools` and `brotli`).
+Set `scene.fontFamily` to choose another font for the whole scene, or `style.fontFamily` on an object to override it. Load your custom font in the host; custom font files are not embedded. Live playback only loads the bundled face when some rendered text needs it. See [fonts and export behavior](../../docs/guides/visual-styling.md#fonts).
+
+Documents you render are not subject to the font license; redistributing the font file or this package is, so keep `assets/Virgil-LICENSE.md` alongside it. The font is shipped as-is and is not subset or renamed. To regenerate `src/font-data.ts`, run `python -I packages/renderer-sketch/scripts/embed-font.py` (requires `fonttools` and `brotli`).
 
 ## Other exports
 

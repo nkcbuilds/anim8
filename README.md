@@ -113,6 +113,18 @@ const svg = renderSketchSvg(evaluate(result.scene, 1250));
 
 For application integration, see [React](packages/react/README.md), [Vue](packages/vue/README.md), [web component](packages/web-component/README.md), and the [player API](packages/player/README.md).
 
+### Use your own font
+
+Set a default for the whole scene, or override individual labels:
+
+```ts
+const s = scene({ theme: "sketch", fontFamily: '"My Brand Font", sans-serif' });
+s.box("Uses the scene font");
+s.text("const answer = 42", { fontFamily: '"My Code Font", monospace' });
+```
+
+This works in both clean and sketch themes, including connector labels. Load custom web fonts in your app with `@font-face` or your framework's font loader. Font files are supplied by the host; scene JSON stores the family name and fallback stack. See [font loading and export behavior](docs/guides/visual-styling.md#fonts).
+
 ### Export an explanation
 
 SVG frames need only the built packages. GIF/MP4 exports additionally need **Playwright Chromium and FFmpeg** installed on your machine.

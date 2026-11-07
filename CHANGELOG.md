@@ -7,6 +7,8 @@ package versions across the `@anim8/*` workspace.
 
 ### Added
 
+- Scene-wide `fontFamily` defaults in TypeScript and JSON, with per-object overrides
+  in both themes. Custom-font-only sketch players skip loading the bundled font.
 - Hand-drawn theme overhaul: rough.js-style bowed double strokes, continuous
   rounded rectangles, overshooting ellipses, drawn arrowheads, outline-following
   fills, wrapped labels, and the bundled OFL Virgil font embedded in sketch SVGs
@@ -32,6 +34,24 @@ package versions across the `@anim8/*` workspace.
 - Next.js and Astro downstream consumer builds.
 - Optional Dagre and ELK layouts, technical presets, sketch rendering, and
   deterministic compatible SVG path morphing.
+
+### Fixed
+
+- Reject negative style dimensions; bound work when fitting very large text.
+- Keep expression reads to own scalar properties and reject nonfinite values/times.
+- Preserve prototype-like state, machine, input and graph identifiers.
+- Apply JSON compiler limits to DSL scenes and roll back invalid keyframes.
+- Validate and bound remote custom-element scene loads; ignore stale loads.
+- Forward object events through React/Vue, clear removed custom-element scenes,
+  and prevent destroyed or reentrant players from creating extra animation loops.
+- Avoid scanning non-interrupting actions for every action on each evaluated frame.
+- Bound diagnostics/expression traversal and conflict-validation work, reject
+  unsafe composed world transforms, and cancel draw actions on all drawable types.
+- Preserve playback time/state when React/Vue object callbacks change, remount Vue
+  after DOM patches, retain keyboard focus during clean SVG updates, and cancel
+  basic custom-element loads when `src` changes or is removed.
+- Cache unchanged sketch marks per mounted object while updating world transforms;
+  invalidate on visual changes and clear retained bodies when the mount is destroyed.
 
 ### Release process
 

@@ -84,6 +84,9 @@ importers:
 
   packages/dsl:
     dependencies:
+      '@anim8/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@anim8/core':
         specifier: workspace:*
         version: link:../core
@@ -132,6 +135,9 @@ importers:
 
   packages/player:
     dependencies:
+      '@anim8/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@anim8/core':
         specifier: workspace:*
         version: link:../core
@@ -211,6 +217,9 @@ importers:
       '@anim8/a11y':
         specifier: workspace:*
         version: link:../a11y
+      '@anim8/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@anim8/core':
         specifier: workspace:*
         version: link:../core

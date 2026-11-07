@@ -19,6 +19,10 @@ export const isSolidColor = (v: unknown): v is string => typeof v === "string" &
 export function styleIssues(style: Style): { property: string; message: string }[] {
   const issues: { property: string; message: string }[] = [];
   const add = (property: string, message: string) => issues.push({ property, message });
+  for (const key of ["strokeWidth", "fontSize", "radius"] as const) {
+    const value = style[key];
+    if (value !== undefined && (!bounded(value) || value < 0)) add(key, key + " must be a finite nonnegative number <= 1000000.");
+  }
   if (style.strokeStyle !== undefined && !["solid", "dashed", "dotted"].includes(style.strokeStyle)) add("strokeStyle", "Unsupported strokeStyle.");
   for (const key of ["strokeDashoffset", "fillOpacity", "strokeOpacity", "fontWeight", "textStrokeWidth"] as const) {
     const v = style[key];

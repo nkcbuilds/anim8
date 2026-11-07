@@ -772,12 +772,18 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
     }
 
     const ordered = [...next.objects].sort((a, b) => a.z - b.z);
+    let previous: Node | null = null;
+    const place = (element: SVGElement) => {
+      const expected = previous ? previous.nextSibling : world.firstChild;
+      if (expected !== element) world.insertBefore(element, expected);
+      previous = element;
+    };
     for (const object of ordered) {
       if (object.type === "group" || !worldVisible(object, objects)) continue;
       const record = records.get(object.id);
       if (record) {
-        world.appendChild(record.revealGroup ?? record.element);
-        if (object.type === "connector" && record.label) world.appendChild(record.label);
+        place(record.revealGroup ?? record.element);
+        if (object.type === "connector" && record.label) place(record.label);
       }
     }
   };

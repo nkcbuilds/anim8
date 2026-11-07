@@ -42,6 +42,10 @@ class FakeHTMLElement {
     this.listeners.set(type, listeners);
   }
 
+  removeEventListener(type: string, listener: (event: any) => void): void {
+    this.listeners.set(type, (this.listeners.get(type) ?? []).filter(value => value !== listener));
+  }
+
   dispatchEvent(): boolean {
     return true;
   }
@@ -162,6 +166,18 @@ afterEach(() => {
 });
 
 describe("@anim8/web-component", () => {
+  it("clears the previous scene and disables playback controls when scene becomes undefined", async () => {
+    installDomGlobals();
+    const module = await import("../src/index.js");
+    const element = new module.Anim8WebComponent();
+    const root = element.shadowRoot as unknown as FakeShadowRoot;
+    installControlNodes(root);
+    element.scene = scene(); element.connectedCallback();
+    element.scene = undefined;
+    expect((root.getElementById("play") as FakeButtonElement).disabled).toBe(true);
+    expect((root.getElementById("timeline") as FakeInputElement).max).toBe("0");
+    expect(root.getElementById("summary")!.textContent).toBe("");
+  });
   it("imports and explicit registration are SSR-safe with no browser globals", async () => {
     vi.unstubAllGlobals();
     vi.resetModules();

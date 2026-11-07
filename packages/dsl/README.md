@@ -6,6 +6,8 @@ This package is part of the [Anim8](https://github.com/nkcbuilds/anim8) monorepo
 
 > Status: pre-1.0. Public APIs may still evolve while the scene format and package boundaries are hardened.
 
+DSL output passes through `@anim8/compiler`, sharing its scene, numeric, text and timeline resource limits. Syntax diagnostics point to source tokens; final document-validation diagnostics include the JSON field path and use line 1, column 1. Oversized source is rejected before parsing.
+
 ## Development
 
 From the repository root:
