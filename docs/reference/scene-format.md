@@ -27,6 +27,12 @@ interface SceneDocument {
 
 Every object has a stable `id`, transform, style, visibility and z-order. Parent relationships are represented with `parentId`.
 
+## Explanation markers
+
+Optional `markers` contain `{ id, label, time }` with an absolute millisecond timestamp. JSON compilation preserves their source order and validates unique IDs, string labels (up to 32,768 characters), finite times in `0..3,600,000`, and a maximum of 10,000 entries. IDs follow the same syntax and length limits as object IDs, in a separate namespace.
+
+The player and playground order markers by time for stepping. Markers name existing points on the timeline; they do not extend animation duration. Use timestamps within the animated interval for reachable steps.
+
 ## Supported v1 generic objects
 
 - `rect`
@@ -112,6 +118,10 @@ arc commands are not silently resampled.
 ## Camera
 
 `scene.camera` defines the base camera as `{ x, y, zoom }`. A `camera` timeline action can animate any subset of those absolute values. Camera state is evaluated from absolute time just like object actions, so seek and reverse do not depend on previous rendered frames.
+
+## Visual styling
+
+The additive optional styling fields include linear `fillGradient`/`strokeGradient`/`colorGradient`, `strokeDasharray`, `strokeDashoffset`, cap/join settings, independent paint opacity and typography. Text/labeled shapes may carry `textRuns` that concatenate exactly to their plain `text`. Timeline `style` actions animate a partial style patch; `text` actions replace a plain/rich label at their endpoint. Existing scenes retain their v1 format; consumers using these new fields/actions need a library version that supports them. See [complete semantics and limits](../guides/visual-styling.md).
 
 ## Security
 

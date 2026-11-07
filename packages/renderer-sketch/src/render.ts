@@ -1,5 +1,8 @@
+import { attributesSvg, gradientSvg, gradients, paint, resourceId, textAttributes, textSvg } from "../../../internal/svg-style.js";
 import {
   DIAGRAM_INK,
+  parseMorphPathData,
+  type TextRun,
   connectorEnd,
   connectorStart,
   connectorGeometry,
@@ -184,7 +187,7 @@ function strokeDashAttributes(pattern: readonly [number, number] | null, length:
   }
   const reveal = clampUnit(progress);
   // A zero-length round-capped dash can still paint a dot before a reveal starts.
-  const hiddenStroke = reveal === 0 ? ' stroke-opacity="0"' : "";
+  const hiddenStroke = "";
   if (!pattern) return `${hiddenStroke} pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - reveal)}"`;
   const target = reveal * length;
   const hidden = formatNumber(length + pattern[0] + pattern[1]);
@@ -196,6 +199,13 @@ function strokeDashAttributes(pattern: readonly [number, number] | null, length:
     list.push(formatNumber(dash), last ? hidden : formatNumber(pattern[1]));
   }
   return ` stroke-dasharray="${list.join(" ")}"`;
+}
+
+function penAttributes(style: Style, progress?: number): string {
+  return attributesSvg({ "stroke-linecap": style.strokeLinecap ?? "round", "stroke-linejoin": style.strokeLinejoin ?? "round", "stroke-opacity": formatNumber(progress === 0 ? 0 : style.strokeOpacity ?? 1) });
+}
+function customDashAttributes(style: Style): string {
+  return ` stroke-dasharray="${style.strokeDasharray!.map(formatNumber).join(" ")}" stroke-dashoffset="${formatNumber(style.strokeDashoffset ?? 0)}"`;
 }
 
 /**
@@ -229,7 +239,9 @@ function renderStrokeGroups(
     // Patterned strokes read best as a single pen line.
     const passes = pattern ? group.slice(0, 1) : group;
     for (const path of passes) {
-      out += `<path data-sketch-part="${escapeXml(part)}" data-sketch-pass="${index}" d="${pathData(path)}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${strokeDashAttributes(pattern, length, local)}/>`;
+      const custom = Boolean(style.strokeDasharray?.length);
+      const reveal = custom ? sketchReveal(formatPathData(sketchPathToSvg(path)), style, local) : { definition: "", attribute: "" };
+      out += reveal.definition + `<path data-sketch-part="${escapeXml(part)}" data-sketch-pass="${index}" d="${pathData(path)}" fill="none" stroke="${color}" stroke-width="${width}" ${penAttributes(style, local)}${custom ? customDashAttributes(style) : strokeDashAttributes(pattern, length, local)}${reveal.attribute}/>`;
       index += 1;
     }
   });
@@ -287,6 +299,7 @@ function renderSketchText(
   box?: TextBox,
   x = 0,
   y = 0,
+  runs?: readonly TextRun[],
 ): string {
   const color = escapeXml(style.color ?? DEFAULT_TEXT);
   const custom = style.fontFamily !== undefined;
@@ -304,7 +317,8 @@ function renderSketchText(
     : { lines: text.split(/\r?\n/), fontSize: requested, lineHeight: requested * 1.25 };
 
   const top = y - ((fit.lines.length - 1) * fit.lineHeight) / 2;
-  const attributes = `data-sketch-part="${escapeXml(key)}" x="${formatNumber(x)}" y="${formatNumber(top)}" dominant-baseline="central" text-anchor="middle" fill="${color}" stroke="none" font-family="${family}" font-size="${formatNumber(fit.fontSize)}"`;
+  const attributes = `data-sketch-part="${escapeXml(key)}" x="${formatNumber(x)}" y="${formatNumber(top)}" dominant-baseline="central" ${attributesSvg(textAttributes({ ...style, fontFamily: custom ? style.fontFamily! : SKETCH_FONT_FAMILY, fontSize: fit.fontSize, color: style.color ?? DEFAULT_TEXT }))}`;
+  if (runs) return `<text ${attributes}>${textSvg(text, runs)}</text>`;
   if (fit.lines.length === 1) return `<text ${attributes}>${escapeXml(fit.lines[0]!)}</text>`;
   const spans = fit.lines
     .map((line, index) =>
@@ -326,9 +340,9 @@ function renderRect(object: Extract<DrawableObject, { type: "rect" }>, seed: Ske
   const outline = sketchRoundedRectangle(x, y, object.width, object.height, radius, sketchContext(seed, object.id), "outline");
   const reveal = revealOpacity(object.drawProgress);
   const label = object.text && reveal > 0
-    ? renderSketchText(object.text, object.style, "label", usage, { width: object.width, height: object.height })
+    ? renderSketchText(object.text, object.style, "label", usage, { width: object.width, height: object.height }, 0, 0, object.textRuns)
     : "";
-  return renderOutlineFill(outline, object.style.fill ?? "none", reveal) +
+  return renderOutlineFill(outline, object.style.fill ?? "none", reveal * (object.style.fillOpacity ?? 1)) +
     renderSketchPaths(outline, object.style, "outline", object.drawProgress) +
     fadeLabel(label, reveal);
 }
@@ -344,9 +358,9 @@ function renderEllipseLike(
   // The largest axis-aligned box inside an ellipse is sqrt(2)/2 of each axis.
   const reveal = revealOpacity(object.drawProgress);
   const label = object.text && reveal > 0
-    ? renderSketchText(object.text, object.style, "label", usage, { width: rx * Math.SQRT2 + LABEL_PADDING * 2, height: ry * Math.SQRT2 + LABEL_PADDING })
+    ? renderSketchText(object.text, object.style, "label", usage, { width: rx * Math.SQRT2 + LABEL_PADDING * 2, height: ry * Math.SQRT2 + LABEL_PADDING }, 0, 0, object.textRuns)
     : "";
-  return renderOutlineFill(outline, object.style.fill ?? "none", reveal) +
+  return renderOutlineFill(outline, object.style.fill ?? "none", reveal * (object.style.fillOpacity ?? 1)) +
     renderSketchPaths(outline, object.style, "outline", object.drawProgress) +
     fadeLabel(label, reveal);
 }
@@ -356,7 +370,7 @@ function renderPointShape(object: Extract<DrawableObject, { type: "polygon" | "p
   const tag = object.type;
   const base = fill === "none"
     ? ""
-    : `<${tag} data-sketch-part="fill" points="${pointsAttribute(object.points)}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<${tag} data-sketch-part="fill" points="${pointsAttribute(object.points)}" fill="${escapeXml(fill)}" stroke="none" fill-opacity="${formatNumber(object.style.fillOpacity ?? 1)}"/>`;
   const outline = renderStrokeGroups(
     segmentGroups(sketchPolyline(object.points, sketchContext(seed, object.id), { closed: object.type === "polygon", key: "outline" })),
     object.style,
@@ -379,7 +393,7 @@ function renderPath(object: Extract<DrawableObject, { type: "path" }>, seed: Ske
   const fill = object.style.fill ?? "none";
   const base = fill === "none"
     ? ""
-    : `<path data-sketch-part="fill" d="${escapeXml(formatPathData(object.d))}" fill="${escapeXml(fill)}" stroke="none"/>`;
+    : `<path data-sketch-part="fill" d="${escapeXml(formatPathData(object.d))}" fill="${escapeXml(fill)}" stroke="none" fill-opacity="${formatNumber(object.style.fillOpacity ?? 1)}"/>`;
   if (!hasStroke(object.style)) return base;
 
   const color = escapeXml(strokeColor(object.style));
@@ -388,14 +402,16 @@ function renderPath(object: Extract<DrawableObject, { type: "path" }>, seed: Ske
   const draw = object.drawProgress !== undefined && object.drawProgress < 1
     ? strokeDashAttributes(null, 0, object.drawProgress)
     : strokeDashAttributes(pattern, 0, undefined);
+  const custom = Boolean(object.style.strokeDasharray?.length);
+  const reveal = custom ? sketchReveal(formatPathData(object.d), object.style, object.drawProgress) : { definition: "", attribute: "" };
   const outlines = Array.from({ length: pattern ? 1 : PASSES }, (_, pass) => {
     const amount = ROUGHNESS * (pass === 0 ? 0.8 : 0.4);
     const dx = sketchJitter(seed, object.id, `path:pass:${pass}:x`, amount);
     const dy = sketchJitter(seed, object.id, `path:pass:${pass}:y`, amount);
-    return `<path data-sketch-part="path" data-sketch-pass="${pass}" d="${escapeXml(formatPathData(object.d))}" transform="translate(${formatNumber(dx)} ${formatNumber(dy)})" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"${draw}/>`;
+    return `<path data-sketch-part="path" data-sketch-pass="${pass}" d="${escapeXml(formatPathData(object.d))}" transform="translate(${formatNumber(dx)} ${formatNumber(dy)})" fill="none" stroke="${color}" stroke-width="${width}" ${penAttributes(object.style, object.drawProgress)}${custom ? customDashAttributes(object.style) : draw}/>`;
   }).join("");
 
-  return base + outlines;
+  return base + reveal.definition + `<g${reveal.attribute}>${outlines}</g>`;
 }
 
 function geometryPathData(geometry: ConnectorGeometry): string {
@@ -487,7 +503,7 @@ function renderConnector(
 
   return {
     id: connector.id,
-    attributes: { opacity: formatNumber(connector.transform.opacity) },
+    attributes: { opacity: formatNumber(worldOpacity(connector, objects)) },
     body: `${base}${strokes}${label}`,
   };
 }
@@ -518,7 +534,7 @@ function renderObject(
       body = renderPointShape(object, seed);
       break;
     case "text":
-      body = renderSketchText(object.text, object.style, "text", usage);
+      body = renderSketchText(object.text, object.style, "text", usage, undefined, 0, 0, object.textRuns);
       break;
     case "line":
       body = renderLine(object, seed);
@@ -558,15 +574,18 @@ export interface SketchFrameMarkup {
   objects: SketchObjectMarkup[];
   /** True when some text uses the bundled font. */
   usesBundledFont: boolean;
+  definitions: string;
 }
 
 /** Render an evaluated frame into structured sketch markup (no DOM required). */
 export function renderSketchFrame(frame: EvaluatedScene): SketchFrameMarkup {
-  const objects = new Map(frame.objects.map(object => [object.id, object] as const));
+  const originalObjects = new Map(frame.objects.map(object => [object.id, object] as const));
+  const painted = frame.objects.map(object => ({ ...object, style: { ...object.style, fill: paint(object.style, "fill", "none", object, originalObjects), stroke: paint(object.style, "stroke", DEFAULT_STROKE, object, originalObjects), color: paint(object.style, "color", DEFAULT_TEXT) } }));
+  const objects = new Map(painted.map(object => [object.id, object] as const));
   const seed: SketchSeed = frame.scene.seed ?? 0;
   const labelBackground = frame.scene.background ?? "#ffffff";
   const usage: TextUsage = { bundledFont: false };
-  const ordered = frame.objects
+  const ordered = painted
     .map((object, index) => ({ object, index }))
     .sort((left, right) => left.object.z - right.object.z || left.index - right.index)
     .map(entry => entry.object);
@@ -583,6 +602,7 @@ export function renderSketchFrame(frame: EvaluatedScene): SketchFrameMarkup {
     camera: cameraTransform(frame),
     objects: rendered,
     usesBundledFont: usage.bundledFont,
+    definitions: gradients(frame.objects).map(gradientSvg).join(""),
   };
 }
 
@@ -600,5 +620,23 @@ export function composeSketchSvg(parts: SketchFrameMarkup, fontFaceCss?: string)
     : "";
   const world = `<g data-anim8-camera="world" transform="${parts.camera}">${parts.objects.map(groupMarkup).join("")}</g>`;
   const fontFace = parts.usesBundledFont && fontFaceCss ? `<defs><style>${fontFaceCss}</style></defs>` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(parts.width)} ${formatNumber(parts.height)}" role="img">${fontFace}${background}${world}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(parts.width)} ${formatNumber(parts.height)}" role="img">${fontFace}<defs data-anim8-sketch-resources="">${parts.definitions}</defs>${background}${world}</svg>`;
+}
+
+// Sketch paths use the bounded canonical cubic subset, so control points bound the mask.
+function sketchReveal(d: string, style: Style, progress?: number): { definition: string; attribute: string } {
+  if (!style.strokeDasharray?.length || progress === undefined || progress >= 1) return { definition: "", attribute: "" };
+  const path = parseMorphPathData(d);
+  if (!path.ok) throw new Error("Dashed sketch reveal requires an M/L/H/V/C/Q/Z path: " + path.message);
+  const points = path.path.subpaths.flatMap(p => [p.start, ...p.segments.flatMap(s => [{ x: s.x, y: s.y }, { x: s.c1x, y: s.c1y }, { x: s.c2x, y: s.c2y }])]);
+  const pad = (style.strokeWidth ?? 2) * 2 + 4;
+  const xs = points.map(p => p.x), ys = points.map(p => p.y);
+  const minX = Math.min(...xs) - pad, minY = Math.min(...ys) - pad;
+  // The fill is already painted separately; a reveal mask covers only strokes.
+  const maskFill = "none";
+  const id = resourceId(["sketch-reveal", d, style.strokeWidth, progress, style.fill ?? "none"]);
+  return {
+    attribute: ` mask="url(#${id})"`,
+    definition: `<mask id="${id}" maskUnits="userSpaceOnUse" x="${formatNumber(minX)}" y="${formatNumber(minY)}" width="${formatNumber(Math.max(...xs) + pad - minX)}" height="${formatNumber(Math.max(...ys) + pad - minY)}"><path d="${escapeXml(d)}" fill="${maskFill}" stroke="${progress > 0 ? "white" : "none"}" stroke-width="${formatNumber((style.strokeWidth ?? 2) + 2)}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${formatNumber(1 - Math.max(0, progress))}"/></mask>`,
+  };
 }

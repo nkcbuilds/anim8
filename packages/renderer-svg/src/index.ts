@@ -1,5 +1,5 @@
-import { connectorGeometry, fitText, worldMatrix, worldOpacity, worldVisible, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument, type Style } from "@anim8/core";
-import { evaluate } from "@anim8/core";
+import { attributesSvg, gradientSvg, gradients, outlineAttributes, paint, resourceId, textAttributes, textSvg } from "../../../internal/svg-style.js";
+import { anchorPoint, routeConnector, connectorGeometry, fitText, worldMatrix, worldOpacity, worldVisible, applyMatrix, evaluate, invertMatrix, multiply, type ConnectorObject, type DrawableObject, type EvaluatedScene, type SceneDocument, type TextRun, type Style } from "@anim8/core";
 
 const esc = (value: string): string => value.replace(/[&<>"']/g, char => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[char]!));
 
@@ -32,13 +32,14 @@ function transform(object: DrawableObject, objects: ReadonlyMap<string, Drawable
   return `matrix(${formatNumber(m.a)} ${formatNumber(m.b)} ${formatNumber(m.c)} ${formatNumber(m.d)} ${formatNumber(m.e)} ${formatNumber(m.f)})`;
 }
 
-function style(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): string {
+function style(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>, fillOverride?: string, opacityOverride?: number): string {
   const s = object.style;
   return [
-    `fill="${esc(s.fill ?? "none")}"`,
-    `stroke="${esc(s.stroke ?? "none")}"`,
+    `fill="${esc(fillOverride ?? paint(s, "fill", "none", object, objects))}"`,
+    `stroke="${esc(paint(s, "stroke", "none", object, objects))}"`,
     `stroke-width="${formatNumber(s.strokeWidth ?? 0)}"`,
-    `opacity="${formatNumber(worldOpacity(object, objects))}"`,
+    `opacity="${formatNumber(opacityOverride ?? worldOpacity(object, objects))}"`,
+    attributesSvg({ ...outlineAttributes(s), ...Object.fromEntries(Object.entries(strokeEffects(object, objects)).filter(([, value]) => value !== null)) } as Record<string, string>),
   ].join(" ");
 }
 
@@ -126,7 +127,7 @@ function strokeLength(object: DrawableObject, objects: ReadonlyMap<string, Drawa
  * connectors trace their line, then show their arrowheads.
  */
 function strokeEffects(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): StrokeEffects {
-  const effects: StrokeEffects = { ...NO_EFFECTS };
+  const effects: StrokeEffects = { ...NO_EFFECTS, "stroke-dasharray": object.style.strokeDasharray?.length ? object.style.strokeDasharray.map(formatNumber).join(" ") : "none", "stroke-dashoffset": formatNumber(object.style.strokeDashoffset ?? 0), "stroke-opacity": formatNumber(object.style.strokeOpacity ?? 1), "fill-opacity": formatNumber(object.style.fillOpacity ?? 1) };
   if (object.type === "text" || object.type === "image" || object.type === "group") return effects;
   const pattern = dashPattern(object.style);
   const raw = "drawProgress" in object ? object.drawProgress : undefined;
@@ -135,7 +136,9 @@ function strokeEffects(object: DrawableObject, objects: ReadonlyMap<string, Draw
   const drawing = progress !== undefined && progress < 1;
   if (progress === 0) effects["stroke-opacity"] = "0";
 
-  if (!drawing) {
+  if (object.style.strokeDasharray?.length) {
+    // Explicit patterns use a separate reveal mask on paths and point shapes.
+  } else if (!drawing) {
     if (pattern) effects["stroke-dasharray"] = `${formatNumber(pattern[0])} ${formatNumber(pattern[1])}`;
   } else {
     const length = strokeLength(object, objects);
@@ -153,7 +156,7 @@ function strokeEffects(object: DrawableObject, objects: ReadonlyMap<string, Draw
   }
 
   if ((object.type === "rect" || object.type === "circle" || object.type === "ellipse") && raw !== undefined && raw < 1) {
-    effects["fill-opacity"] = formatNumber(clampUnit((raw - 0.5) * 2));
+    effects["fill-opacity"] = formatNumber((object.style.fillOpacity ?? 1) * clampUnit((raw - 0.5) * 2));
   }
 
   if (isConnector) {
@@ -229,19 +232,25 @@ function textMarkup(layout: LabelLayout): { y: number; content: string } {
 
 function labelSvg(object: DrawableObject, text: string): string {
   const layout = labelLayout(object, text);
+  const runs = "textRuns" in object ? object.textRuns : undefined;
   const { y, content } = textMarkup(layout);
-  return `<text x="0" y="${formatNumber(y)}" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" font-family="${esc(fontFamily(object.style))}" font-size="${formatNumber(layout.fontSize)}">${content}</text>`;
+  return `<text x="0" y="${formatNumber(y)}" dominant-baseline="middle" ${attributesSvg(textAttributes({ ...object.style, fontFamily: fontFamily(object.style), fontSize: layout.fontSize }))}>${runs ? textSvg(text, runs) : content}</text>`;
+}
+function drawAttributes(object: DrawableObject, frame: EvaluatedScene): string {
+  return needsRevealMask(object) ? ` mask="url(#${revealId(object, frame)})"` : "";
 }
 
-function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): string {
+function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>, frame: EvaluatedScene): string {
   if (!worldVisible(object, objects)) return "";
   if (object.type === "connector") {
     const d = connectorPath(object, objects);
-    return `<path data-anim8-id="${esc(object.id)}" d="${d}" fill="none" stroke="${esc(object.style.stroke ?? "#1f2937")}" stroke-width="${formatNumber(object.style.strokeWidth ?? 2)}" opacity="${formatNumber(worldOpacity(object, objects))}"${effectAttributes(strokeEffects(object, objects))}/>`;
+    const p = connectorLabelPosition(object, objects);
+    const label = object.label ? `<text data-anim8-connector-label="${esc(object.id)}" x="${formatNumber(p.x)}" y="${formatNumber(p.y - 12)}" dominant-baseline="middle" ${attributesSvg(textAttributes({ ...object.style, fontFamily: fontFamily(object.style) }))} opacity="${formatNumber(worldOpacity(object, objects))}">${textSvg(object.label)}</text>` : "";
+    return `<path data-anim8-id="${esc(object.id)}" d="${d}" fill="none" stroke="${esc(paint(object.style, "stroke", "#1f2937", object, objects))}" stroke-width="${formatNumber(object.style.strokeWidth ?? 2)}" opacity="${formatNumber(worldOpacity(object, objects))}" ${attributesSvg({ ...outlineAttributes(object.style), ...Object.fromEntries(Object.entries(strokeEffects(object, objects)).filter(([, value]) => value !== null)) } as Record<string, string>)}/>${label}`;
   }
   if (object.type === "group") return "";
   const t = transform(object, objects);
-  const common = `data-anim8-id="${esc(object.id)}" transform="${t}" ${style(object, objects)}${effectAttributes(strokeEffects(object, objects))}`;
+  const common = `data-anim8-id="${esc(object.id)}" transform="${t}" ${style(object, objects)}`;
   switch (object.type) {
     case "rect": {
       const x = -object.width / 2, y = -object.height / 2;
@@ -258,17 +267,15 @@ function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, Drawable
       return `<g ${common}><ellipse cx="0" cy="0" rx="${formatNumber(object.rx)}" ry="${formatNumber(object.ry)}"/>${text}</g>`;
     }
     case "polygon":
-      return `<polygon ${common} points="${points(object.points)}"/>`;
+      return revealObjectSvg(object, objects, frame);
     case "polyline":
-      return `<polyline ${common} points="${points(object.points)}"/>`;
-    case "text": {
-      const { y, content } = textMarkup(labelLayout(object, object.text));
-      return `<text data-anim8-id="${esc(object.id)}" transform="${t}" x="0" y="${formatNumber(y)}" dominant-baseline="middle" text-anchor="middle" fill="${esc(object.style.color ?? "#111827")}" stroke="none" opacity="${formatNumber(worldOpacity(object, objects))}" font-family="${esc(fontFamily(object.style))}" font-size="${formatNumber(object.style.fontSize ?? 16)}">${content}</text>`;
-    }
+      return revealObjectSvg(object, objects, frame);
+    case "text":
+      return labelSvg(object, object.text).replace("<text ", `<text data-anim8-id="${esc(object.id)}" transform="${t}" opacity="${formatNumber(worldOpacity(object, objects))}" `);
     case "line":
       return `<line ${common} x1="0" y1="0" x2="${formatNumber(object.x2)}" y2="${formatNumber(object.y2)}"/>`;
     case "path":
-      return `<path ${common} d="${esc(formatPathData(object.d))}"/>`;
+      return revealObjectSvg(object, objects, frame);
     case "image":
       return `<image ${common} x="${formatNumber(-object.width/2)}" y="${formatNumber(-object.height/2)}" width="${formatNumber(object.width)}" height="${formatNumber(object.height)}" href="${esc(object.href)}"/>`;
   }
@@ -277,10 +284,14 @@ function objectSvg(object: DrawableObject, objects: ReadonlyMap<string, Drawable
 export function renderSvg(frame: EvaluatedScene): string {
   const objects = new Map(frame.objects.map(object => [object.id, object]));
   const ordered = [...frame.objects].sort((a,b) => a.z - b.z);
-  const body = ordered.map(object => objectSvg(object, objects)).join("");
+  const body = ordered.map(object => objectSvg(object, objects, frame)).join("");
+  const masks = frame.objects.filter(needsRevealMask).map(object => {
+    const { region, tag, shape } = revealMask(object, frame, objects);
+    return `<mask ${attributesSvg(region)}><${tag} ${attributesSvg(shape)}/></mask>`;
+  }).join("");
   const bg = frame.scene.background ? `<rect width="100%" height="100%" fill="${esc(frame.scene.background)}"/>` : "";
   const world = `<g data-anim8-camera="world" transform="${cameraTransform(frame)}">${body}</g>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(frame.scene.width)} ${formatNumber(frame.scene.height)}" role="img"><defs><marker id="anim8-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#1f2937"/></marker><marker id="anim8-arrow-start" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto"><path d="M9,0 L9,6 L0,3 z" fill="#1f2937"/></marker></defs>${bg}${world}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatNumber(frame.scene.width)} ${formatNumber(frame.scene.height)}" role="img"><defs><marker id="anim8-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="context-stroke"/></marker><marker id="anim8-arrow-start" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto"><path d="M9,0 L9,6 L0,3 z" fill="context-stroke"/></marker>${gradients(frame.objects).map(gradientSvg).join("")}${masks}</defs>${bg}${world}</svg>`;
 }
 
 export function renderSceneAt(scene: SceneDocument, time: number): string {
@@ -298,6 +309,8 @@ interface ObjectDomRecord {
   element: SVGElement;
   shape?: SVGElement;
   label?: SVGTextElement;
+  revealGroup?: SVGGElement;
+  revealFill?: SVGElement;
 }
 
 function createSvgElement<K extends keyof SVGElementTagNameMap>(
@@ -319,10 +332,11 @@ function syncCommonAttributes(
   const s = object.style;
   setAttribute(element, "data-anim8-id", object.id);
   setAttribute(element, "transform", transform(object, objects));
-  setAttribute(element, "fill", s.fill ?? "none");
-  setAttribute(element, "stroke", s.stroke ?? "none");
+  setAttribute(element, "fill", paint(s, "fill", "none", object, objects));
+  setAttribute(element, "stroke", paint(s, "stroke", "none", object, objects));
   setAttribute(element, "stroke-width", s.strokeWidth ?? 0);
   setAttribute(element, "opacity", worldOpacity(object, objects));
+  syncAttributes(element, outlineAttributes(s));
 }
 
 function syncStrokeEffects(element: SVGElement, object: MountedObject, objects: ReadonlyMap<string, DrawableObject>): void {
@@ -363,11 +377,18 @@ function syncEmbeddedLabel(
 /** Mirror the static renderer's wrapped label markup on a live text element. */
 function syncTextContent(document: Document, element: SVGElement, object: MountedObject, text: string): void {
   const layout = labelLayout(object, text);
+  syncAttributes(element, textAttributes({ ...object.style, fontFamily: fontFamily(object.style), fontSize: layout.fontSize }));
   const y = -((layout.lines.length - 1) * layout.lineHeight) / 2;
   setAttribute(element, "y", y);
   setAttribute(element, "font-family", fontFamily(object.style));
   setAttribute(element, "font-size", layout.fontSize);
+  const runs = "textRuns" in object ? object.textRuns : undefined;
+  if (runs) { syncText(document, element, text, runs); return; }
+  const signature = JSON.stringify(["wrapped", layout.lines, layout.lineHeight]);
+  if (textCache.get(element) === signature) return;
+  textCache.set(element, signature);
   if (layout.lines.length === 1) {
+    element.replaceChildren();
     element.textContent = layout.lines[0]!;
     return;
   }
@@ -422,16 +443,24 @@ function syncObjectRecord(
   record: ObjectDomRecord,
   object: MountedObject,
   objects: ReadonlyMap<string, DrawableObject>,
+  frame: EvaluatedScene,
 ): void {
   if (object.type === "connector") {
     const element = record.element;
     setAttribute(element, "data-anim8-id", object.id);
     setAttribute(element, "d", connectorPath(object, objects));
     setAttribute(element, "fill", "none");
-    setAttribute(element, "stroke", object.style.stroke ?? "#1f2937");
+    setAttribute(element, "stroke", paint(object.style, "stroke", "#1f2937", object, objects));
     setAttribute(element, "stroke-width", object.style.strokeWidth ?? 2);
     setAttribute(element, "opacity", worldOpacity(object, objects));
+    syncAttributes(element, outlineAttributes(object.style));
     syncStrokeEffects(element, object, objects);
+    if (object.label) {
+      record.label ??= createSvgElement(document, "text");
+      const p = connectorLabelPosition(object, objects);
+      syncAttributes(record.label, { "data-anim8-connector-label": object.id, x: formatNumber(p.x), y: formatNumber(p.y - 12), "dominant-baseline": "middle", ...textAttributes({ ...object.style, fontFamily: fontFamily(object.style) }), opacity: formatNumber(worldOpacity(object, objects)) });
+      syncText(document, record.label, object.label);
+    } else { record.label?.remove(); delete record.label; }
     return;
   }
 
@@ -469,6 +498,9 @@ function syncObjectRecord(
     case "polygon":
     case "polyline":
       setAttribute(record.element, "points", points(object.points));
+      if (needsRevealMask(object)) setAttribute(record.element, "mask", `url(#${revealId(object, frame)})`);
+      else record.element.removeAttribute("mask");
+      syncRevealFill(document, record, object, objects);
       return;
     case "text":
       setAttribute(record.element, "x", 0);
@@ -487,6 +519,9 @@ function syncObjectRecord(
       return;
     case "path":
       setAttribute(record.element, "d", formatPathData(object.d));
+      if (needsRevealMask(object)) setAttribute(record.element, "mask", `url(#${revealId(object, frame)})`);
+      else record.element.removeAttribute("mask");
+      syncRevealFill(document, record, object, objects);
       return;
     case "image":
       setAttribute(record.element, "x", -object.width / 2);
@@ -510,7 +545,7 @@ function createDefs(document: Document): SVGDefsElement {
     setAttribute(marker, "orient", "auto");
     const arrow = createSvgElement(document, "path");
     setAttribute(arrow, "d", d);
-    setAttribute(arrow, "fill", "#1f2937");
+    setAttribute(arrow, "fill", "context-stroke");
     marker.appendChild(arrow);
     defs.appendChild(marker);
   }
@@ -584,15 +619,28 @@ function findHydratableSvg(container: Element, frame: EvaluatedScene): {
   const objects = new Map(frame.objects.map(object => [object.id, object]));
   const records = new Map<string, ObjectDomRecord>();
   for (const child of Array.from(world.children)) {
-    const id = child.getAttribute("data-anim8-id");
+    const revealGroup = child.hasAttribute("data-anim8-reveal-group");
+    const id = child.getAttribute("data-anim8-id") ?? child.getAttribute("data-anim8-reveal-group");
     if (!id) continue;
     const object = objects.get(id);
     if (!object || object.type === "group") {
       child.remove();
       continue;
     }
-    const record = adoptObjectRecord(object, child);
-    if (record) records.set(id, record);
+    const element = revealGroup ? Array.from(child.children).find(node => node.getAttribute("data-anim8-id") === id) : child;
+    const fill = revealGroup ? Array.from(child.children).find(node => node.getAttribute("data-anim8-reveal-fill") === id) : undefined;
+    const record = element ? adoptObjectRecord(object, element) : undefined;
+    if (record && (!revealGroup || (child.tagName.toLowerCase() === "g" && fill))) {
+      if (revealGroup) { record.revealGroup = child as SVGGElement; record.revealFill = fill as SVGElement; }
+      records.set(id, record);
+    }
+    else child.remove();
+  }
+  for (const child of Array.from(world.children)) {
+    const id = child.getAttribute("data-anim8-connector-label");
+    if (!id) continue;
+    const record = records.get(id);
+    if (record?.type === "connector") record.label = child as SVGTextElement;
     else child.remove();
   }
 
@@ -640,6 +688,9 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
     container.replaceChildren(svg);
   }
 
+  for (const child of Array.from(defs.childNodes)) if ((child as Element).tagName?.toLowerCase() === "lineargradient" || (child as Element).tagName?.toLowerCase() === "mask") child.remove();
+  const maskDefinitions = new Map<string, SVGMaskElement>();
+  const paintDefinitions = new Map<string, SVGLinearGradientElement>();
   const records = hydrated?.records ?? new Map<string, ObjectDomRecord>();
   let background: SVGRectElement | undefined = hydrated?.background;
 
@@ -660,12 +711,40 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
       background = undefined;
     }
 
+    const activePaints = new Set<string>();
+    for (const gradient of gradients(next.objects)) {
+      const id = resourceId(gradient);
+      activePaints.add(id);
+      if (paintDefinitions.has(id)) continue;
+      const element = createSvgElement(document, "linearGradient");
+      if (gradient.svgUnits) setAttribute(element, "gradientUnits", gradient.svgUnits);
+      syncAttributes(element, { id, x1: formatNumber(gradient.from?.x ?? 0), y1: formatNumber(gradient.from?.y ?? 0), x2: formatNumber(gradient.to?.x ?? 1), y2: formatNumber(gradient.to?.y ?? 0) });
+      for (const stop of gradient.stops) {
+        const child = createSvgElement(document, "stop");
+        syncAttributes(child, { offset: formatNumber(stop.offset), "stop-color": stop.color, "stop-opacity": formatNumber(stop.opacity ?? 1) });
+        element.appendChild(child);
+      }
+      defs.appendChild(element); paintDefinitions.set(id, element);
+    }
+    for (const [id, element] of paintDefinitions) if (!activePaints.has(id)) { element.remove(); paintDefinitions.delete(id); }
     const objects = new Map(next.objects.map(object => [object.id, object]));
+    const liveMasks = new Set<string>();
+    for (const object of next.objects.filter(needsRevealMask)) {
+      const { region, tag, shape } = revealMask(object, next, objects);
+      const id = region.id!;
+      liveMasks.add(id);
+      if (!maskDefinitions.has(id)) {
+        const mask = createSvgElement(document, "mask"), path = createSvgElement(document, tag);
+        syncAttributes(mask, region); syncAttributes(path, shape); mask.appendChild(path);
+        defs.appendChild(mask); maskDefinitions.set(id, mask);
+      }
+    }
+    for (const [id, mask] of maskDefinitions) if (!liveMasks.has(id)) { mask.remove(); maskDefinitions.delete(id); }
     const liveIds = new Set(next.objects.map(object => object.id));
 
     for (const [id, record] of records) {
       if (!liveIds.has(id)) {
-        record.element.remove();
+        removeRecord(record);
         records.delete(id);
       }
     }
@@ -675,7 +754,7 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
 
       if (object.type === "group") {
         if (existing) {
-          existing.element.remove();
+          removeRecord(existing);
           records.delete(object.id);
         }
         continue;
@@ -683,20 +762,23 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
 
       let record = existing;
       if (!record || record.type !== object.type) {
-        record?.element.remove();
+        if (record) removeRecord(record);
         record = createObjectRecord(document, object);
         records.set(object.id, record);
       }
 
-      syncObjectRecord(document, record, object, objects);
-      if (!worldVisible(object, objects)) record.element.remove();
+      syncObjectRecord(document, record, object, objects, next);
+      if (!worldVisible(object, objects)) { (record.revealGroup ?? record.element).remove(); record.label?.remove(); }
     }
 
     const ordered = [...next.objects].sort((a, b) => a.z - b.z);
     for (const object of ordered) {
       if (object.type === "group" || !worldVisible(object, objects)) continue;
       const record = records.get(object.id);
-      if (record) world.appendChild(record.element);
+      if (record) {
+        world.appendChild(record.revealGroup ?? record.element);
+        if (object.type === "connector" && record.label) world.appendChild(record.label);
+      }
     }
   };
 
@@ -710,4 +792,108 @@ export function mountSvg(container: Element, frame: EvaluatedScene): SvgMount {
       container.replaceChildren();
     },
   };
+}
+
+function syncAttributes(element: Element, attributes: Record<string, string>): void {
+  for (const [name, value] of Object.entries(attributes)) setAttribute(element, name, value);
+}
+const textCache = new WeakMap<Element, string>();
+function syncText(document: Document, element: SVGElement, text: string, runs?: readonly TextRun[]): void {
+  const signature = JSON.stringify([text, runs]);
+  if (textCache.get(element) === signature) return;
+  element.replaceChildren();
+  if (!runs) element.textContent = text;
+  else for (const run of runs) {
+    const span = createSvgElement(document, "tspan");
+    if (run.color !== undefined) setAttribute(span, "fill", run.color);
+    if (run.fontWeight !== undefined) setAttribute(span, "font-weight", run.fontWeight);
+    if (run.fontStyle !== undefined) setAttribute(span, "font-style", run.fontStyle);
+    span.textContent = run.text; element.appendChild(span);
+  }
+  textCache.set(element, signature);
+}
+
+type RevealObject = Extract<DrawableObject, { type: "path" | "polygon" | "polyline" }>;
+function splitRevealFill(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): object is RevealObject {
+  return needsRevealMask(object) && paint(object.style, "fill", "none", object, objects) !== "none";
+}
+function revealGeometry(object: RevealObject): Record<string, string> {
+  return object.type === "path" ? { d: formatPathData(object.d) } : { points: points(object.points) };
+}
+function revealFillAttributes(object: RevealObject, objects: ReadonlyMap<string, DrawableObject>): Record<string, string> {
+  return {
+    "data-anim8-reveal-fill": object.id, transform: transform(object, objects),
+    fill: paint(object.style, "fill", "none", object, objects), stroke: "none", "pointer-events": "none",
+    "fill-opacity": formatNumber(object.style.fillOpacity ?? 1), ...revealGeometry(object),
+  };
+}
+function revealObjectSvg(object: RevealObject, objects: ReadonlyMap<string, DrawableObject>, frame: EvaluatedScene): string {
+  const split = splitRevealFill(object, objects);
+  const outline = `<${object.type} data-anim8-id="${esc(object.id)}" transform="${transform(object, objects)}" ${style(object, objects, split ? "none" : undefined, split ? 1 : undefined)} ${attributesSvg(revealGeometry(object))}${split ? ' pointer-events="visible"' : ""}${drawAttributes(object, frame)}/>`;
+  if (!split) return outline;
+  // Apply world opacity once to the composed fill and stroke, matching a single
+  // SVG shape's compositing even where translucent paints overlap.
+  return `<g data-anim8-reveal-group="${esc(object.id)}" opacity="${formatNumber(worldOpacity(object, objects))}"><${object.type} ${attributesSvg(revealFillAttributes(object, objects))}/>${outline}</g>`;
+}
+function syncRevealFill(document: Document, record: ObjectDomRecord, object: RevealObject, objects: ReadonlyMap<string, DrawableObject>): void {
+  if (!splitRevealFill(object, objects)) {
+    record.element.removeAttribute("pointer-events");
+    if (record.revealGroup) {
+      record.element.remove(); record.revealGroup.remove();
+      delete record.revealGroup; delete record.revealFill;
+    }
+    return;
+  }
+  if (!record.revealGroup) {
+    record.revealGroup = createSvgElement(document, "g");
+    record.revealFill = createSvgElement(document, object.type);
+    record.revealGroup.appendChild(record.revealFill);
+    record.revealGroup.appendChild(record.element);
+  }
+  syncAttributes(record.revealGroup, { "data-anim8-reveal-group": object.id, opacity: formatNumber(worldOpacity(object, objects)) });
+  syncAttributes(record.revealFill!, revealFillAttributes(object, objects));
+  setAttribute(record.element, "fill", "none");
+  setAttribute(record.element, "opacity", 1);
+  setAttribute(record.element, "pointer-events", "visible");
+}
+function removeRecord(record: ObjectDomRecord): void {
+  record.revealGroup?.remove(); record.element.remove(); record.label?.remove();
+}
+function needsRevealMask(object: DrawableObject): object is RevealObject {
+  return (object.type === "path" || object.type === "polygon" || object.type === "polyline") &&
+    object.drawProgress !== undefined && object.drawProgress < 1 && Boolean(object.style.strokeDasharray?.length);
+}
+function revealId(object: RevealObject, frame: EvaluatedScene): string {
+  return resourceId(["reveal", object, frame.scene, frame.camera, frame.objects.filter(o => o.type === "group")]);
+}
+function revealMask(object: RevealObject, frame: EvaluatedScene, objects: ReadonlyMap<string, DrawableObject>): {
+  region: Record<string, string>; tag: "path" | "polygon" | "polyline"; shape: Record<string, string>;
+} {
+  // Bound masks to the visible viewport, mapped into object-local coordinates.
+  // This supports arbitrary SVG path commands and zero-height horizontal paths.
+  const camera = { a: frame.camera.zoom, b: 0, c: 0, d: frame.camera.zoom, e: frame.camera.x, f: frame.camera.y };
+  const inverse = invertMatrix(multiply(camera, worldMatrix(object, objects)));
+  const corners = [{ x: 0, y: 0 }, { x: frame.scene.width, y: 0 }, { x: 0, y: frame.scene.height }, { x: frame.scene.width, y: frame.scene.height }].map(p => inverse ? applyMatrix(inverse, p) : p);
+  const pad = (object.style.strokeWidth ?? 2) * 2 + 2;
+  const minX = Math.min(...corners.map(p => p.x)) - pad, minY = Math.min(...corners.map(p => p.y)) - pad;
+  return {
+    region: { id: revealId(object, frame), maskUnits: "userSpaceOnUse", x: formatNumber(minX), y: formatNumber(minY), width: formatNumber(Math.max(...corners.map(p => p.x)) + pad - minX), height: formatNumber(Math.max(...corners.map(p => p.y)) + pad - minY) },
+    tag: object.type,
+    shape: { ...(object.type === "path" ? { d: formatPathData(object.d) } : { points: points(object.points) }), fill: "none", stroke: Math.max(0, object.drawProgress ?? 1) > 0 ? "white" : "none", "stroke-width": formatNumber(object.style.strokeWidth ?? 2), "stroke-linecap": object.style.strokeLinecap ?? "butt", "stroke-linejoin": object.style.strokeLinejoin ?? "miter", pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": formatNumber(1 - Math.max(0, object.drawProgress ?? 1)) },
+  };
+}
+
+function connectorLabelPosition(connector: ConnectorObject, objects: ReadonlyMap<string, DrawableObject>): { x: number; y: number } {
+  const a = objects.get(connector.from.objectId), b = objects.get(connector.to.objectId);
+  if (!a || !b) return { x: 0, y: 0 };
+  const from = anchorPoint(a, connector.from.anchor, objects), to = anchorPoint(b, connector.to.anchor, objects);
+  const midX = (from.x + to.x) / 2;
+  const route = connector.kind === "routed" ? routeConnector(connector, objects) : connector.kind === "orthogonal" ? [from, { x: midX, y: from.y }, { x: midX, y: to.y }, to] : [from, to];
+  let best = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 }, longest = -1;
+  for (let i = 1; i < route.length; i++) {
+    const start = route[i - 1]!, end = route[i]!;
+    const distance = Math.hypot(end.x - start.x, end.y - start.y);
+    if (distance > longest) { longest = distance; best = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 }; }
+  }
+  return best;
 }

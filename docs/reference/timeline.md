@@ -14,6 +14,8 @@ Current primitive actions include:
 - `opacity`
 - `fill`
 - `stroke`
+- `style` (partial visual style transition)
+- `text` (plain/rich label replacement at the endpoint)
 - `visibility`
 - `draw`
 - `morph`

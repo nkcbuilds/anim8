@@ -296,3 +296,27 @@ describe("mountSvg incremental DOM updates", () => {
     expect(container.childNodes).toHaveLength(0);
   });
 });
+
+it("removes stale dash/gradient/span state while retaining mounted shape identity", () => {
+  const document = new FakeDocument(), container = new FakeElement("div", document);
+  const a = rect("a", 80, "Red Blue");
+  if (a.type !== "rect") throw Error("fixture");
+  a.textRuns = [{ text: "Red ", color: "red" }, { text: "Blue", color: "blue" }];
+  a.style.strokeDasharray = [8, 4];
+  a.style.fillGradient = { type: "linear", stops: [{ offset: 0, color: "red" }, { offset: 1, color: "blue" }] };
+  const mount = mountSvg(container as unknown as Element, frame([a]));
+  const svg = container.childNodes[0]!, original = findByAnim8Id(svg, "a")!;
+  expect(original.getAttribute("stroke-dasharray")).toBe("8 4");
+  expect(original.getAttribute("fill")).toMatch(/^url\(#/);
+  const label = original.childNodes.find(child => child.tagName === "text")!;
+  expect(label.childNodes).toHaveLength(2);
+  expect(svg.childNodes[0]!.childNodes.filter(child => child.tagName === "linearGradient")).toHaveLength(1);
+  mount.update(frame([rect("a", 80, "Done", "green")]));
+  expect(findByAnim8Id(svg, "a")).toBe(original);
+  expect(original.getAttribute("stroke-dasharray")).toBe("none");
+  expect(original.getAttribute("fill")).toBe("green");
+  expect(label.textContent).toBe("Done");
+  expect(label.childNodes).toHaveLength(0);
+  expect(svg.childNodes[0]!.childNodes.filter(child => child.tagName === "linearGradient")).toHaveLength(0);
+  mount.destroy();
+});

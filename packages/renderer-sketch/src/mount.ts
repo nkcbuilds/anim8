@@ -132,8 +132,17 @@ export function mountSketchSvg(container: Element, frame: EvaluatedScene, option
     }
   };
 
+  let resourceMarkup: string | undefined;
+  let resources = svg.querySelector('defs[data-anim8-sketch-resources]');
   const update = (next: EvaluatedScene) => {
     const parts = renderSketchFrame(next);
+    if (parts.definitions !== resourceMarkup) {
+      resources ??= document.createElementNS(SVG_NS, "defs");
+      resources.setAttribute("data-anim8-sketch-resources", "");
+      if (!resources.parentNode) svg.insertBefore(resources, svg.firstChild);
+      resources.innerHTML = parts.definitions;
+      resourceMarkup = parts.definitions;
+    }
     svg.setAttribute("viewBox", `0 0 ${parts.width} ${parts.height}`);
     world.setAttribute("transform", parts.camera);
     syncFont(parts);

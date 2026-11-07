@@ -3,6 +3,10 @@ import {
   defaultCamera,
   defaultStyle,
   defaultTransform,
+  STYLE_KEYS,
+  styleIssues,
+  styleProperties,
+  textRunIssues,
   morphPathCompatibility,
   parseMorphPathData,
   validateScene,
@@ -24,12 +28,15 @@ import {
   type Diagnostic,
   type DrawableObject,
   type Easing,
+  type LinearGradient,
+  type Marker,
   type PointValue,
   type SceneDocument,
   type Style,
   type Transform,
   DRAWABLE_TYPES,
   isDrawableType,
+  type TextRun,
 } from "@anim8/core";
 
 export interface CompileResult {
@@ -48,6 +55,7 @@ export const COMPILER_LIMITS = Object.freeze({
   sourceBytes: 2 * 1024 * 1024,
   objects: 5_000,
   timelineActions: 10_000,
+  markers: 10_000,
   bindings: 10_000,
   interactions: 5_000,
   interactionActions: 100,
@@ -202,9 +210,12 @@ function parseTransform(value: unknown, path: string, diagnostics: Diagnostic[])
   return transform;
 }
 
-function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[]): Style {
-  const style = defaultStyle();
-  if (value === undefined) return style;
+function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[], partial = false): Style {
+  const style: Style = partial ? {} : defaultStyle();
+  if (value === undefined) {
+    if (partial) diagnostic(diagnostics, "INVALID_STYLE_TARGET", path, "style.to requires a style object.");
+    return style;
+  }
   if (!isRecord(value)) {
     diagnostic(diagnostics, "INVALID_STYLE", path, "style must be a JSON object.");
     return style;
@@ -251,6 +262,26 @@ function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[]): St
     style[key] = candidate;
   }
 
+  for (const key of STYLE_KEYS) {
+    if (["fill", "stroke", "color", "fontFamily", "strokeWidth", "fontSize", "radius"].includes(key)) continue;
+    if (value[key] !== undefined) (style as Record<string, unknown>)[key] = value[key];
+  }
+  const issues = styleIssues(style);
+  for (const issue of issues) diagnostic(diagnostics, "INVALID_STYLE_VALUE", `${path}.${issue.property}`, issue.message);
+  if (!issues.length) {
+    if (style.strokeDasharray) style.strokeDasharray = [...style.strokeDasharray];
+    for (const key of ["fillGradient", "strokeGradient", "colorGradient"] as const) {
+      const g = style[key];
+      if (g) style[key] = {
+        type: "linear", ...(g.from ? { from: { x: g.from.x, y: g.from.y } } : {}), ...(g.to ? { to: { x: g.to.x, y: g.to.y } } : {}),
+        stops: g.stops.map(stop => ({ offset: stop.offset, color: stop.color, ...(stop.opacity !== undefined ? { opacity: stop.opacity } : {}) })),
+      } satisfies LinearGradient;
+    }
+  }
+  if (partial) {
+    if (Object.keys(style).length === 0) diagnostic(diagnostics, "INVALID_STYLE_TARGET", path, "style.to requires at least one supported style property.");
+    for (const key of Object.keys(value)) if (!(STYLE_KEYS as readonly string[]).includes(key)) diagnostic(diagnostics, "INVALID_STYLE_TARGET", `${path}.${key}`, "Unsupported style property.");
+  }
   return style;
 }
 
@@ -646,6 +677,14 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
     const drawProgress = parseDrawProgress(value.drawProgress, `${path}.drawProgress`, diagnostics);
     return drawProgress !== undefined ? { drawProgress } : {};
   };
+  let textRuns: TextRun[] | undefined;
+  if (value.textRuns !== undefined) {
+    if (!["rect", "circle", "ellipse", "text"].includes(type)) diagnostic(diagnostics, "INVALID_TEXT_RUNS", `${path}.textRuns`, "Only text and labeled shapes expose textRuns.");
+    const issues = textRunIssues(value.textRuns as TextRun[], typeof value.text === "string" ? value.text : "");
+    for (const message of issues) diagnostic(diagnostics, "INVALID_TEXT_RUNS", `${path}.textRuns`, message);
+    if (!issues.length) textRuns = (value.textRuns as TextRun[]).map(run => ({ text: run.text, ...(run.color !== undefined ? { color: run.color } : {}), ...(run.fontWeight !== undefined ? { fontWeight: run.fontWeight } : {}), ...(run.fontStyle !== undefined ? { fontStyle: run.fontStyle } : {}) }));
+  }
+  const labelRuns = textRuns ? { textRuns } : {};
 
   switch (type) {
     case "rect": {
@@ -653,6 +692,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       return {
         ...base,
         type,
+        ...labelRuns,
         width: parsePositiveDimension(value.width, 100, `${path}.width`, diagnostics),
         height: parsePositiveDimension(value.height, 60, `${path}.height`, diagnostics),
         ...(text !== undefined ? { text } : {}),
@@ -664,6 +704,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       return {
         ...base,
         type,
+        ...labelRuns,
         radius: parsePositiveDimension(value.radius, 30, `${path}.radius`, diagnostics),
         ...(text !== undefined ? { text } : {}),
         ...shapeDraw(),
@@ -677,6 +718,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       return {
         ...base,
         type,
+        ...labelRuns,
         rx,
         ry,
         ...(text !== undefined ? { text } : {}),
@@ -700,6 +742,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       return {
         ...base,
         type,
+        ...labelRuns,
         text: parseBoundedText(value.text, "", `${path}.text`, diagnostics),
       };
     case "line":
@@ -819,7 +862,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
 }
 
 
-const BINDING_PROPERTIES = ["x","y","rotation","scaleX","scaleY","opacity","fill","stroke","text"] as const;
+const BINDING_PROPERTIES = ["x","y","rotation","scaleX","scaleY","opacity","fill","stroke","color","strokeDashoffset","text"] as const;
 const EXPRESSION_OPS = ["add","sub","mul","div","min","max","clamp","lerp","eq","lt","gt","and","or","not"] as const;
 
 function parseScalar(value: unknown, path: string, diagnostics: Diagnostic[]): ScalarValue | null {
@@ -1375,6 +1418,8 @@ function actionProperties(action: Action): readonly ActionProperty[] {
     case "opacity": return ["opacity"];
     case "fill": return ["fill"];
     case "stroke": return ["stroke"];
+    case "style": return styleProperties(action.to) as ActionProperty[];
+    case "text": return ["text"];
     case "resize": return ["width", "height"];
     case "draw": return ["drawProgress"];
     case "reparent": return ["parentId"];
@@ -1556,6 +1601,19 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
   const objectBase = { ...base, target };
 
   switch (value.type) {
+    case "text": {
+      if (typeof value.to !== "string" || value.to.length > COMPILER_LIMITS.textLength) {
+        diagnostic(diagnostics, "INVALID_TEXT_TARGET", `${path}.to`, "text.to requires a bounded string."); return null;
+      }
+      if (value.textRuns !== undefined) {
+        const issues = textRunIssues(value.textRuns as TextRun[], value.to);
+        for (const message of issues) diagnostic(diagnostics, "INVALID_TEXT_RUNS", `${path}.textRuns`, message);
+        if (issues.length) return null;
+      }
+      return { ...objectBase, type: "text", to: value.to, ...(value.textRuns !== undefined ? { textRuns: (value.textRuns as TextRun[]).map(run => ({ text: run.text, ...(run.color !== undefined ? { color: run.color } : {}), ...(run.fontWeight !== undefined ? { fontWeight: run.fontWeight } : {}), ...(run.fontStyle !== undefined ? { fontStyle: run.fontStyle } : {}) })) } : {}) };
+    }
+    case "style":
+      return { ...objectBase, type: "style", to: parseStyle(value.to, `${path}.to`, diagnostics, true) };
     case "move": {
       const to = isRecord(value.to) && boundedNumber(value.to.x) && boundedNumber(value.to.y)
         ? { x: value.to.x, y: value.to.y }
@@ -1715,7 +1773,7 @@ function parseAction(value: unknown, index: number, diagnostics: Diagnostic[]): 
         "UNKNOWN_ACTION",
         `${path}.type`,
         `Unsupported action type '${value.type}'.`,
-        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, resize, draw, morph, visibility, reparent, or zOrder.",
+        "Use camera, move, followPath, rotate, scale, opacity, fill, stroke, style, text, resize, draw, morph, visibility, reparent, or zOrder.",
       );
       return null;
   }
@@ -1954,6 +2012,7 @@ function validateTimelineReferences(
       }
     }
 
+    if (action.type === "text" && target.type !== "text" && target.type !== "rect" && target.type !== "circle" && target.type !== "ellipse") diagnostic(diagnostics, "UNSUPPORTED_TEXT_TARGET", `timeline[${index}].target`, "Only text and labeled shapes expose text.");
     if (action.type === "resize") {
       if (target.type !== "rect" && target.type !== "image" && target.type !== "ellipse" && target.type !== "circle") {
         diagnostic(
@@ -2150,6 +2209,33 @@ function parseSceneMetadata(
   };
 }
 
+function parseMarkers(value: unknown, diagnostics: Diagnostic[]): Marker[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    diagnostic(diagnostics, "INVALID_MARKERS", "markers", "markers must be an array.");
+    return [];
+  }
+  const markers: Marker[] = [], ids = new Set<string>();
+  value.forEach((item: unknown, index: number) => {
+    const path = `markers[${index}]`;
+    if (!isRecord(item)) {
+      diagnostic(diagnostics, "INVALID_MARKER", path, "Marker must be an object.");
+      return;
+    }
+    const id = parseId(item.id, `${path}.id`, diagnostics);
+    if (id && ids.has(id)) diagnostic(diagnostics, "DUPLICATE_MARKER_ID", `${path}.id`, "Marker IDs must be unique.");
+    if (id) ids.add(id);
+    if (typeof item.label !== "string") diagnostic(diagnostics, "INVALID_TEXT", `${path}.label`, "Marker label must be a string.");
+    const label = typeof item.label === "string" ? parseBoundedText(item.label, "", `${path}.label`, diagnostics) : "";
+    if (!finite(item.time) || item.time < 0 || item.time > COMPILER_LIMITS.actionTime) {
+      diagnostic(diagnostics, "INVALID_MARKER_TIME", `${path}.time`, `Marker time must be between 0 and ${COMPILER_LIMITS.actionTime} milliseconds.`);
+      return;
+    }
+    if (id) markers.push({ id, label, time: item.time });
+  });
+  return markers;
+}
+
 export function compile(input: unknown): CompileResult {
   const diagnostics: Diagnostic[] = [];
   if (!isRecord(input)) {
@@ -2187,6 +2273,10 @@ export function compile(input: unknown): CompileResult {
     );
   }
 
+  if (Array.isArray(input.markers) && input.markers.length > COMPILER_LIMITS.markers) {
+    diagnostic(diagnostics, "LIMIT_MARKERS", "markers", `markers exceeds the ${COMPILER_LIMITS.markers}-entry limit.`);
+  }
+
   if (input.bindings !== undefined && !Array.isArray(input.bindings)) {
     diagnostic(diagnostics, "INVALID_BINDINGS", "bindings", "bindings must be an array.");
   } else if (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings) {
@@ -2222,6 +2312,7 @@ export function compile(input: unknown): CompileResult {
     !Array.isArray(input.timeline) ||
     input.objects.length > COMPILER_LIMITS.objects ||
     input.timeline.length > COMPILER_LIMITS.timelineActions ||
+    (Array.isArray(input.markers) && input.markers.length > COMPILER_LIMITS.markers) ||
     (Array.isArray(input.bindings) && input.bindings.length > COMPILER_LIMITS.bindings) ||
     (Array.isArray(input.interactions) && input.interactions.length > COMPILER_LIMITS.interactions) ||
     (Array.isArray(input.stateMachines) && input.stateMachines.length > COMPILER_LIMITS.stateMachines)
@@ -2238,6 +2329,7 @@ export function compile(input: unknown): CompileResult {
     .filter((value): value is Action => value !== null);
 
   const state = parseState(input.state, diagnostics);
+  const markers = parseMarkers(input.markers, diagnostics);
   const bindings = Array.isArray(input.bindings)
     ? input.bindings.map((value, index) => parseBinding(value, index, diagnostics)).filter((value): value is Binding => value !== null)
     : [];
@@ -2264,6 +2356,7 @@ export function compile(input: unknown): CompileResult {
     scene,
     objects,
     timeline,
+    ...(markers.length ? { markers } : {}),
     ...(state ? { state } : {}),
     ...(bindings.length ? { bindings } : {}),
     ...(interactions.length ? { interactions } : {}),

@@ -1,4 +1,5 @@
 export * from "./types.js";
+export * from "./style.js";
 export * from "./defaults.js";
 export * from "./easing.js";
 export * from "./expression.js";

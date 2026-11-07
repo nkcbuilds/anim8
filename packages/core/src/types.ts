@@ -27,6 +27,20 @@ export interface Transform {
 }
 
 export type StrokeStyle = "solid" | "dashed" | "dotted";
+/** Coordinates are fractions of the painted object's bounding box. */
+export interface LinearGradient {
+  type: "linear";
+  from?: PointValue;
+  to?: PointValue;
+  stops: { offset: number; color: string; opacity?: number }[];
+}
+
+export interface TextRun {
+  text: string;
+  color?: string;
+  fontWeight?: number;
+  fontStyle?: "normal" | "italic";
+}
 
 export interface Style {
   fill?: string;
@@ -38,6 +52,21 @@ export interface Style {
   fontSize?: number;
   fontFamily?: string;
   radius?: number;
+  fillGradient?: LinearGradient | null;
+  strokeGradient?: LinearGradient | null;
+  colorGradient?: LinearGradient | null;
+  /** Empty array means a solid outline. Values are scene-space dash/gap lengths. */
+  strokeDasharray?: number[];
+  strokeDashoffset?: number;
+  strokeLinecap?: "butt" | "round" | "square";
+  strokeLinejoin?: "miter" | "round" | "bevel";
+  fillOpacity?: number;
+  strokeOpacity?: number;
+  fontWeight?: number;
+  fontStyle?: "normal" | "italic";
+  textAnchor?: "start" | "middle" | "end";
+  textStroke?: string;
+  textStrokeWidth?: number;
 }
 
 export interface BaseObject {
@@ -65,12 +94,14 @@ export interface RectObject extends BaseObject, ShapeDrawProgress {
   width: number;
   height: number;
   text?: string;
+  textRuns?: TextRun[];
 }
 
 export interface CircleObject extends BaseObject, ShapeDrawProgress {
   type: "circle";
   radius: number;
   text?: string;
+  textRuns?: TextRun[];
 }
 
 export interface EllipseObject extends BaseObject, ShapeDrawProgress {
@@ -78,6 +109,7 @@ export interface EllipseObject extends BaseObject, ShapeDrawProgress {
   rx: number;
   ry: number;
   text?: string;
+  textRuns?: TextRun[];
 }
 
 export interface PointValue {
@@ -100,6 +132,7 @@ export interface PolylineObject extends BaseObject {
 export interface TextObject extends BaseObject {
   type: "text";
   text: string;
+  textRuns?: TextRun[];
 }
 
 export interface LineObject extends BaseObject {
@@ -251,6 +284,19 @@ export interface StrokeAction extends ActionBase {
   to: string;
 }
 
+/** Numeric/color values interpolate; discrete values switch at the endpoint. */
+export interface StyleAction extends ActionBase {
+  type: "style";
+  to: Style;
+}
+
+/** Replace a label, including its optional rich spans, at the action endpoint. */
+export interface TextAction extends ActionBase {
+  type: "text";
+  to: string;
+  textRuns?: TextRun[];
+}
+
 export interface ResizeAction extends ActionBase {
   type: "resize";
   to: { width: number; height: number };
@@ -308,6 +354,8 @@ export type Action =
   | OpacityAction
   | FillAction
   | StrokeAction
+  | StyleAction
+  | TextAction
   | ResizeAction
   | DrawAction
   | MorphAction
@@ -376,7 +424,7 @@ export type Expression =
 
 export type BindingProperty =
   | "x" | "y" | "rotation" | "scaleX" | "scaleY" | "opacity"
-  | "fill" | "stroke" | "text";
+  | "fill" | "stroke" | "color" | "strokeDashoffset" | "text";
 
 export interface Binding {
   id: string;

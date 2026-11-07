@@ -657,7 +657,7 @@ describe("@anim8/renderer-sketch", () => {
     expect(at(0.25)).not.toContain("Start");
     expect(at(0.75)).toContain('fill-opacity="0.5"');
     expect(at(0.75)).toMatch(/data-sketch-part="label-fade" opacity="0.5"/);
-    expect(at(1)).not.toContain("fill-opacity");
+    expect(at(1).match(/<path data-sketch-part="fill"[^>]*>/)![0]).not.toContain("fill-opacity");
     expect(at(1)).not.toContain("label-fade");
   });
 

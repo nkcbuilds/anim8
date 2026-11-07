@@ -233,7 +233,7 @@ describe("SVG renderer", () => {
     expect(rect(0.5)).toMatch(/stroke-dasharray="[\d.]+ [\d.]+"/);
     expect(rect(0.5)).toContain('fill-opacity="0"');
     expect(rect(0.75)).toContain('fill-opacity="0.5"');
-    expect(rect(1)).not.toContain("stroke-dasharray");
+    expect(rect(1)).toContain('stroke-dasharray="none"');
     expect(edge(0.4)).toContain('stroke-dashoffset="0.5"');
     expect(edge(0.4)).not.toContain("marker-end");
     expect(edge(0.9)).toContain('marker-end="url(#anim8-arrow)"');
