@@ -52,6 +52,12 @@ Each available engine verifies:
 - `prefers-reduced-motion: reduce` through the real custom element;
 - multiple player instances with independent state/DOM;
 - mount/destroy/remount cleanup.
+- React/Vue object callback forwarding, callback replacement/removal, and keyboard activation.
+- callback updates without playback/state resets, Vue scene replacement while playing,
+  focus retention during seek/playback, and delayed source replacement/removal races.
+- host-loaded WOFF2 fonts on text, rich/shape/connector labels in both themes,
+  object overrides, font changes under seeking, SSR adoption and custom-font-only
+  sketch mounts without the bundled font rule.
 
 ## Visual determinism
 

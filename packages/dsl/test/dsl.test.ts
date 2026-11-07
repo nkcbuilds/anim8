@@ -16,6 +16,18 @@ highlight right color "#fde68a" duration 250
 `;
 
 describe("@anim8/dsl", () => {
+  it("keeps safe-integer seeds outside the geometry range", () => {
+    expect(compile("scene 800 450 seed 9007199254740991").scene?.scene.seed).toBe(Number.MAX_SAFE_INTEGER);
+  });
+  it.each([
+    "scene 1000000 1000000",
+    'scene 800 450\nbox a "A" at 1e20 0',
+    'scene 800 450\nbox a "A" at 0 0\nmove a to 100 0 duration 1e100',
+    'scene 800 450\nbox a "' + "x".repeat(32769) + '" at 0 0',
+  ])("enforces the JSON compiler's resource limits for DSL documents", source => {
+    expect(compile(source)).toMatchObject({ ok: false, diagnostics: expect.arrayContaining([expect.objectContaining({ code: expect.any(String), line: expect.any(Number) })]) });
+  });
+
   it("compiles every DSL command into a SceneDocument", () => {
     const result = compile(EXAMPLE);
 
@@ -23,13 +35,13 @@ describe("@anim8/dsl", () => {
     expect(result.diagnostics).toEqual([]);
     expect(result.scene).toEqual(expect.objectContaining({
       version: "1.0",
-      scene: {
+      scene: expect.objectContaining({
         width: 800,
         height: 450,
         theme: "sketch",
         background: "#f8fafc",
         seed: 42,
-      },
+      }),
     }));
 
     const scene = result.scene!;

@@ -11,6 +11,7 @@ import {
   renderSceneMarkup,
   type PlayerController,
   type PlayerOptions,
+  type PlayerObjectEvent,
 } from "@anim8/player";
 
 export type Anim8Scene = Parameters<typeof mountPlayer>[1];
@@ -45,6 +46,9 @@ export function useAnim8Player(
   const controllerRef = useRef<PlayerController | null>(null);
   const onFrameRef = useRef(options.onFrame);
   onFrameRef.current = options.onFrame;
+  const onObjectEventRef = useRef(options.onObjectEvent);
+  onObjectEventRef.current = options.onObjectEvent;
+  const handlesObjectEvents = Boolean(options.onObjectEvent);
 
   const {
     autoplay = false,
@@ -64,6 +68,7 @@ export function useAnim8Player(
       ...(reducedMotion !== undefined ? { reducedMotion } : {}),
       ...(speed !== undefined ? { speed } : {}),
       onFrame: (frame) => onFrameRef.current?.(frame),
+      ...(handlesObjectEvents ? { onObjectEvent: (event: PlayerObjectEvent) => onObjectEventRef.current?.(event) } : {}),
     });
 
     controllerRef.current = controller;
@@ -76,6 +81,10 @@ export function useAnim8Player(
       controller.destroy();
     };
   }, [autoplay, initialTime, loop, reducedMotion, scene, speed]);
+
+  useEffect(() => {
+    controllerRef.current?.setObjectEventHandler(handlesObjectEvents ? event => onObjectEventRef.current?.(event) : undefined);
+  }, [handlesObjectEvents]);
 
   return { containerRef, controllerRef };
 }

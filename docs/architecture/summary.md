@@ -53,3 +53,15 @@ Heavy functionality remains optional:
 - exporters.
 
 The core remains portable and headless.
+
+## Input boundaries
+
+JSON and DSL share `@anim8/compiler` validation and resource limits. Custom-element
+`src` loaders import that compiler lazily, bound streamed response bytes, and ignore
+stale responses after replacement or disconnect. Programmatic authoring/player APIs
+accept trusted application data; imported documents should be compiled first.
+
+Scene font defaults resolve into evaluated object styles before timeline actions.
+Renderers use the resulting styles; host applications supply custom font assets.
+Expression reads access own scalar state/input properties, and nonfinite runtime
+values are rejected before they can reach renderer geometry.

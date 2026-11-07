@@ -11,7 +11,7 @@ pnpm build
 node tests/consumers/run.mjs
 ```
 
-The runner requires built `dist` output for `@anim8/core`, `@anim8/renderer-svg`, `@anim8/player`, and `@anim8/react`. It copies only each package's `package.json` and `dist` into an isolated temporary `tests/consumers/.runtime/node_modules`, then runs the fixtures from that runtime.
+The runner requires built `dist` output for its workspace packages, including the player's lazy `@anim8/compiler` dependency. It copies only each package's `package.json` and `dist` into an isolated temporary `tests/consumers/.runtime/node_modules`, then runs the fixtures from that runtime.
 
 React and ReactDOM are copied separately from the repository's installed development dependencies so `@anim8/react` receives React as a downstream peer instead of resolving its own package-local development dependency.
 
@@ -25,7 +25,7 @@ Each fixture also checks that its Anim8 imports resolve from the isolated runtim
 
 ## Optional framework source fixtures
 
-`optional/next` and `optional/astro` are source/config examples only. The lightweight runner checks whether their large framework dependencies are installed and prints an explicit `SKIP` either way; it never claims a Next or Astro build ran.
+The runner builds `optional/next` and `optional/astro` when their framework dependencies are installed, then checks their generated HTML. It prints an explicit `SKIP` for missing dependencies.
 
 They are intentionally outside the pnpm workspace and do not alter root or workspace package manifests.
 

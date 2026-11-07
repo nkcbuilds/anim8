@@ -8,6 +8,35 @@ const scene = (): SceneDocument => ({
 });
 
 describe("visual styles", () => {
+  it.each([NaN, Infinity, -Infinity])("rejects invalid evaluation time %s", time => {
+    expect(() => evaluate(scene(), time)).toThrow(/finite/);
+  });
+  it.each(["strokeWidth", "fontSize", "radius"] as const)("rejects negative %s in objects and actions", key => {
+    const document = scene();
+    document.objects[0]!.style[key] = -6.4;
+    document.timeline = [{ id: "bad", type: "style", target: "node", start: 0, duration: 100, to: { [key]: -1 } }];
+    const paths = validateScene(document).map(d => d.path);
+    expect(paths).toContain(`objects[0].style.${key}`);
+    expect(paths).toContain(`timeline[0].to.${key}`);
+  });
+  it("inherits the scene font before actions, respects overrides and preserves reverse seeks", () => {
+    const document = scene();
+    document.scene.fontFamily = '"My Font", serif';
+    document.objects.push({ ...structuredClone(document.objects[0]!), id: "override", style: { fontFamily: "monospace" } });
+    document.timeline = [{ id: "font", type: "style", target: "node", start: 0, duration: 100, to: { fontFamily: "Georgia, serif" } }];
+    const original = structuredClone(document);
+    expect(evaluate(document, 50).objects.map(o => o.style.fontFamily)).toEqual(['"My Font", serif', "monospace"]);
+    expect(evaluate(document, 100).objects[0]!.style.fontFamily).toBe("Georgia, serif");
+    expect(evaluate(document, 0).objects[0]!.style.fontFamily).toBe('"My Font", serif');
+    expect(document).toEqual(original);
+    delete document.scene.fontFamily;
+    expect(evaluate(document, 0).objects[0]!.style.fontFamily).toBeUndefined();
+  });
+  it.each(["", "   ", "x".repeat(513), 123, null])("rejects an invalid scene font %j", fontFamily => {
+    const document = scene();
+    document.scene.fontFamily = fontFamily as string;
+    expect(validateScene(document)).toContainEqual(expect.objectContaining({ path: "scene.fontFamily", code: "INVALID_FONT_FAMILY" }));
+  });
   it("animates independent channels, persists finished states and remains seek-order independent", () => {
     const document = scene(), original = structuredClone(document);
     const halfway = evaluate(document, 500);

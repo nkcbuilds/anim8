@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 import { createHash } from "node:crypto";
 import { createReadStream, existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -38,6 +39,8 @@ function runBuilds() {
     "--filter", "@anim8/renderer-svg",
     "--filter", "@anim8/player",
     "--filter", "@anim8/react",
+    "--filter", "@anim8/vue",
+    "--filter", "@anim8/web-component",
     "build",
   ];
 
@@ -78,6 +81,8 @@ function assertBuiltOutputs() {
     "packages/renderer-svg/dist/index.js",
     "packages/player/dist/index.js",
     "packages/react/dist/index.js",
+    "packages/vue/dist/index.js",
+    "packages/web-component/dist/index.js",
   ]) {
     assert.ok(
       existsSync(resolve(repoRoot, relative)),
@@ -116,6 +121,7 @@ async function prepareReactHydrationFixture() {
 
   await build({
     entryPoints: [resolve(browserRoot, "react-hydration-entry.mjs")],
+    tsconfigRaw: { compilerOptions: {} },
     bundle: true,
     platform: "browser",
     format: "esm",
@@ -135,6 +141,16 @@ async function prepareReactHydrationFixture() {
 </body>
 </html>`,
   );
+  const vueRequire = createRequire(new URL("../../packages/vue/package.json", import.meta.url));
+  await build({
+    entryPoints: [resolve(browserRoot, "framework-events.mjs")],
+    tsconfigRaw: { compilerOptions: {} },
+    bundle: true, platform: "browser", format: "esm", target: "es2022",
+    alias: { vue: vueRequire.resolve("vue/dist/vue.runtime.esm-bundler.js") },
+    define: { __VUE_OPTIONS_API__: "true", __VUE_PROD_DEVTOOLS__: "false", __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: "false" },
+    outfile: resolve(tempDir, "framework-events.js"), logLevel: "silent",
+  });
+  await writeFile(resolve(tempDir, "framework-events.html"), '<!doctype html><html><body><script type="module" src="/tests/browser/.tmp/framework-events.js"></script></body></html>');
 }
 
 async function startStaticServer() {
@@ -255,6 +271,23 @@ async function runBrowserSuite(browserName, browserType, server) {
       assert.equal(result.sentinel, "same-node");
       assert.equal(result.svgCount, 1);
       assert.notEqual(result.beforeTransform, result.afterTransform);
+    });
+
+    await runCase(caseName("custom web fonts apply to all label types in both themes"), async () => {
+      const results = await page.evaluate(() => globalThis.__anim8Browser.customFonts());
+      assert.equal(results.length, 2);
+      for (const result of results) {
+        assert.equal(result.loaded, "loaded");
+        assert.equal(result.families.length, 6);
+        assert.equal(result.families.filter(f => f === '"Anim8TestFont", serif').length, 5);
+        assert.equal(result.families.filter(f => f === "monospace").length, 1);
+        assert.match(result.computed, /Anim8TestFont/);
+        assert.ok(result.widthDifference < 1, `${result.theme}: SVG uses the loaded font's glyph widths`);
+        assert.equal(result.endFamily, "monospace");
+        assert.equal(result.reverseFamily, '"Anim8TestFont", serif');
+        assert.equal(result.hydrated, true);
+        assert.equal(result.bundledStyles, 0, "custom-font-only scenes do not load the bundled face");
+      }
     });
 
     await runCase(caseName("sketch-theme player animates hand-drawn marks in place"), async () => {
@@ -383,6 +416,24 @@ async function runBrowserSuite(browserName, browserType, server) {
       });
     }
 
+    await runCase(caseName("custom elements validate remote scene loads and clear removed scenes"), async () => {
+      const results = await page.evaluate(() => globalThis.__anim8Browser.remoteSceneLoads());
+      assert.equal(results.length, 4);
+      for (const result of results) {
+        assert.equal(result.rendered, result.name === "valid", result.tag);
+        assert.equal(result.normalized, result.name === "valid" ? 1 : null);
+        if (result.name === "invalid") assert.match(result.error, /Invalid Anim8 scene/);
+        else assert.equal(result.error, null);
+        assert.equal(result.cleared, true);
+      }
+    });
+
+    await runCase(caseName("playback retains keyboard focus and source changes discard pending loads"), async () => {
+      const result = await page.evaluate(() => globalThis.__anim8Browser.focusAndSourceRaces());
+      for (const focus of result.focus) { assert.equal(focus.focused, true, focus.theme); assert.equal(focus.blurs, 0, focus.theme); }
+      for (const race of result.races) { assert.equal(race.aborted, true); assert.equal(race.label, race.action === "remove" ? null : "new", `${race.tag}: ${race.action}`); }
+    });
+
     await runCase(caseName("React SSR markup hydrates without replacement or recoverable errors"), async () => {
       await page.goto(`${server.origin}/tests/browser/.tmp/react-hydration.html`, { waitUntil: "load" });
       await page.waitForFunction(() => globalThis.__anim8HydrationReady === true);
@@ -395,11 +446,25 @@ async function runBrowserSuite(browserName, browserType, server) {
     });
 
     assert.equal(pageErrors.length, 0, pageErrors.map(error => error.message).join("\n"));
-    const caseCount = browserName === "chromium" ? 12 : 11;
+    await runCase(caseName("React and Vue forward current object callbacks, including keyboard activation"), async () => {
+      await page.goto(`${server.origin}/tests/browser/.tmp/framework-events.html`, { waitUntil: "load" });
+      const results = await page.evaluate(() => globalThis.FRAMEWORK_EVENTS());
+      assert.equal(results.length, 2);
+      for (const result of results) assert.deepEqual(result.events, ["first:click:hydration-box", "first:activate:hydration-box", "latest:click:hydration-box"], result.framework);
+    });
+    await runCase(caseName("framework updates preserve controller state and keep Vue's visible SVG moving"), async () => {
+      const results = await page.evaluate(() => globalThis.FRAMEWORK_LIFECYCLE());
+      for (const result of results) {
+        if (result.framework) assert.deepEqual(result.stable, [true, true, true], result.framework);
+        else { assert.ok(result.frameTime > 0, result.theme); assert.ok(Math.abs(result.visibleX - result.frameX) < 0.0001, result.theme); }
+      }
+    });
+    const caseCount = browserName === "chromium" ? 18 : 17;
     console.log(`PASS browser harness (${browserName}, ${caseCount} cases)`);
     return true;
   } finally {
-    await context.close();
+    // This browser belongs to one suite; closing it also closes its contexts.
+    // Avoid a redundant Firefox context-removal operation during teardown.
     await browser.close();
   }
 }

@@ -20,6 +20,7 @@ import {
   renderSceneMarkup,
   type PlayerController,
   type PlayerOptions,
+  type PlayerObjectEvent,
 } from "@anim8/player";
 
 export type Anim8Scene = Parameters<typeof mountPlayer>[1];
@@ -66,6 +67,7 @@ export function useAnim8Player(
         : {}),
       ...(resolvedOptions.speed !== undefined ? { speed: resolvedOptions.speed } : {}),
       onFrame: (frame) => toValue(options).onFrame?.(frame),
+      ...(resolvedOptions.onObjectEvent ? { onObjectEvent: (event: PlayerObjectEvent) => toValue(options).onObjectEvent?.(event) } : {}),
     });
 
     activeController = controller;
@@ -84,19 +86,19 @@ export function useAnim8Player(
   watch(
     [
       () => toValue(scene),
-      () => {
-        const resolved = toValue(options);
-        return [
-          resolved.autoplay,
-          resolved.initialTime,
-          resolved.loop,
-          resolved.reducedMotion,
-          resolved.speed,
-        ] as const;
-      },
+      () => toValue(options).autoplay,
+      () => toValue(options).initialTime,
+      () => toValue(options).loop,
+      () => toValue(options).reducedMotion,
+      () => toValue(options).speed,
     ],
     () => mount(),
+    { flush: "post" },
   );
+
+  watch(() => Boolean(toValue(options).onObjectEvent), enabled => {
+    activeController?.setObjectEventHandler(enabled ? event => toValue(options).onObjectEvent?.(event) : undefined);
+  }, { flush: "post" });
 
   onBeforeUnmount(() => {
     isMounted = false;

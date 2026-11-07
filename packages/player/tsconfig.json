@@ -11,6 +11,7 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@anim8/compiler": ["../compiler/src/index.ts"],
       "@anim8/renderer-sketch/live": [
         "../renderer-sketch/src/live.ts"
       ],

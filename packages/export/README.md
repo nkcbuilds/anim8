@@ -12,3 +12,5 @@ Hard limits: 1–60 FPS, 30 seconds, at most 720 frames, <= 1920×1080 px, PNG s
 `anim8-export scene.json frames/ --fps 24`
 
 The headless browser explicitly blocks all external network requests while rasterizing. Remote SVG image assets are therefore not embedded by the default exporter; hosts must explicitly provide a trusted rasterization strategy for such scenes. The result is deterministic at the scene/SVG level. PNG and encoded video bytes may vary across browser builds, fonts, OS rasterizers, and FFmpeg versions; pin them for reproducible media. Untrusted scene JSON must be compiled with `@anim8/compiler` before calling these APIs.
+
+`scene.fontFamily` and object `style.fontFamily` are preserved in SVG frames. Custom font files and your app's `@font-face` CSS are not included; standalone SVG viewers need the selected font available. For video, install the custom font on the export machine or inject a trusted `rasterize` callback that loads it and waits for font readiness before capturing. The default sketch font is embedded when used. See [font setup](../../docs/guides/visual-styling.md#fonts).

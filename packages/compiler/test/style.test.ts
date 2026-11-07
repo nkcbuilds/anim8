@@ -4,6 +4,21 @@ import { compile } from "../src/index.js";
 const scene = (style: unknown = {}, extra = {}, timeline: unknown[] = []) => ({ version: "1.0", scene: { width: 400, height: 200 }, objects: [{ id: "a", type: "rect", style, text: "A B", ...extra }], timeline });
 
 describe("extended styling compilation", () => {
+  it("preserves a scene font through JSON round trips without baking it into objects", () => {
+    const input = scene({ fontFamily: "monospace" });
+    const metadata = { ...input.scene, fontFamily: '"Developer Font", sans-serif' };
+    const result = compile({ ...input, scene: metadata });
+    expect(result.diagnostics).toEqual([]);
+    expect(result.scene?.scene.fontFamily).toBe(metadata.fontFamily);
+    expect(result.scene?.objects[0]!.style.fontFamily).toBe("monospace");
+    expect(compile(JSON.parse(JSON.stringify(result.scene))).scene).toEqual(result.scene);
+  });
+  it.each(["", " \n ", "x".repeat(513), 123, null, {}])("rejects invalid scene font %j", fontFamily => {
+    const input = scene();
+    const result = compile({ ...input, scene: { ...input.scene, fontFamily } });
+    expect(result.ok).toBe(false);
+    expect(result.diagnostics).toContainEqual(expect.objectContaining({ path: "scene.fontFamily" }));
+  });
   it("preserves gradients, dashed outlines, text runs and partial actions", () => {
     const result = compile(scene({ strokeDasharray: [8, 4], strokeDashoffset: -2, fillGradient: { type: "linear", stops: [{ offset: 0, color: "#fff" }, { offset: 1, color: "blue" }] } }, { textRuns: [{ text: "A ", color: "red" }, { text: "B", color: "blue", fontWeight: 700 }] }, [{ id: "done", type: "style", target: "a", start: 0, duration: 100, to: { color: "green", strokeDasharray: [] } }]));
     expect(result.diagnostics).toEqual([]);
@@ -13,6 +28,7 @@ describe("extended styling compilation", () => {
   it.each([
     { strokeDasharray: [-1, 2] }, { strokeDasharray: [0, 0] }, { strokeDasharray: Array(65).fill(1) },
     { strokeDasharray: "8 4" }, { strokeDashoffset: Infinity }, { fillOpacity: 2 }, { fontWeight: 1001 }, { strokeLinecap: "invalid" },
+    { strokeWidth: -6.4, strokeStyle: "dashed" }, { fontSize: -1 }, { radius: -1 },
     { fillGradient: { type: "linear", stops: [{ offset: 1, color: "red" }, { offset: 0, color: "blue" }] } },
     { colorGradient: { type: "linear", stops: [{ offset: 0, color: "url(https://evil.invalid/x)" }, { offset: 1, color: "blue" }] } },
     { strokeGradient: { type: "linear", from: { x: -1, y: 0 }, stops: [{ offset: 0, color: "red" }, { offset: 1, color: "blue" }] } },

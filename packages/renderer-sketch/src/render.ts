@@ -579,6 +579,18 @@ export interface SketchFrameMarkup {
 
 /** Render an evaluated frame into structured sketch markup (no DOM required). */
 export function renderSketchFrame(frame: EvaluatedScene): SketchFrameMarkup {
+  return renderFrame(frame);
+}
+
+interface CachedBody { key: string; body: string; bundledFont: boolean }
+
+/** Per-mount cache: one current body per object, with no frame history retained. */
+export function createSketchFrameRenderer(): { render(frame: EvaluatedScene): SketchFrameMarkup; clear(): void } {
+  const bodies = new Map<string, CachedBody>();
+  return { render: frame => renderFrame(frame, bodies), clear: () => bodies.clear() };
+}
+
+function renderFrame(frame: EvaluatedScene, bodies?: Map<string, CachedBody>): SketchFrameMarkup {
   const originalObjects = new Map(frame.objects.map(object => [object.id, object] as const));
   const painted = frame.objects.map(object => ({ ...object, style: { ...object.style, fill: paint(object.style, "fill", "none", object, originalObjects), stroke: paint(object.style, "stroke", DEFAULT_STROKE, object, originalObjects), color: paint(object.style, "color", DEFAULT_TEXT) } }));
   const objects = new Map(painted.map(object => [object.id, object] as const));
@@ -591,8 +603,26 @@ export function renderSketchFrame(frame: EvaluatedScene): SketchFrameMarkup {
     .map(entry => entry.object);
 
   const rendered: SketchObjectMarkup[] = [];
+  if (bodies) {
+    const live = new Set(painted.map(object => object.id));
+    for (const id of bodies.keys()) if (!live.has(id)) bodies.delete(id);
+  }
   for (const object of ordered) {
-    const markup = renderObject(object, objects, seed, labelBackground, usage);
+    // Connector bodies depend on the entire graph and label background. Other
+    // bodies use local geometry/style; world transforms live on their outer group.
+    const cacheable = bodies && object.type !== "connector" && object.type !== "group" && worldVisible(object, objects);
+    const key = cacheable ? JSON.stringify([seed, { ...object, transform: undefined, parentId: undefined, z: undefined, visible: undefined }]) : undefined;
+    const cached = key === undefined ? undefined : bodies?.get(object.id);
+    let markup: SketchObjectMarkup | null;
+    if (cached && cached.key === key) {
+      usage.bundledFont ||= cached.bundledFont;
+      markup = { id: object.id, attributes: { transform: worldTransform(object, objects), opacity: formatNumber(worldOpacity(object, objects)) }, body: cached.body };
+    } else {
+      const objectUsage: TextUsage = { bundledFont: false };
+      markup = renderObject(object, objects, seed, labelBackground, objectUsage);
+      usage.bundledFont ||= objectUsage.bundledFont;
+      if (key !== undefined && markup) bodies!.set(object.id, { key, body: markup.body, bundledFont: objectUsage.bundledFont });
+    }
     if (markup) rendered.push(markup);
   }
   return {

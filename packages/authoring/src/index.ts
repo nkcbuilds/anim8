@@ -4,6 +4,8 @@ export interface SceneOptions {
   width?: number;
   height?: number;
   theme?: ThemeName;
+  /** Default CSS font-family stack; per-object fontFamily overrides it. Load custom fonts in the host app. */
+  fontFamily?: string;
   background?: string;
   seed?: number;
   camera?: Partial<CameraState>;
@@ -216,14 +218,19 @@ export class SceneBuilder {
   private objects: DrawableObject[] = [];
   private timeline: Action[] = [];
   private markers: Marker[] = [];
-  private stateValues: Record<string, ScalarValue> = {};
+  private stateValues: Record<string, ScalarValue> = Object.create(null);
   private bindings: Binding[] = [];
   private interactions: Interaction[] = [];
   private stateMachines: StateMachine[] = [];
   private cursor = 0;
   private idCounter = 0;
 
-  constructor(private readonly options: SceneOptions = {}) {}
+  constructor(private readonly options: SceneOptions = {}) {
+    const family = options.fontFamily;
+    if (family !== undefined && (typeof family !== "string" || !family.trim() || family.length > 512)) {
+      throw new Error("fontFamily must be a nonempty CSS font-family stack of at most 512 characters.");
+    }
+  }
 
   private next(prefix: string): string { return `${prefix}_${++this.idCounter}`; }
 
@@ -260,7 +267,11 @@ export class SceneBuilder {
     if (this.timeline.length === 0 || this.cursor === 0) return this.objectById(id);
     const frame = evaluate({
       version: "1.0",
-      scene: { width: this.options.width ?? 800, height: this.options.height ?? 450 },
+      scene: {
+        width: this.options.width ?? 800,
+        height: this.options.height ?? 450,
+        ...(this.options.fontFamily !== undefined ? { fontFamily: this.options.fontFamily } : {}),
+      },
       objects: this.objects,
       timeline: this.timeline,
     }, this.cursor);
@@ -621,6 +632,18 @@ export class SceneBuilder {
    * offset 0 is allowed to intentionally establish an immediate value.
    */
   keyframes(target: NodeHandle, frames: readonly Keyframe[], options: KeyframeOptions): string[] {
+    const timeline = structuredClone(this.timeline), cursor = this.cursor, counter = this.idCounter;
+    try {
+      return this.buildKeyframes(target, frames, options);
+    } catch (error) {
+      this.timeline = timeline;
+      this.cursor = cursor;
+      this.idCounter = counter;
+      throw error;
+    }
+  }
+
+  private buildKeyframes(target: NodeHandle, frames: readonly Keyframe[], options: KeyframeOptions): string[] {
     if (!Number.isFinite(options.duration) || options.duration <= 0) {
       throw new Error("Keyframe duration must be a finite number > 0.");
     }
@@ -756,6 +779,7 @@ export class SceneBuilder {
         width: this.options.width ?? 800,
         height: this.options.height ?? 450,
         camera: this.baseCamera(),
+        ...(this.options.fontFamily !== undefined ? { fontFamily: this.options.fontFamily } : {}),
       },
       objects: this.objects,
       timeline: this.timeline,
@@ -813,8 +837,8 @@ export class SceneBuilder {
           break;
         }
         case "draw":
-          if (object.type === "path" || object.type === "polygon" || object.type === "polyline") {
-            hold = { type: "draw", target: original.target, to: object.drawProgress ?? 1, duration: 0, easing: "linear", interrupt: true };
+          if (isDrawableType(object.type)) {
+            hold = { type: "draw", target: original.target, to: ("drawProgress" in object ? object.drawProgress : undefined) ?? 1, duration: 0, easing: "linear", interrupt: true };
           }
           break;
         case "morph":
@@ -967,6 +991,7 @@ export class SceneBuilder {
         width: this.options.width ?? 800,
         height: this.options.height ?? 450,
         theme: this.options.theme ?? "clean",
+        ...(this.options.fontFamily !== undefined ? { fontFamily: this.options.fontFamily } : {}),
         ...(this.options.background ? { background: this.options.background } : {}),
         ...(this.options.seed !== undefined ? { seed: this.options.seed } : {}),
         camera: this.baseCamera(),

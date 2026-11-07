@@ -26,6 +26,8 @@ class FakeElement {
     return index >= 0 ? this.parentNode.childNodes[index + 1] ?? null : null;
   }
 
+  get firstChild(): FakeElement | null { return this.childNodes[0] ?? null; }
+
   setAttribute(name: string, value: string): void {
     this.attributes.set(name, String(value));
   }

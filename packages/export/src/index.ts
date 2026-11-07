@@ -35,7 +35,7 @@ export function* svgFrames(scene:SceneDocument, options:FrameOptions={}):Generat
   for(let index=0;index<totalFrames;index++){
     const timeMs=Math.min(durationMs,index*1000/fps);
     const frame=evaluate(scene,timeMs);
-    // Sketch frames embed their font, so headless capture needs no network or system fonts.
+    // The default sketch font is embedded. Custom families must be available to the rasterizer.
     yield {index,timeMs,svg:frame.scene.theme==="sketch"?renderSketchSvg(frame):renderSvg(frame)};
   }
 }

@@ -11,6 +11,7 @@ interface SceneDocument {
     width: number;
     height: number;
     theme?: "clean" | "sketch";
+    fontFamily?: string;
     background?: string;
     seed?: number;
     camera?: { x: number; y: number; zoom: number };
@@ -26,6 +27,8 @@ interface SceneDocument {
 ```
 
 Every object has a stable `id`, transform, style, visibility and z-order. Parent relationships are represented with `parentId`.
+
+`scene.fontFamily` supplies a default CSS font-family stack for all text and labels in either theme. An object's `style.fontFamily` overrides it, including on connectors. Omit it to keep the theme's existing default. It must contain a non-whitespace character and be at most 512 characters long. The evaluator resolves it before timeline style actions without changing the source document. Font files are loaded by the host; see [fonts](../guides/visual-styling.md#fonts).
 
 ## Explanation markers
 

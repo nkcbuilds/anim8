@@ -13,3 +13,4 @@ export * from "./path-morph.js";
 export * from "./interactions.js";
 export * from "./evaluate.js";
 export * from "./validate.js";
+export * from "./validation-budget.js";

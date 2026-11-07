@@ -439,7 +439,14 @@ export interface EvaluationContext {
 
 export interface SceneDocument {
   version: "1.0";
-  scene: SceneSize & { theme?: ThemeName; background?: string; seed?: number; camera?: CameraState };
+  scene: SceneSize & {
+    theme?: ThemeName;
+    /** Default CSS font-family stack for all labels; object styles take precedence. */
+    fontFamily?: string;
+    background?: string;
+    seed?: number;
+    camera?: CameraState;
+  };
   objects: DrawableObject[];
   timeline: Action[];
   state?: Record<string, ScalarValue>;
