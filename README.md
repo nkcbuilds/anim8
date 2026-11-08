@@ -1,60 +1,83 @@
-# Anim8
+<h1 align="center">Anim8</h1>
 
-**Animated diagrams, authored as data.**
+<p align="center">Animated diagrams, authored as data.</p>
+<p align="center">Explain systems and algorithms with diagrams you can play, scrub, and export.</p>
 
-Explain algorithms, systems, and processes with 2D scenes you can play, pause, scrub, reverse, embed, and export. Write TypeScript or portable JSON; Anim8 evaluates the same scene at any timestamp and renders it as SVG.
+<p align="center">
+  <a href="#why-anim8">Why Anim8?</a> &nbsp;·&nbsp;
+  <a href="#examples">Examples</a> &nbsp;·&nbsp;
+  <a href="#quickstart">Quickstart</a> &nbsp;·&nbsp;
+  <a href="#author-a-scene">Create a scene</a> &nbsp;·&nbsp;
+  <a href="#documentation">Docs</a>
+</p>
 
-[Get started](#get-started) · [Examples](#see-it-move) · [How it compares](#where-anim8-fits) · [Documentation](#documentation)
+![Anim8's workflow: author a scene in TypeScript or JSON, animate data through a system, seek and reverse the timeline, then embed or export the same scene.](docs/media/intro.gif)
 
-![A hand-drawn CI pipeline progressively reveals parallel checks, builds, and a release.](docs/media/pipeline.gif)
+<p align="center">Describe it. Animate it. Explore it. Share it.</p>
 
-[Edit this scene](examples/diagram-gallery/dag/scene.json) · [See how it is authored](examples/diagram-gallery/build.mjs)
+---
 
-> **Pre-1.0.** Anim8 is in active development. Start from this repository; the public npm release is still a [release gate](docs/release/README.md). APIs may change before 1.0.
+<a id="what-makes-anim8-useful"></a>
 
-## See it move
+## Why Anim8?
 
-These GIFs are rendered from the scene files in this repository. The browser player adds timeline scrubbing, speed controls, reverse playback, and named steps.
+**The goal: make explanations people can explore.** Turn a system, algorithm, or process into a reusable scene, with its relationships and motion kept together.
 
-| Follow the data | Explain a protocol |
+| Built around | What that gives you |
 | --- | --- |
-| ![An array pointer moves between cells, then a linked list draws its next pointers.](docs/media/data-structures.gif) | ![A login sequence reveals lifelines, activation bars, requests, and dashed replies.](docs/media/sequence.gif) |
-| [Array and linked list source](examples/diagram-gallery/data-structures/scene.json) | [Sequence diagram source](examples/diagram-gallery/sequence/scene.json) |
+| **Diagrams with a timeline** | Move data through a system, reveal a process in steps, and keep connectors attached as objects move. |
+| **Portable scene data** | Author in TypeScript or JSON; inspect, validate, save, and reuse the resulting document. |
+| **Any frame, directly** | Play, seek, or reverse the same scene. Use its evaluator for browser playback and exported frames. |
 
-| Keep object identity through an algorithm | Give visual details meaning |
+Anim8 combines diagram structure, explicit motion, and an embeddable SVG player. [How it compares with other tools →](docs/guides/choosing-anim8.md)
+
+[Capabilities](#capabilities) · [Integrations](#use-the-library) · [Fonts](#use-your-own-font) · [Exports](#export-an-explanation) · [Comparison](#how-it-compares)
+
+<a id="see-it-move"></a>
+
+## Examples
+
+### CI pipeline
+
+![A hand-drawn pipeline reveals parallel checks, builds, and a release.](docs/media/pipeline.gif)
+
+[Scene JSON](examples/diagram-gallery/dag/scene.json) · [Authoring source](examples/diagram-gallery/build.mjs)
+
+| Data structures | Sequence diagrams |
 | --- | --- |
-| ![The same numbered boxes split into runs and merge into a stable sorted order.](docs/media/merge-sort.gif) | ![A distributed write changes gradients, rich labels, dash flow, and completion styling.](docs/media/styling.gif) |
-| [Full merge-sort example and checks](examples/merge-sort-motion/README.md) | [Styling example](examples/complex-styling/README.md) |
+| ![An array pointer moves between cells, then a linked list draws its next pointers.](docs/media/data-structures.gif) | ![Lifelines, requests, and replies reveal a login sequence.](docs/media/sequence.gif) |
+| [View scene →](examples/diagram-gallery/data-structures/scene.json) | [View scene →](examples/diagram-gallery/sequence/scene.json) |
 
-Explore the [17 diagram families](examples/diagram-gallery/README.md): DAGs, flowcharts, sequence diagrams, state machines, ER diagrams, architecture, mind maps, org charts, timelines, Venn diagrams, bar and line charts, geometry, data structures, swimlanes, cycles, and undirected networks. The separate [150-scene teaching catalog](examples/catalog/README.md) covers computing, math/science, and everyday workflows.
+| Stable merge sort | Rich styling |
+| --- | --- |
+| ![Numbered boxes split into runs and merge into a stable sorted order.](docs/media/merge-sort.gif) | ![A distributed write animates gradients, labels, dash flow, and completion styling.](docs/media/styling.gif) |
+| [Example and checks →](examples/merge-sort-motion/README.md) | [Styling example →](examples/complex-styling/README.md) |
 
-## What makes Anim8 useful
+[17 diagram families](examples/diagram-gallery/README.md) · [150 teaching scenes](examples/catalog/README.md)
 
-- **An explanation has a timeline.** Reveal a diagram in steps, move a token through a system, or keep the same numbered boxes attached to their values throughout a sorting algorithm.
-- **Scenes travel as JSON.** Objects, relationships, actions, markers, and supported interactions live in a versioned document you can inspect, save, generate, and validate.
-- **Any frame is addressable.** `evaluate(scene, 1250)` computes that frame directly. Seeking and reverse playback use the same evaluator as exports; scene state does not depend on which frame was rendered before it.
-- **A consistent diagram vocabulary.** Clean and seeded sketch themes, outline-bound connectors, label fitting, role colours, gradients, rich text, and layout/design checks help keep explanations readable.
-- **Embed the scene where people learn.** Use the browser player, React, Vue, or a web component. Static SVG rendering also works in Node.js without a DOM.
-- **A small surface for agents.** The compiler returns diagnostics with codes and field paths. Agents can repair generated JSON without executing it as JavaScript. See the [authoring guide](docs/guides/ai-agents.md) and [skill](SKILL.md).
+The gallery covers systems, relationships, charts, geometry, and data structures. The teaching catalog spans computing, math/science, and everyday workflows. Every preview links to its editable source.
 
-## Where Anim8 fits
+<details>
+<summary><strong>Browse the catalog and offline gallery locally</strong></summary>
 
-These tools overlap. Choose based on what you want to author and deliver; Anim8's distinction is the combination of a portable diagram scene, explicit motion, headless evaluation, and an embeddable SVG player.
+For the teaching catalog, run `pnpm catalog:serve` and open **http://127.0.0.1:4178**.
 
-| Tool | A natural fit | Choose Anim8 when… |
-| --- | --- | --- |
-| [Mermaid](https://mermaid.js.org/intro/) | Text-defined diagrams in documentation. | The explanation needs objects to move through an explicit, seekable timeline. |
-| [Excalidraw](https://plus.excalidraw.com/docs/sdk) | Sketching diagrams with a visual editor and integrating that editor into an app. | You want to author the diagram's motion as a scene and play it inside a page. |
-| [GSAP](https://gsap.com/docs/v3/GSAP/) | General JavaScript animation, with tweens and timelines for web interfaces and graphics. | You want diagram objects, connector bindings, validation, and portable scene data as the starting point. |
-| [Motion Canvas](https://motioncanvas.io/docs/) | TypeScript generator-based explanatory vector animation with an editor and voice-over workflow. | You want a declarative JSON interchange format and a framework-independent SVG player. |
-| [Manim](https://docs.manim.community/en/stable/) | Programmatic mathematical animation and rendered explanatory videos. | Your delivery starts with an interactive web diagram and a JavaScript/TypeScript application. |
-| [Remotion](https://www.remotion.dev/docs/player) | React video compositions, including videos embedded with its Player. | You want an SVG diagram scene that can be evaluated and inspected independently of React. |
+For the interactive diagram gallery:
 
-Other animation tools also support timelines and seeking. Those features alone are not unique to Anim8. This comparison describes the projects' documented focuses, not a performance ranking or an exhaustive feature checklist.
+```sh
+pnpm exec playwright install chromium
+pnpm gallery:browser
+```
 
-## Get started
+Open `artifacts/gallery/index.html` directly. It works offline, with replay and keyboard timeline controls.
 
-Use **Node.js 24** and **pnpm 10.28.0**, matching CI. From a fresh checkout:
+</details>
+
+<a id="get-started"></a>
+
+## Quickstart
+
+**Node.js 24 · pnpm 10.28.0**
 
 ```sh
 git clone https://github.com/nkcbuilds/anim8.git
@@ -64,14 +87,24 @@ pnpm build
 pnpm playground
 ```
 
-Open **http://127.0.0.1:4179** for Anim8 Studio. It starts with the merge-sort demonstration: play it, drag the timeline, change speed, jump between explanation steps, edit the JSON, or import a scene. Download the scene JSON or the current SVG.
+Open **http://127.0.0.1:4179**. Play a scene, edit its JSON, or export a frame.
 
-To browse the teaching catalog, run `pnpm catalog:serve` and open **http://127.0.0.1:4178**. For the diagram gallery, install Chromium with `pnpm exec playwright install chromium`, run `pnpm gallery:browser`, and open `artifacts/gallery/index.html` directly. It works offline.
+*Pre-1.0: use the workspace setup above. The [public npm release](docs/release/README.md) is still pending; APIs may change before 1.0.*
 
-### Author a scene
+## Author a scene
 
-Within a workspace consumer, use the TypeScript builder and mount the result into an existing element such as `<div id="diagram"></div>`:
+Create two objects. Connect them. Add motion.
 
+![The code creates Request and Service boxes, connects them, moves Request, and turns Service green.](docs/media/authoring.gif)
+
+*Rendered from the example below. Build steps are separated; playback is shown at ¼ speed.*
+
+<details>
+<summary><strong>Show the TypeScript</strong></summary>
+
+Add `<div id="diagram"></div>` to your page in a workspace consumer:
+
+<!-- quickstart:start -->
 ```ts
 import { scene } from "@anim8/authoring";
 import { DIAGRAM_TONES } from "@anim8/core";
@@ -97,37 +130,80 @@ const player = mountPlayer(document.querySelector("#diagram")!, s.toJSON());
 player.play();
 // player.pause(); player.seek(450); player.reverse(); player.destroy();
 ```
+<!-- quickstart:end -->
 
-JSON is the interchange format. Validate imported or generated documents before passing the compiled scene to a player or renderer:
+</details>
+
+[Authoring API](packages/authoring/README.md) · [Scene JSON](docs/media/quickstart.scene.json) · [React](packages/react/README.md) · [Vue](packages/vue/README.md) · [Web component](packages/web-component/README.md)
+
+### How it works
+
+**TypeScript / JSON → validate → evaluate(time) → SVG**
+
+The same scene drives playback, seeking, reverse, and export. [Explore the architecture →](docs/architecture/summary.md)
+
+## Capabilities
+
+| Area | Included |
+| --- | --- |
+| **Diagram objects** | Shapes, paths, text, groups, images, and connectors bound to object edges. Routed connectors can avoid obstacles. |
+| **Motion & timing** | Moves, style changes, camera motion, compatible path morphing, named steps, and direct evaluation at any timestamp. |
+| **Visual design** | Clean and seeded sketch themes, label fitting, role colours, custom fonts, gradients, rich text, and design checks. |
+| **Interaction** | Inputs, bindings, object events, and bounded declarative interactions/state machines. |
+| **Layout** | Optional Dagre and ELK adapters for directed graphs. |
+| **Delivery** | Browser playback, React/Vue/web components, headless SVG, and optional GIF/MP4 export. |
+
+The same object keeps its identity as it moves. Connectors follow evaluated objects, so a changing diagram stays connected. [Visual design guide](docs/guides/visual-style.md) · [Styling reference](docs/guides/visual-styling.md)
+
+## Use the library
+
+Choose the packages your application needs; the evaluator works without a DOM.
+
+| Your application | Start with |
+| --- | --- |
+| **Plain browser app** | [`mountPlayer`](packages/player/README.md) for play/pause, seek, speed, reverse, and named-step controls. |
+| **Framework app** | [React](packages/react/README.md), [Vue](packages/vue/README.md), or the [web component](packages/web-component/README.md). |
+| **Node.js / static output** | [Core evaluator](packages/core/README.md), [clean SVG](packages/renderer-svg/README.md), or [sketch SVG](packages/renderer-sketch/README.md). |
+| **Imported or generated scenes** | [Compiler](packages/compiler/README.md), [JSON schema](packages/compiler/scene.schema.json), and [scene format](docs/reference/scene-format.md). |
+| **Text authoring or agents** | [DSL](packages/dsl/README.md), [agent guide](docs/guides/ai-agents.md), and [authoring skill](SKILL.md). |
+
+<details>
+<summary><strong>Validate imported JSON and render an SVG frame</strong></summary>
+
+`source` is a scene JSON string. Compile it before passing the result to a player or renderer:
 
 ```ts
 import { compileJson } from "@anim8/compiler";
 import { evaluate } from "@anim8/core";
 import { renderSketchSvg } from "@anim8/renderer-sketch";
 
-const result = compileJson(source); // source is a scene JSON string
-if (!result.ok || !result.scene) throw new Error(JSON.stringify(result.diagnostics));
+const result = compileJson(source);
+if (!result.ok || !result.scene) {
+  throw new Error(JSON.stringify(result.diagnostics));
+}
 
 const svg = renderSketchSvg(evaluate(result.scene, 1250));
 ```
 
-For application integration, see [React](packages/react/README.md), [Vue](packages/vue/README.md), [web component](packages/web-component/README.md), and the [player API](packages/player/README.md).
+Compiler diagnostics include codes and field paths, so generated scenes can be inspected and repaired without executing them as JavaScript.
 
-### Use your own font
+</details>
 
-Set a default for the whole scene, or override individual labels:
+## Use your own font
+
+Set a scene default, then override individual labels when needed. Both themes support this, including connector labels.
 
 ```ts
-const s = scene({ theme: "sketch", fontFamily: '"My Brand Font", sans-serif' });
+const s = scene({ fontFamily: '"My Brand Font", sans-serif' });
 s.box("Uses the scene font");
-s.text("const answer = 42", { fontFamily: '"My Code Font", monospace' });
+s.text("const answer = 42", { fontFamily: "monospace" });
 ```
 
-This works in both clean and sketch themes, including connector labels. Load custom web fonts in your app with `@font-face` or your framework's font loader. Font files are supplied by the host; scene JSON stores the family name and fallback stack. See [font loading and export behavior](docs/guides/visual-styling.md#fonts).
+Load custom fonts in your app with `@font-face` or your framework's font loader. Custom font files remain host-supplied and are not automatically embedded in exported SVGs. [Font loading & export behaviour →](docs/guides/visual-styling.md#fonts)
 
-### Export an explanation
+## Export an explanation
 
-SVG frames need only the built packages. GIF/MP4 exports additionally need **Playwright Chromium and FFmpeg** installed on your machine.
+**SVG:** built packages only. **GIF / MP4:** also install Playwright Chromium and FFmpeg.
 
 ```sh
 node packages/cli/dist/cli.js validate examples/diagram-gallery/dag/scene.json
@@ -136,41 +212,64 @@ node packages/export/dist/cli.js examples/diagram-gallery/dag/scene.json frames/
 node packages/export/dist/cli.js examples/diagram-gallery/dag/scene.json pipeline.mp4 --fps 12
 ```
 
-Exports are create-only; choose a new destination if one already exists. See [export options and limits](packages/export/README.md). The README GIFs have a [reproducible rendering recipe](docs/media/README.md).
+Exports are create-only: choose a new destination for each run. [Export options & limits](packages/export/README.md) · [Reproduce the README animations](docs/media/README.md)
 
-## Capabilities and boundaries
+<a id="where-anim8-fits"></a>
 
-Anim8 supports shapes, paths, text, groups, images, bound/routed connectors, camera motion, compatible path morphing, style animation, named markers, bindings, and bounded declarative interactions/state machines. Optional Dagre and ELK adapters help lay out larger directed graphs.
+## How it compares
 
-It focuses on 2D explanations. It does not currently provide a 3D engine, physics simulation, a full visual scene editor, a voice-over production system, or built-in mathematical typesetting. The playground is a JSON editor and player. Specialised figures still need domain-aware authoring and layout review.
+Anim8 focuses on **portable diagram scenes with explicit motion and an embeddable SVG player**. Other tools also support animation and seeking; the choice is what you want to author and deliver.
 
-The core evaluator does not depend on the DOM. Live playback uses SVG and `requestAnimationFrame`. Sketch playback can load its bundled font lazily with ESM code splitting; a single-file bundle includes that font up front. See the [bundle measurement](benchmarks/check-runtime-size.mjs).
+| Tool | Its focus | Choose Anim8 for |
+| --- | --- | --- |
+| Mermaid | Text-defined diagrams | Diagram objects moving through a seekable timeline. |
+| Excalidraw | Visual diagram drawing | Authoring and playing a diagram's motion as data. |
+| GSAP | General JavaScript animation | Diagram objects, bound connectors, and scene validation. |
+| Motion Canvas | Explanatory vector animation | Declarative JSON interchange and a framework-independent player. |
+| Manim | Mathematical animation | An interactive web diagram in a JS/TS application. |
+| Remotion | React video compositions | An SVG scene evaluated independently of React. |
 
-Generated scene JSON is untrusted data. The compiler enforces structural and resource limits; it does not execute scene JavaScript. Default media export blocks external asset requests. See the [security model](docs/security.md).
+[Full comparison with source links →](docs/guides/choosing-anim8.md)
 
 ## Documentation
 
-| Start with | Reference |
+| Task | Reference |
 | --- | --- |
-| Authoring and visual design | [Agent guide](docs/guides/ai-agents.md) · [Sketch diagram guide](docs/guides/visual-style.md) · [Rich styling](docs/guides/visual-styling.md) |
-| Scene data and timing | [Scene format](docs/reference/scene-format.md) · [Timeline](docs/reference/timeline.md) · [JSON schema](packages/compiler/scene.schema.json) |
-| Building blocks | [Authoring](packages/authoring/README.md) · [Layouts](packages/layout/README.md) · [Presets](packages/presets/README.md) |
-| Accessibility and embedding | [Accessibility](docs/guides/accessibility.md) · [Player](packages/player/README.md) · [Package directory](packages/) |
-| Status and project decisions | [Changelog](CHANGELOG.md) · [Release checklist](docs/release/README.md) · [Architecture decisions](docs/architecture/decisions/) |
+| Author an explanation | [Authoring API](packages/authoring/README.md) · [Agent guide](docs/guides/ai-agents.md) · [Visual design](docs/guides/visual-style.md) |
+| Style and arrange a scene | [Rich styling & fonts](docs/guides/visual-styling.md) · [Layouts](packages/layout/README.md) · [Presets](packages/presets/README.md) |
+| Understand the data model | [Scene format](docs/reference/scene-format.md) · [Timeline](docs/reference/timeline.md) · [JSON schema](packages/compiler/scene.schema.json) |
+| Embed and export | [Player API](packages/player/README.md) · [Accessibility](docs/guides/accessibility.md) · [Export API](packages/export/README.md) |
+| Explore the library | [All packages](packages/) · [Architecture](docs/architecture/summary.md) · [Architecture decisions](docs/architecture/decisions/) |
+| Track project status | [Changelog](CHANGELOG.md) · [Release checklist](docs/release/README.md) |
+
+<a id="capabilities-and-boundaries"></a>
+
+## Scope & security
+
+It does not provide a 3D engine, physics, voice-over production, mathematical typesetting, or a full visual scene editor. The playground edits JSON.
+
+Validate imported JSON with the compiler. It enforces structural and resource limits without executing scene JavaScript. Default media export blocks external asset requests. [Security model →](docs/security.md)
+
+Sketch playback can load its bundled font lazily with ESM code splitting; a single-file bundle includes it up front. [Startup and lazy bundle measurements →](benchmarks/check-runtime-size.mjs)
 
 ## Development and verification
 
 ```sh
-pnpm check                 # types, unit tests, builds, tarballs, consumers, scenes
-pnpm bundle:check          # startup bundle ceiling; lazy bytes reported separately
+pnpm check                 # types, unit tests, builds, packages, consumers, scenes
+pnpm docs:check            # README links, executable example, animation checksums
+pnpm bundle:check          # startup bundle ceiling and lazy bytes
 pnpm exec playwright install chromium firefox webkit
-pnpm release:check         # browser, media, layout and playback qualification
+pnpm release:check
 ```
 
-Browser tests check playback, retained object identity, SSR hydration, rich styles, reveal pixels, and seek parity. Qualification includes mobile emulation and CPU throttling; that is not a substitute for physical-device testing. The [model-provider smoke tests](tests/model-eval/README.md) use offline mocks; live model quality and teaching accuracy require separate evaluation.
+Browser qualification includes mobile emulation and CPU throttling, rather than physical-device tests. [Model-provider smoke tests](tests/model-eval/README.md) use offline mocks.
 
-Issues and focused pull requests are welcome. Include a small scene, the expected behaviour, and a timestamp when reporting animation problems.
+The suite checks playback, retained object identity, SSR hydration, rich styles, reveal pixels, and seek parity. Live model quality and teaching accuracy need separate evaluation.
+
+Include a small scene and timestamp when reporting a bug. [Regenerate README animations →](docs/media/README.md)
+
+---
 
 ## License
 
-[MIT](LICENSE). The bundled Virgil font is separately licensed under the [SIL Open Font License 1.1](packages/renderer-sketch/assets/Virgil-LICENSE.md).
+[MIT](LICENSE) · Bundled Virgil font: [SIL OFL 1.1](packages/renderer-sketch/assets/Virgil-LICENSE.md)
