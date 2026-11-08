@@ -32,7 +32,7 @@ The downstream TypeScript fixture uses NodeNext resolution, strict checking, and
 
 ## Editor support
 
-The CLI migration does not automatically select TypeScript 7 in editors. For VS Code, use Microsoft's [TypeScript 7 extension](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview). Selecting `node_modules/typescript` as a classic workspace SDK selects the compatibility API. Other editors should follow their TypeScript 7 integration instructions.
+The CLI migration does not automatically select TypeScript 7 in editors. For VS Code, use Microsoft's [TypeScript 7 extension](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview). The `node_modules/typescript` compatibility alias supplies the compiler API but lacks `tsserver.js`, so it cannot serve as a classic workspace SDK. Classic editor integrations require a complete TypeScript SDK. Other editors should follow their TypeScript 7 integration instructions.
 
 ## Updating the toolchain
 
