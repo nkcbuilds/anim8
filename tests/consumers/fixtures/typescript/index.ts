@@ -13,6 +13,8 @@ import { h, ref } from "vue";
 
 const builder = scene({ fontFamily: '"My Font", sans-serif' });
 const request = builder.box("Request", { id: "request", x: 120, y: 100 });
+const service = builder.box("Service", { id: "service", x: 500, y: 100 });
+const connection = builder.connect(request, service);
 builder.sequence(request.moveTo({ x: 300, y: 100 }, { duration: 900 }));
 const document: SceneDocument = builder.toJSON();
 const result = compileJson(JSON.stringify(document));
@@ -36,7 +38,8 @@ useAnim8Player(ref(document), options);
 const routeSection: ElkRouteSection = { id: "route", points: [{ x: 1, y: 2 }] };
 const layout = await layoutElk(document);
 const layoutWidth: number = layout.width;
-void [routeSection, layoutWidth];
+const returnedSection: ElkRouteSection = layout.routes[connection.id]!.sections[0]!;
+void [routeSection, returnedSection, layoutWidth];
 void [svg, sketch];
 
 // Keep a negative assertion so a loss of public typing cannot silently pass.

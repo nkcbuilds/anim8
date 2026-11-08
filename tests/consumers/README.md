@@ -25,6 +25,7 @@ Executed fixtures:
 - `fixtures/custom-extension` — exercises a reusable authoring helper through package exports.
 - `fixtures/desktop-webview` — bundles a browser consumer with esbuild.
 - `fixtures/typescript` — checks public authoring, compiler, rendering, playback, React, and Vue types with both compilers, including a negative type assertion.
+- `fixtures/layout-elk` — runs layout and routed edges in an OS temporary directory outside the repository, with copied built packages and the installed ELK dependency; checks resolution, geometry, and unchanged input.
 
 Each fixture also checks that its Anim8 imports resolve from the isolated runtime's copied package output, preventing a false pass through workspace source aliases.
 

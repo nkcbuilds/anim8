@@ -111,6 +111,7 @@ try {
       await page.waitForFunction(() => Number(document.querySelector("#scrubber").value) > 100);
       await page.locator("#play").click();
       const paused = await page.locator("#preview svg").evaluate(svg => svg.outerHTML);
+      assert.equal(await page.locator("#play").getAttribute("aria-pressed"), "false", "Pause updates the play control state");
       await page.waitForTimeout(120);
       const afterPause = await page.locator("#preview svg").evaluate(svg => svg.outerHTML);
       if (afterPause !== paused) {

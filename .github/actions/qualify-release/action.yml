@@ -24,6 +24,7 @@ runs:
       shell: bash
       env:
         ANIM8_BROWSER_REQUIRE_ALL: "1"
+        ANIM8_BROWSER_ENGINES: "chromium,firefox,webkit"
       run: |
         mkdir -p artifacts
         set -o pipefail

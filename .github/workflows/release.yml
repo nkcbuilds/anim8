@@ -10,9 +10,9 @@ permissions:
   contents: read
   id-token: write
 
-# Serialize retries of the same release; never cancel an active publication.
+# Keep manual qualifications separate from publishing runs for the same tag.
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -30,4 +32,18 @@ test("compiler API consumers retain the supported TypeScript 6 API", () => {
     assert.equal(peer.version, ts.version);
     assert.equal(typeof peer.createProgram, "function");
   }
+});
+
+test("every package script environment selects the native TypeScript compiler", () => {
+  const packages = readdirSync(join(root, "packages")).filter(name => {
+    const manifest = join(root, "packages", name, "package.json");
+    return existsSync(manifest) && JSON.parse(readFileSync(manifest, "utf8")).scripts?.typecheck;
+  });
+  assert.ok(process.env.npm_execpath, "Run this guard through pnpm toolchain:check");
+  const output = execFileSync(process.execPath, [process.env.npm_execpath, "-r", "exec", "tsc", "--version"], {
+    cwd: root, encoding: "utf8", timeout: 30_000,
+  });
+  const versions = [...output.matchAll(/^Version ([^\r\n]+)\r?$/gm)].map(match => match[1]);
+  assert.equal(versions.length, packages.length, output);
+  for (const version of versions) assert.equal(version, require("@typescript/native/package.json").version, output);
 });
