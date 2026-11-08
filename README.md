@@ -256,6 +256,8 @@ Sketch playback can load its bundled font lazily with ESM code splitting; a sing
 
 ## Development and verification
 
+Typechecking uses **TypeScript 7**; declaration builds and framework tools retain Microsoft's compatibility API. [Compiler setup and editor support →](docs/guides/typescript-tooling.md)
+
 ```sh
 pnpm check                 # types, unit tests, builds, packages, consumers, scenes
 pnpm docs:check            # README links, executable example, animation checksums

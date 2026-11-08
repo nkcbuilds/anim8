@@ -25,6 +25,7 @@ const workspacePackages = [
   "renderer-sketch",
   "player",
   "react",
+  "vue",
 ];
 
 function packageTarget(name) {
@@ -158,6 +159,21 @@ function runFrameworkBuild(label, cliPath, cwd) {
   );
 }
 
+function runTypeScriptConsumers(rootRequire) {
+  const cwd = join(fixtureRuntime, "typescript");
+  for (const [packageName, bin] of [["@typescript/native", "tsc"], ["typescript", "tsc6"]]) {
+    const cli = packageBinPath(rootRequire, packageName, bin);
+    const result = spawnSync(process.execPath, [cli, "-p", "tsconfig.json"], {
+      cwd,
+      encoding: "utf8",
+    });
+    if (result.stdout) process.stdout.write(result.stdout);
+    if (result.stderr) process.stderr.write(result.stderr);
+    assert.equal(result.status, 0, `${bin} downstream declaration check failed.`);
+    console.log(`PASS typescript-public-declarations-${bin}`);
+  }
+}
+
 function runDesktopWebviewBuild(rootRequire) {
   const cwd = join(fixtureRuntime, "desktop-webview");
   const cli = packageBinPath(rootRequire, "esbuild", "esbuild");
@@ -252,6 +268,9 @@ async function main() {
     );
     await copyInstalledDependency("react", reactConsumerRequire);
     await copyInstalledDependency("react-dom", reactConsumerRequire);
+    await copyInstalledDependency("@types/react", reactConsumerRequire);
+    const vueConsumerRequire = createRequire(join(repoRoot, "packages", "vue", "package.json"));
+    await copyInstalledDependency("vue", vueConsumerRequire);
 
     await cp(fixtureSource, fixtureRuntime, { recursive: true });
     await cp(optionalSource, optionalRuntime, { recursive: true });
@@ -263,9 +282,10 @@ async function main() {
 
     const rootRequire = createRequire(join(repoRoot, "package.json"));
     runDesktopWebviewBuild(rootRequire);
+    runTypeScriptConsumers(rootRequire);
 
     const frameworkCount = await runOptionalFrameworks();
-    console.log(`PASS consumer package-boundary suite (${5 + frameworkCount} executed fixtures)`);
+    console.log(`PASS consumer package-boundary suite (${7 + frameworkCount} executed fixtures)`);
   } finally {
     if (process.env.KEEP_CONSUMER_RUNTIME !== "1") {
       await rm(runtimeRoot, { recursive: true, force: true });

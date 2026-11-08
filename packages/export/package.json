@@ -33,7 +33,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean && tsup src/cli.ts --format esm --no-splitting",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --fsModuleCachePath node_modules/.vitest-cache",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "description": "Optional deterministic scene frames, PNG/GIF/MP4 export with explicit Playwright and FFmpeg dependencies.",

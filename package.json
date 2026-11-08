@@ -6,7 +6,8 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm toolchain:check && pnpm -r typecheck",
+    "toolchain:check": "node --test tests/tooling/compiler.test.mjs",
     "lint": "pnpm -r lint",
     "packaging": "node --test tests/packaging/runtime-coverage.test.mjs && node tests/packaging/check.mjs",
     "consumers": "node tests/consumers/run.mjs",
@@ -43,6 +44,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@types/node": "^24.10.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "astro": "^7.4.4",
     "esbuild": "^0.28.2",
     "next": "^16.4.3",
@@ -51,7 +53,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^9.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^5.0.5"
   }
 }

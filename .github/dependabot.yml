@@ -9,6 +9,7 @@ updates:
       development-tooling:
         patterns:
           - "typescript"
+          - "@typescript/*"
           - "vitest"
           - "tsup"
           - "esbuild"

@@ -24,7 +24,7 @@
   },
   "scripts": {
     "build": "tsup src/index.ts src/live.ts --format esm --dts --clean --splitting",
-    "test": "vitest run",
+    "test": "vitest run --fsModuleCachePath node_modules/.vitest-cache",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
