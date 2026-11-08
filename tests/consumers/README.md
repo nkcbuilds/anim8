@@ -15,7 +15,7 @@ The runner requires built `dist` output for its workspace packages, including th
 
 React and ReactDOM are copied separately from the repository's installed development dependencies so `@anim8/react` receives React as a downstream peer instead of resolving its own package-local development dependency.
 
-Vue and React's type declarations are also copied as downstream peers. The TypeScript fixture checks the copied public declarations using both the native TypeScript 7 CLI and the TypeScript 6 compatibility CLI, with strict NodeNext resolution and library checking enabled.
+Vue and React's type declarations are also copied as downstream peers. The TypeScript fixture checks the copied public declarations using both the native TypeScript 7 CLI and the TypeScript 6 compatibility CLI, with strict NodeNext resolution and library checking enabled. ELK layout route points are checked through Anim8's public types so upstream ELK declarations cannot leak into that boundary.
 
 Executed fixtures:
 

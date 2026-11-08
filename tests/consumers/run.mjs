@@ -26,6 +26,7 @@ const workspacePackages = [
   "player",
   "react",
   "vue",
+  "layout-elk",
 ];
 
 function packageTarget(name) {

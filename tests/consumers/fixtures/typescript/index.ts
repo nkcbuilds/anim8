@@ -5,6 +5,7 @@ import { describeScene } from "@anim8/a11y";
 import { mountPlayer, type PlayerOptions } from "@anim8/player";
 import { renderSvg } from "@anim8/renderer-svg";
 import { renderSketchSvg } from "@anim8/renderer-sketch";
+import { layoutElk, type ElkRouteSection } from "@anim8/layout-elk";
 import { Anim8Player as ReactPlayer, type Anim8PlayerProps } from "@anim8/react";
 import { Anim8Player as VuePlayer, useAnim8Player } from "@anim8/vue";
 import { createElement } from "react";
@@ -32,6 +33,10 @@ const props: Anim8PlayerProps = { scene: result.scene, options };
 createElement(ReactPlayer, props);
 h(VuePlayer, { scene: result.scene, options });
 useAnim8Player(ref(document), options);
+const routeSection: ElkRouteSection = { id: "route", points: [{ x: 1, y: 2 }] };
+const layout = await layoutElk(document);
+const layoutWidth: number = layout.width;
+void [routeSection, layoutWidth];
 void [svg, sketch];
 
 // Keep a negative assertion so a loss of public typing cannot silently pass.
