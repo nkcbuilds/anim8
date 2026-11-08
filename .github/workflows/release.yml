@@ -10,124 +10,48 @@ permissions:
   contents: read
   id-token: write
 
+# Serialize retries of the same release; never cancel an active publication.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
-
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
         with:
           version: 10.28.0
           run_install: false
-
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
-      - run: pnpm install --frozen-lockfile
-
       - name: Validate release metadata
         run: node tests/release/check-version.mjs
         env:
           ANIM8_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
 
-      - name: Run release checks
-        run: pnpm check
-
-      - name: Validate README examples and animation assets
-        run: pnpm docs:check
-
-      - name: Configure reliable Ubuntu package downloads
-        run: bash .github/scripts/prepare-apt.sh
-
-      - name: Install browser matrix
-        run: pnpm exec playwright install --with-deps chromium firefox webkit
-
-      - name: Run browser matrix
-        run: pnpm browser
+      - name: Qualify the complete release
+        uses: ./.github/actions/qualify-release
         env:
-          ANIM8_BROWSER_REQUIRE_ALL: "1"
-
-      - name: Verify rich styles, dashed reveal and static/mounted pixel parity
-        run: pnpm browser:styles
-
-      - name: Verify renderer hierarchy and reveal pixels across browsers
-        run: pnpm browser:visual
-
-      - name: Save renderer quality evidence
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: rendering-quality
-          path: artifacts/rendering-quality/
-          if-no-files-found: warn
-
-      - name: Save styling previews
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: rich-styles
-          path: artifacts/rich-styles/
-          if-no-files-found: warn
-
-      - name: Qualify full merge-sort box motion and stable identity
-        run: pnpm sorting:browser
-
-      - name: Save merge-sort motion evidence
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: sorting-motion
-          path: artifacts/sorting/
-          if-no-files-found: warn
-
-      - name: Validate all 150 gallery scenes in Chromium
-        run: pnpm catalog:browser
-
-      - name: Validate animated diagram families in Chromium
-        run: pnpm gallery:browser
-
-      - name: Qualify browser performance and lifecycle
-        run: pnpm qualification:matrix
-
-      - name: Save browser qualification evidence
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: browser-qualification
-          path: artifacts/qualification/
-          if-no-files-found: warn
-
-      - name: Install required media qualification tools
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Inspect and decode real GIF and MP4 exports
-        run: pnpm qualification:media
-
-      - name: Qualify playground interactions
-        run: pnpm playground:browser
-
-      - name: Save playground qualification evidence
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: playground-qualification
-          path: artifacts/playground/
-          if-no-files-found: warn
+          ANIM8_RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
 
       - name: Verify publishing credentials and matching release tag
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: node tests/release/preflight.mjs --publish
         env:
           ANIM8_RELEASE_TAG: ${{ github.ref_name }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish public packages
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: pnpm -r --filter "./packages/**" publish --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
