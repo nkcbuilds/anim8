@@ -9,6 +9,7 @@ import {
   objectBounds,
   transformMatrix,
   type DrawableObject,
+  type Point,
   type SceneDocument,
 } from "@anim8/core";
 
@@ -43,7 +44,7 @@ export interface ElkRouteSection {
   /** Stable section id returned by ELK. */
   id: string;
   /** Start, bend, and end points in ELK graph coordinates. */
-  points: readonly ElkPoint[];
+  points: readonly Point[];
 }
 
 export interface ElkEdgeRoute {

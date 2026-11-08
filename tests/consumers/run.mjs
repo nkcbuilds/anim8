@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cp, mkdir, readFile, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join, relative, sep } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const consumerRoot = dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,8 @@ const workspacePackages = [
   "renderer-sketch",
   "player",
   "react",
+  "vue",
+  "layout-elk",
 ];
 
 function packageTarget(name) {
@@ -158,6 +161,42 @@ function runFrameworkBuild(label, cliPath, cwd) {
   );
 }
 
+function runTypeScriptConsumers(rootRequire, cwd) {
+  for (const [packageName, bin] of [["@typescript/native", "tsc"], ["typescript", "tsc6"]]) {
+    const cli = packageBinPath(rootRequire, packageName, bin);
+    const result = spawnSync(process.execPath, [cli, "-p", "tsconfig.json"], {
+      cwd,
+      encoding: "utf8",
+    });
+    if (result.stdout) process.stdout.write(result.stdout);
+    if (result.stderr) process.stderr.write(result.stderr);
+    assert.equal(result.status, 0, `${bin} downstream declaration check failed.`);
+    console.log(`PASS typescript-public-declarations-${bin}`);
+  }
+}
+
+/** Exercise ELK's installed runtime dependencies outside the workspace tree. */
+async function runElkConsumer(rootRequire) {
+  const isolated = await mkdtemp(join(tmpdir(), "anim8-elk-consumer-"));
+  try {
+    await cp(runtimeNodeModules, join(isolated, "node_modules"), { recursive: true });
+    await cp(join(fixtureRuntime, "layout-elk"), join(isolated, "fixture"), { recursive: true });
+    await cp(join(fixtureRuntime, "typescript"), join(isolated, "typescript"), { recursive: true });
+    runTypeScriptConsumers(rootRequire, join(isolated, "typescript"));
+    const result = spawnSync(process.execPath, [join(isolated, "fixture", "index.mjs")], {
+      cwd: isolated, encoding: "utf8", timeout: 30_000, windowsHide: true,
+    });
+    if (result.stdout) process.stdout.write(result.stdout);
+    if (result.stderr) process.stderr.write(result.stderr);
+    assert.equal(result.status, 0, "Outside-workspace ELK runtime fixture failed.");
+  } finally {
+    const target = resolve(isolated);
+    assert.equal(dirname(target), resolve(tmpdir()));
+    assert.ok(basename(target).startsWith("anim8-elk-consumer-"));
+    await rm(target, { recursive: true, force: true });
+  }
+}
+
 function runDesktopWebviewBuild(rootRequire) {
   const cwd = join(fixtureRuntime, "desktop-webview");
   const cli = packageBinPath(rootRequire, "esbuild", "esbuild");
@@ -252,6 +291,11 @@ async function main() {
     );
     await copyInstalledDependency("react", reactConsumerRequire);
     await copyInstalledDependency("react-dom", reactConsumerRequire);
+    await copyInstalledDependency("@types/react", reactConsumerRequire);
+    const vueConsumerRequire = createRequire(join(repoRoot, "packages", "vue", "package.json"));
+    await copyInstalledDependency("vue", vueConsumerRequire);
+    const elkConsumerRequire = createRequire(join(repoRoot, "packages", "layout-elk", "package.json"));
+    await copyInstalledDependency("elkjs", elkConsumerRequire);
 
     await cp(fixtureSource, fixtureRuntime, { recursive: true });
     await cp(optionalSource, optionalRuntime, { recursive: true });
@@ -263,9 +307,10 @@ async function main() {
 
     const rootRequire = createRequire(join(repoRoot, "package.json"));
     runDesktopWebviewBuild(rootRequire);
+    await runElkConsumer(rootRequire);
 
     const frameworkCount = await runOptionalFrameworks();
-    console.log(`PASS consumer package-boundary suite (${5 + frameworkCount} executed fixtures)`);
+    console.log(`PASS consumer package-boundary suite (${8 + frameworkCount} executed fixtures)`);
   } finally {
     if (process.env.KEEP_CONSUMER_RUNTIME !== "1") {
       await rm(runtimeRoot, { recursive: true, force: true });

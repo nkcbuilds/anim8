@@ -15,11 +15,17 @@ The runner requires built `dist` output for its workspace packages, including th
 
 React and ReactDOM are copied separately from the repository's installed development dependencies so `@anim8/react` receives React as a downstream peer instead of resolving its own package-local development dependency.
 
+Vue and React's type declarations are also copied as downstream peers. The TypeScript fixture checks the copied public declarations from an OS temporary directory outside the repository using both the native TypeScript 7 CLI and the TypeScript 6 compatibility CLI, with strict NodeNext resolution and library checking enabled. ELK layout route points are checked through Anim8's public types so upstream ELK declarations cannot leak into that boundary.
+
 Executed fixtures:
 
 - `fixtures/vanilla-esm` — imports `@anim8/core` and `@anim8/renderer-svg`, evaluates a scene, and renders SVG.
 - `fixtures/ssr-node` — imports `@anim8/player` with no browser globals and verifies custom-element registration remains a safe no-op.
 - `fixtures/react-ssr` — renders `@anim8/react` through `react-dom/server` and verifies static initial SVG.
+- `fixtures/custom-extension` — exercises a reusable authoring helper through package exports.
+- `fixtures/desktop-webview` — bundles a browser consumer with esbuild.
+- `fixtures/typescript` — checks public authoring, compiler, rendering, playback, React, and Vue types with both compilers, including a negative type assertion.
+- `fixtures/layout-elk` — runs layout and routed edges in an OS temporary directory outside the repository, with copied built packages and the installed ELK dependency; checks resolution, geometry, and unchanged input.
 
 Each fixture also checks that its Anim8 imports resolve from the isolated runtime's copied package output, preventing a false pass through workspace source aliases.
 

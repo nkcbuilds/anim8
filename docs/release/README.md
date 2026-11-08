@@ -2,6 +2,14 @@
 
 Anim8 is **pre-1.0**. The release pipeline is guarded and does not publish on ordinary pushes or pull requests.
 
+## CI qualification
+
+Pull requests, pushes to main, manual runs, and version tags use the same [qualification action](../../.github/actions/qualify-release/action.yml). It installs the locked dependencies, Chromium/Firefox/WebKit and real FFmpeg tools, then runs `pnpm release:check` with every browser required. That command includes package checks, strict downstream declarations, Next/Astro consumers, README assets, runtime benchmarks, bundle limits, browser and media qualification, and a 60-second soak per desktop/mobile/dense profile. Reference scenes are validated afterward.
+
+The `release-qualification` Actions artifact retains the complete command log and generated browser evidence for 14 days, including qualification failures. The CI check keeps its existing `check` job name. Both workflows allow 30 minutes for dependency installation and full qualification.
+
+Manual runs qualify without publishing and each use an independent concurrency group, so they cannot displace one another or a pending pushed-tag release. Publishing still requires a matching `vX.Y.Z` tag and successful credential/tag preflight; publishing runs for the same tag are serialized. Qualification does not establish npm ownership or replace the remaining product release gates below.
+
 ## Completed technical qualification
 
 - Schema normalization, static SVG, deterministic seeking/reverse tests, compiler safety ceilings, accessible wrappers and 150 catalog examples.
@@ -15,7 +23,7 @@ Anim8 is **pre-1.0**. The release pipeline is guarded and does not publish on or
 ## Incomplete release gates
 
 1. Run real, paid model providers on all 36 cases (ideally expanded to a held-out 100); save anonymized reports, compare first-pass syntax, compiler, render failures and repair rates, and manually evaluate teaching usefulness/accuracy. Do not pretend offline mocks prove cross-model success. Run `node tests/model-eval/run.mjs --models ... --cases 36 --attempts 2 --out report.json` after `pnpm build`. No keys are configured in this checkout.
-2. Run `pnpm qualification:matrix --duration-ms 60000 --out artifacts/qualification/soak.json` for a longer emulated soak. Validate p95 frame timing and memory on physical lower-end PCs and mobile platforms as well. The matrix covers a larger scene, mobile emulation and throttled Chromium, but CI smoke thresholds must not be marketed as comprehensive performance proof. See [qualification instructions](../../tests/qualification/README.md).
+2. Validate p95 frame timing and memory on physical lower-end PCs and mobile platforms. CI runs the longer emulated soak with `pnpm qualification:matrix --duration-ms 60000 --out artifacts/qualification/soak.json`, covering a larger scene, mobile emulation and throttled Chromium. Its smoke thresholds must not be marketed as comprehensive performance proof. See [qualification instructions](../../tests/qualification/README.md).
 3. Review publicly exposed APIs with representative external package installs. Breaking scene IR changes require a new version or migration; do not reuse `1.0` scene schema silently for incompatible syntax.
 4. Set up npm access for `@anim8/*` packages and `NPM_TOKEN` in GitHub Actions, or move to verified OIDC trusted publishing. No npm credentials were found in the development environment. Ownership and package names cannot be assumed.
 5. Produce a signed-off release candidate and run `ANIM8_BROWSER_REQUIRE_ALL=1 pnpm release:check` (requires all three browsers, FFmpeg and ffprobe); create matching `vX.Y.Z` tag only after approval.

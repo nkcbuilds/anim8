@@ -1,0 +1,47 @@
+name: Qualify release
+description: Run the same complete release qualification on PRs, main, manual runs and version tags.
+
+runs:
+  using: composite
+  steps:
+    - name: Install locked dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Configure reliable Ubuntu package downloads
+      shell: bash
+      run: bash .github/scripts/prepare-apt.sh
+
+    - name: Install the complete browser matrix
+      shell: bash
+      run: pnpm exec playwright install --with-deps chromium firefox webkit
+
+    - name: Install real media encoders
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+    - name: Run complete release qualification
+      shell: bash
+      env:
+        ANIM8_BROWSER_REQUIRE_ALL: "1"
+        ANIM8_BROWSER_ENGINES: "chromium,firefox,webkit"
+      run: |
+        mkdir -p artifacts
+        set -o pipefail
+        pnpm release:check 2>&1 | tee artifacts/release-check.log
+
+    - name: Validate reference scenes
+      shell: bash
+      run: |
+        for example in two-sum database geometry reactive geometry-rich binary-search bubble-sort linked-list binary-tree; do
+          node packages/cli/dist/cli.js validate "examples/$example/scene.json"
+        done
+
+    - name: Save release qualification evidence
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: release-qualification
+        path: artifacts/
+        if-no-files-found: warn
+        retention-days: 14

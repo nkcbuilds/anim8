@@ -9,7 +9,6 @@
       "ES2022",
       "DOM"
     ],
-    "baseUrl": ".",
     "paths": {
       "@anim8/compiler": ["../compiler/src/index.ts"],
       "@anim8/renderer-sketch/live": [

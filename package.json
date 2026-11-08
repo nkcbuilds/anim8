@@ -6,7 +6,8 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm toolchain:check && pnpm -r typecheck",
+    "toolchain:check": "node --test tests/tooling/compiler.test.mjs",
     "lint": "pnpm -r lint",
     "packaging": "node --test tests/packaging/runtime-coverage.test.mjs && node tests/packaging/check.mjs",
     "consumers": "node tests/consumers/run.mjs",
@@ -30,10 +31,10 @@
     "security:adversarial": "node tests/qualification/adversarial.mjs",
     "model:providers:smoke": "node tests/model-eval/test.mjs",
     "model:benchmark": "node tests/model-eval/run.mjs",
-    "release:preflight": "node tests/release/preflight.mjs",
+    "release:preflight": "node --test tests/release/preflight.test.mjs && node tests/release/preflight.mjs",
     "release:metadata": "node tests/release/check-version.mjs",
     "check": "pnpm typecheck && pnpm test && pnpm build && pnpm packaging && pnpm consumers && pnpm catalog:check && pnpm catalog && pnpm gallery:check && pnpm security:adversarial && pnpm model:providers:smoke && pnpm release:metadata && pnpm release:preflight && node packages/cli/dist/cli.js validate examples/complex-styling/scene.json && pnpm sorting:check",
-    "release:check": "pnpm check && pnpm browser && pnpm catalog:browser && pnpm gallery:browser && pnpm playground:browser && pnpm qualification:matrix && pnpm qualification:media && pnpm browser:styles && pnpm sorting:browser && pnpm browser:visual",
+    "release:check": "pnpm check && pnpm docs:check && pnpm benchmark && pnpm bundle:check && pnpm browser && pnpm catalog:browser && pnpm gallery:browser && pnpm playground:browser && pnpm qualification:matrix --duration-ms 60000 --out artifacts/qualification/soak.json && pnpm qualification:media && pnpm browser:styles && pnpm sorting:browser && pnpm browser:visual",
     "browser:styles": "node tests/browser/rich-styles.mjs",
     "sorting:generate": "node examples/merge-sort-motion/generate.mjs",
     "sorting:check": "node tests/qualification/sorting.mjs",
@@ -43,6 +44,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@types/node": "^24.10.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "astro": "^7.4.4",
     "esbuild": "^0.28.2",
     "next": "^16.4.3",
@@ -51,7 +53,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^9.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^5.0.5"
   }
 }

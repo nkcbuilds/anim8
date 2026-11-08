@@ -9,7 +9,6 @@
       "ES2022",
       "DOM"
     ],
-    "baseUrl": ".",
     "paths": {
       "@anim8/core": [
         "../core/src/index.ts"

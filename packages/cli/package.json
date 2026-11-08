@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "tsup src/cli.ts --format esm --clean",
-    "test": "vitest run",
+    "test": "vitest run --fsModuleCachePath node_modules/.vitest-cache",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
   },

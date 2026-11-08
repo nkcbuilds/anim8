@@ -111,8 +111,31 @@ try {
       await page.waitForFunction(() => Number(document.querySelector("#scrubber").value) > 100);
       await page.locator("#play").click();
       const paused = await page.locator("#preview svg").evaluate(svg => svg.outerHTML);
+      assert.equal(await page.locator("#play").getAttribute("aria-pressed"), "false", "Pause updates the play control state");
+      const pausedTime = await page.locator("#scrubber").inputValue();
       await page.waitForTimeout(120);
-      assert.equal(await page.locator("#preview svg").evaluate(svg => svg.outerHTML), paused);
+      const afterPause = await page.locator("#preview svg").evaluate(svg => svg.outerHTML);
+      assert.equal(await page.locator("#scrubber").inputValue(), pausedTime, "Pause retains timeline time");
+      if (afterPause !== paused) {
+        await writeFile(`artifacts/playground/${name}-paused-before.svg`, paused);
+        await writeFile(`artifacts/playground/${name}-paused-after.svg`, afterPause);
+        const state = await page.evaluate(() => ({
+          playing: document.querySelector("#play").getAttribute("aria-pressed"),
+          time: document.querySelector("#scrubber").value,
+        }));
+        assert.fail(`Paused SVG changed in ${name}; ${JSON.stringify(state)}. See artifacts/playground/${name}-paused-{before,after}.svg`);
+      }
+
+      const resumed = await page.evaluate(() => new Promise(resolve => {
+        const button = document.querySelector("#play");
+        button.click();
+        const immediate = document.querySelector("#scrubber").value;
+        const playing = button.getAttribute("aria-pressed");
+        requestAnimationFrame(() => resolve({ immediate, playing, firstFrame: document.querySelector("#scrubber").value }));
+      }));
+      assert.equal(resumed.playing, "true", "Resume updates the play control state");
+      assert.equal(resumed.immediate, pausedTime, "Resume retains the paused position");
+      assert.equal(resumed.firstFrame, pausedTime, "First resumed frame retains the paused position");
 
       console.log(name + " · quorum");
       await page.locator("#catalog").selectOption("complex-styling");
