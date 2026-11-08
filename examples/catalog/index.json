@@ -20,7 +20,7 @@
         "Discard the impossible half",
         "Repeat until the target matches"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/binary-search/scene.json"
     },
     {
@@ -41,7 +41,7 @@
         "Advance when values differ",
         "Stop when the target matches"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/linear-search/scene.json"
     },
     {
@@ -62,7 +62,7 @@
         "Swap an inverted pair",
         "Repeat passes until ordered"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/bubble-sort/scene.json"
     },
     {
@@ -83,7 +83,7 @@
         "Sort the right partition",
         "Merge two ordered runs"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/merge-sort/scene.json"
     },
     {
@@ -104,7 +104,7 @@
         "Partition values below it",
         "Keep values above it"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/quick-sort/scene.json"
     },
     {
@@ -125,7 +125,7 @@
         "Swap it into the sorted tail",
         "Restore heap order"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/heap-sort/scene.json"
     },
     {
@@ -146,7 +146,7 @@
         "Shift larger values right",
         "Insert the key into its slot"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/insertion-sort/scene.json"
     },
     {
@@ -167,7 +167,7 @@
         "Finish scanning candidates",
         "Place the minimum at the front"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/selection-sort/scene.json"
     },
     {
@@ -188,7 +188,7 @@
         "Move left if too small",
         "Move right if too large"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/two-pointers/scene.json"
     },
     {
@@ -209,7 +209,7 @@
         "Evict an outgoing value",
         "Record the current optimum"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/sliding-window/scene.json"
     },
     {
@@ -230,7 +230,7 @@
         "Store each prefix total",
         "Subtract two prefixes for a range"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/prefix-sum/scene.json"
     },
     {
@@ -251,7 +251,7 @@
         "Subtract it after the end",
         "Prefix sum reconstructs values"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/difference-array/scene.json"
     },
     {
@@ -272,7 +272,7 @@
         "Index the bucket array",
         "Compare keys in the bucket"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/hash-table/scene.json"
     },
     {
@@ -293,7 +293,7 @@
         "Inspect the most recent entry",
         "Pop that entry first"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/stack-lifo/scene.json"
     },
     {
@@ -314,7 +314,7 @@
         "The head becomes eligible",
         "Remove the oldest entry"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/queue-fifo/scene.json"
     },
     {
@@ -335,7 +335,7 @@
         "Remove the leading element",
         "Either end can be removed"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/deque/scene.json"
     },
     {
@@ -356,7 +356,7 @@
         "Visit the next node",
         "Stop at the null tail"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/linked-list/scene.json"
     },
     {
@@ -377,7 +377,7 @@
         "Choose right for larger keys",
         "Continue to the matching leaf"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/binary-tree-search/scene.json"
     },
     {
@@ -398,7 +398,7 @@
         "Expand the next distance layer",
         "Visit each reachable node once"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/breadth-first-search/scene.json"
     },
     {
@@ -419,7 +419,7 @@
         "Return when no child remains",
         "Explore another branch"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/depth-first-search/scene.json"
     },
     {
@@ -440,7 +440,7 @@
         "Relax outgoing edge distances",
         "Finalize the nearest vertex"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/dijkstra/scene.json"
     },
     {
@@ -461,7 +461,7 @@
         "Repeat for V minus 1 passes",
         "Detect any improving negative cycle"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/bellman-ford/scene.json"
     },
     {
@@ -482,7 +482,7 @@
         "Remove its outgoing edges",
         "Repeat to order the DAG"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/topological-sort/scene.json"
     },
     {
@@ -503,7 +503,7 @@
         "Compress paths toward root",
         "Compare roots for connectivity"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/union-find/scene.json"
     },
     {
@@ -524,7 +524,7 @@
         "Skip edges forming a cycle",
         "Accept edges until connected"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/minimum-spanning-tree/scene.json"
     },
     {
@@ -545,7 +545,7 @@
         "Cache solved state values",
         "Build the larger answer"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/dynamic-programming/scene.json"
     },
     {
@@ -566,7 +566,7 @@
         "Compare include and exclude",
         "Keep the best feasible value"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/knapsack/scene.json"
     },
     {
@@ -587,7 +587,7 @@
         "Use neighboring scores",
         "Trace back a shared subsequence"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/longest-common-subsequence/scene.json"
     },
     {
@@ -608,7 +608,7 @@
         "Consider substitutions",
         "Choose minimum edit cost"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/edit-distance/scene.json"
     },
     {
@@ -629,7 +629,7 @@
         "Branch when characters differ",
         "Mark completed words"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/trie-prefix/scene.json"
     },
     {
@@ -650,7 +650,7 @@
         "Use XOR to flip a bit",
         "One integer stores the subset"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/bitmasking/scene.json"
     },
     {
@@ -671,7 +671,7 @@
         "Multiply for each one-bit",
         "Finish in logarithmic steps"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/binary-exponentiation/scene.json"
     },
     {
@@ -692,7 +692,7 @@
         "Replace the larger pair",
         "Last nonzero divisor is GCD"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/euclid-gcd/scene.json"
     },
     {
@@ -713,7 +713,7 @@
         "Mark its multiples composite",
         "Unmarked numbers remain prime"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/sieve-primes/scene.json"
     },
     {
@@ -734,7 +734,7 @@
         "Stop at a base condition",
         "Return values while unwinding"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/recursion-call-stack/scene.json"
     },
     {
@@ -755,7 +755,7 @@
         "Drain pending microtasks",
         "Process the next event-loop task"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/event-loop/scene.json"
     },
     {
@@ -776,7 +776,7 @@
         "Transform in the next handler",
         "Propagate failures to catch"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/promise-chain/scene.json"
     },
     {
@@ -797,7 +797,7 @@
         "Find the unmarked allocation",
         "Return its memory to the heap"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/garbage-collection/scene.json"
     },
     {
@@ -818,7 +818,7 @@
         "Optimize an intermediate form",
         "Emit machine instructions"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/compiler-pipeline/scene.json"
     },
     {
@@ -839,7 +839,7 @@
         "Compile optimized machine code",
         "Reuse compiled paths on future calls"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/jit-compiler/scene.json"
     },
     {
@@ -860,7 +860,7 @@
         "Locate the physical memory page",
         "Fault and load when absent"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/virtual-memory/scene.json"
     },
     {
@@ -881,7 +881,7 @@
         "Modify shared state safely",
         "B proceeds after A unlocks"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/mutex-lock/scene.json"
     },
     {
@@ -902,7 +902,7 @@
         "B already owns the second",
         "Both block without prevention"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/deadlock/scene.json"
     },
     {
@@ -923,7 +923,7 @@
         "Consumer removes an event",
         "Slow consumption causes backpressure"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/producer-consumer/scene.json"
     },
     {
@@ -944,7 +944,7 @@
         "Charge a request token",
         "Reject when no token remains"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/rate-limiting/scene.json"
     },
     {
@@ -965,7 +965,7 @@
         "A write changes the source",
         "Evict or refresh stale entries"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/cache-invalidation/scene.json"
     },
     {
@@ -986,7 +986,7 @@
         "Forward some traffic to A",
         "Forward remaining traffic to B"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/load-balancing/scene.json"
     },
     {
@@ -1007,7 +1007,7 @@
         "Client acknowledges reply",
         "Both sides track the connection"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/tcp-handshake/scene.json"
     },
     {
@@ -1028,7 +1028,7 @@
         "Query authoritative name servers",
         "Return the address to the client"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/dns-resolution/scene.json"
     },
     {
@@ -1049,7 +1049,7 @@
         "Derive shared traffic secrets",
         "Encrypt application messages"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "computing/tls-handshake/scene.json"
     },
     {
@@ -1070,7 +1070,7 @@
         "Combine equal-sized parts",
         "Simplify the final fraction"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/fractions-addition/scene.json"
     },
     {
@@ -1091,7 +1091,7 @@
         "Find the diagonal side",
         "Relate squares with a²+b²=c²"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/pythagorean-theorem/scene.json"
     },
     {
@@ -1112,7 +1112,7 @@
         "Rise by slope m",
         "Repeat to trace the line"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/slope-intercept/scene.json"
     },
     {
@@ -1133,7 +1133,7 @@
         "Shrink the interval toward zero",
         "The limiting slope is the derivative"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/derivative-tangent/scene.json"
     },
     {
@@ -1154,7 +1154,7 @@
         "Add the strip contributions",
         "Refine widths toward zero"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/integration-area/scene.json"
     },
     {
@@ -1175,7 +1175,7 @@
         "Multiply aligned entries",
         "Sum to make one output cell"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/matrix-multiply/scene.json"
     },
     {
@@ -1196,7 +1196,7 @@
         "Trace origin to final tip",
         "That arrow is the resultant vector"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/vector-addition/scene.json"
     },
     {
@@ -1217,7 +1217,7 @@
         "Multiply magnitudes and cosine",
         "Positive means aligned directions"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/dot-product/scene.json"
     },
     {
@@ -1238,7 +1238,7 @@
         "Assign each conditional chance",
         "Multiply probabilities along a path"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/probability-tree/scene.json"
     },
     {
@@ -1259,7 +1259,7 @@
         "Normalize across possibilities",
         "Update the posterior belief"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/bayes-rule/scene.json"
     },
     {
@@ -1280,7 +1280,7 @@
         "Farther ranges have fewer samples",
         "Extreme tails are uncommon"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/normal-distribution/scene.json"
     },
     {
@@ -1301,7 +1301,7 @@
         "Compare sample representation",
         "Avoid unsupported generalization"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/sampling-bias/scene.json"
     },
     {
@@ -1322,7 +1322,7 @@
         "Take a small downhill step",
         "Repeat toward lower loss"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/gradient-descent/scene.json"
     },
     {
@@ -1343,7 +1343,7 @@
         "Measure vertical residuals",
         "Minimize squared residuals"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/linear-regression/scene.json"
     },
     {
@@ -1364,7 +1364,7 @@
         "Apply nonlinear activations",
         "Generate an output prediction"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/neural-network/scene.json"
     },
     {
@@ -1385,7 +1385,7 @@
         "Propagate gradient backward",
         "Adjust trainable weights"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/backpropagation/scene.json"
     },
     {
@@ -1406,7 +1406,7 @@
         "Measure their strengths",
         "Represent signal in frequency space"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/fourier-transform/scene.json"
     },
     {
@@ -1427,7 +1427,7 @@
         "A fair coin has two equal outcomes",
         "Its entropy reaches one bit"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/binary-entropy/scene.json"
     },
     {
@@ -1448,7 +1448,7 @@
         "Old bonds rearrange",
         "Conserve atoms in products"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/chemical-reaction/scene.json"
     },
     {
@@ -1469,7 +1469,7 @@
         "Liquid particles flow past one another",
         "Gas particles spread throughout space"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/states-of-matter/scene.json"
     },
     {
@@ -1490,7 +1490,7 @@
         "Water falls as rain or snow",
         "Runoff returns water downstream"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/water-cycle/scene.json"
     },
     {
@@ -1511,7 +1511,7 @@
         "Chloroplasts transform captured energy",
         "Sugars store energy and oxygen is released"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/photosynthesis/scene.json"
     },
     {
@@ -1532,7 +1532,7 @@
         "Extract energy through mitochondrial pathways",
         "Store usable energy in ATP"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/cellular-respiration/scene.json"
     },
     {
@@ -1553,7 +1553,7 @@
         "Match A with T and C with G",
         "Build two double-stranded molecules"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/dna-replication/scene.json"
     },
     {
@@ -1574,7 +1574,7 @@
         "Ribosome reads codons",
         "Link amino acids into a protein"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/protein-synthesis/scene.json"
     },
     {
@@ -1595,7 +1595,7 @@
         "Move sister chromatids apart",
         "Divide into daughter cells"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/mitosis/scene.json"
     },
     {
@@ -1616,7 +1616,7 @@
         "Specific lymphocytes activate",
         "Memory cells support later responses"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/immune-response/scene.json"
     },
     {
@@ -1637,7 +1637,7 @@
         "Molecules cross the synaptic gap",
         "Receptors change the next cell"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/neuron-synapse/scene.json"
     },
     {
@@ -1658,7 +1658,7 @@
         "Predators consume other organisms",
         "Decomposers recycle nutrients"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/ecosystem-food-web/scene.json"
     },
     {
@@ -1679,7 +1679,7 @@
         "Survivors reproduce at different rates",
         "Offspring inherit successful variants"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/natural-selection/scene.json"
     },
     {
@@ -1700,7 +1700,7 @@
         "A denser plate may sink",
         "Compression uplifts crust"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/plate-tectonics/scene.json"
     },
     {
@@ -1721,7 +1721,7 @@
         "Fault suddenly slips",
         "Energy radiates as seismic waves"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/earthquakes/scene.json"
     },
     {
@@ -1742,7 +1742,7 @@
         "Magma rises through a vent",
         "Lava and ash reach the surface"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/volcano-eruption/scene.json"
     },
     {
@@ -1763,7 +1763,7 @@
         "The path curves continuously",
         "Balance creates an orbit"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/solar-system-orbits/scene.json"
     },
     {
@@ -1784,7 +1784,7 @@
         "Earth-facing side appears fully bright",
         "The visible lit portion shrinks"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/moon-phases/scene.json"
     },
     {
@@ -1805,7 +1805,7 @@
         "Both hemispheres receive near-equal daylight",
         "Northern hemisphere tilts away"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/seasons-earth/scene.json"
     },
     {
@@ -1826,7 +1826,7 @@
         "Core fuel changes and outer layers expand",
         "Mass determines the final remnant"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/star-lifecycle/scene.json"
     },
     {
@@ -1847,7 +1847,7 @@
         "Inner material becomes very hot",
         "Beyond the horizon light cannot escape"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/black-hole-accretion/scene.json"
     },
     {
@@ -1868,7 +1868,7 @@
         "Higher frequencies carry more photon energy",
         "X-rays lie beyond ultraviolet"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/electromagnetic-spectrum/scene.json"
     },
     {
@@ -1889,7 +1889,7 @@
         "The load converts electrical energy",
         "Charge circulates through the circuit"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/electric-circuit/scene.json"
     },
     {
@@ -1910,7 +1910,7 @@
         "Observe the resulting flow",
         "Current equals voltage divided by resistance"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/ohms-law/scene.json"
     },
     {
@@ -1931,7 +1931,7 @@
         "Voltage grows across the gap",
         "Energy resides in the electric field"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/capacitor-charge/scene.json"
     },
     {
@@ -1952,7 +1952,7 @@
         "Voltage appears across the conductor",
         "Induced current opposes that change"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/induction/scene.json"
     },
     {
@@ -1973,7 +1973,7 @@
         "Acceleration equals net force over mass",
         "Velocity changes over time"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/newtons-laws/scene.json"
     },
     {
@@ -1994,7 +1994,7 @@
         "Gravity accelerates downward",
         "Trajectory curves into a parabola"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/projectile-motion/scene.json"
     },
     {
@@ -2015,7 +2015,7 @@
         "At bottom speed is greatest",
         "Motion then slows as height increases"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/pendulum/scene.json"
     },
     {
@@ -2036,7 +2036,7 @@
         "Moving fluid carries thermal energy",
         "Electromagnetic waves carry heat without contact"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/heat-transfer/scene.json"
     },
     {
@@ -2057,7 +2057,7 @@
         "Compare peaks and troughs",
         "Amplitudes add or cancel locally"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/wave-interference/scene.json"
     },
     {
@@ -2078,7 +2078,7 @@
         "Load acts at another distance",
         "Moments balance when forces times arms match"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/lever-mechanics/scene.json"
     },
     {
@@ -2099,7 +2099,7 @@
         "Compute desired minus actual",
         "Adjust actuator to reduce error"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "science/feedback-control/scene.json"
     },
     {
@@ -2120,7 +2120,7 @@
         "Gateway authorizes payment",
         "Store records the confirmed order"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/online-checkout/scene.json"
     },
     {
@@ -2141,7 +2141,7 @@
         "Merchant captures when ready",
         "Networks settle the transfer later"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/payment-authorization/scene.json"
     },
     {
@@ -2162,7 +2162,7 @@
         "Processor sends a refund transaction",
         "Issuer posts the credit later"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/refund-lifecycle/scene.json"
     },
     {
@@ -2183,7 +2183,7 @@
         "Local carrier loads final route",
         "Delivery proof closes the journey"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/shipping-tracking/scene.json"
     },
     {
@@ -2204,7 +2204,7 @@
         "Scans verify correct SKUs",
         "Items are packed for dispatch"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/warehouse-picking/scene.json"
     },
     {
@@ -2225,7 +2225,7 @@
         "Place order before running out",
         "Delivery restores available units"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/inventory-reorder/scene.json"
     },
     {
@@ -2246,7 +2246,7 @@
         "Warehouse aggregates shipments",
         "Customer receives final product"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/supply-chain/scene.json"
     },
     {
@@ -2267,7 +2267,7 @@
         "Estimate upcoming demand",
         "Replan as new data arrives"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/demand-forecast/scene.json"
     },
     {
@@ -2288,7 +2288,7 @@
         "Cook prepares and checks meal",
         "Server delivers the finished plate"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/restaurant-kitchen/scene.json"
     },
     {
@@ -2309,7 +2309,7 @@
         "Urgent cases get rapid care",
         "Stable cases enter the appropriate queue"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/hospital-triage/scene.json"
     },
     {
@@ -2330,7 +2330,7 @@
         "Reserve the time atomically",
         "Confirm and send details"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/appointment-booking/scene.json"
     },
     {
@@ -2351,7 +2351,7 @@
         "Learners try a related problem",
         "Feedback guides another attempt"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/school-lesson/scene.json"
     },
     {
@@ -2372,7 +2372,7 @@
         "Collect controlled evidence",
         "Update the model from results"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/scientific-method/scene.json"
     },
     {
@@ -2393,7 +2393,7 @@
         "Build a small candidate solution",
         "Test and refine based on evidence"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/design-thinking/scene.json"
     },
     {
@@ -2414,7 +2414,7 @@
         "Specify a falsifiable assumption",
         "Test demand with a minimal prototype"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/product-discovery/scene.json"
     },
     {
@@ -2435,7 +2435,7 @@
         "Enable for a small user cohort",
         "Expand after monitoring metrics"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/feature-flag-rollout/scene.json"
     },
     {
@@ -2456,7 +2456,7 @@
         "Measure control outcomes",
         "Compare against treatment outcomes"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/ab-test/scene.json"
     },
     {
@@ -2477,7 +2477,7 @@
         "Observe cart intent",
         "Measure completed purchases"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/conversion-funnel/scene.json"
     },
     {
@@ -2498,7 +2498,7 @@
         "Agent investigates and responds",
         "Confirm the issue is resolved"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/customer-support/scene.json"
     },
     {
@@ -2519,7 +2519,7 @@
         "Apply safe mitigation",
         "Analyze causes and prevention"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/incident-response/scene.json"
     },
     {
@@ -2540,7 +2540,7 @@
         "Create a versioned build artifact",
         "Deploy after required gates pass"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/ci-cd-pipeline/scene.json"
     },
     {
@@ -2561,7 +2561,7 @@
         "Resolve review and CI feedback",
         "Merge verified code"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/git-pull-request/scene.json"
     },
     {
@@ -2582,7 +2582,7 @@
         "User approves specific scopes",
         "App receives a scoped token"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/oauth-login/scene.json"
     },
     {
@@ -2603,7 +2603,7 @@
         "Validate token and account state",
         "Set a new password and revoke token"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/password-reset/scene.json"
     },
     {
@@ -2624,7 +2624,7 @@
         "Server checks both factors",
         "Issue a bounded login session"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/two-factor-auth/scene.json"
     },
     {
@@ -2645,7 +2645,7 @@
         "Recipient domain accepts the message",
         "Mailbox delivers it to the user"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/email-delivery/scene.json"
     },
     {
@@ -2666,7 +2666,7 @@
         "Platform delivers to target device",
         "App shows notification per policy"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/push-notifications/scene.json"
     },
     {
@@ -2687,7 +2687,7 @@
         "Observe playback buffer level",
         "Choose a sustainable next quality"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/video-streaming/scene.json"
     },
     {
@@ -2708,7 +2708,7 @@
         "Retry only missing parts",
         "Verify all bytes before finalizing"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/file-upload/scene.json"
     },
     {
@@ -2729,7 +2729,7 @@
         "Remove underlying content from output",
         "Search extracted text to confirm removal"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/pdf-redaction/scene.json"
     },
     {
@@ -2750,7 +2750,7 @@
         "Attach signature and certificate",
         "Recipient verifies bytes and trust"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/document-signing/scene.json"
     },
     {
@@ -2771,7 +2771,7 @@
         "Approver accepts or rejects",
         "Finance schedules reimbursement"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/expense-approval/scene.json"
     },
     {
@@ -2792,7 +2792,7 @@
         "Bank transfer settles the amount",
         "Accountant matches transaction to invoice"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/invoice-payment/scene.json"
     },
     {
@@ -2813,7 +2813,7 @@
         "Record equal total credits",
         "Verify journal stays balanced"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/double-entry-accounting/scene.json"
     },
     {
@@ -2834,7 +2834,7 @@
         "Future interest includes prior gains",
         "Growth accelerates with time"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/compound-interest/scene.json"
     },
     {
@@ -2855,7 +2855,7 @@
         "Remainder lowers principal",
         "Next period interest uses lower debt"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/loan-amortization/scene.json"
     },
     {
@@ -2876,7 +2876,7 @@
         "Only a portion suffer covered losses",
         "Pool funds eligible claims"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/insurance-risk-pooling/scene.json"
     },
     {
@@ -2897,7 +2897,7 @@
         "Allocate to future goals",
         "Cap optional expenditures"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/budget-allocation/scene.json"
     },
     {
@@ -2918,7 +2918,7 @@
         "Interview and evaluate skills",
         "Select and extend an offer"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/job-application/scene.json"
     },
     {
@@ -2939,7 +2939,7 @@
         "Make remaining blockers explicit",
         "Next teammate resumes with context"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/remote-team-handoff/scene.json"
     },
     {
@@ -2960,7 +2960,7 @@
         "Implement and verify the increment",
         "Review feedback for next cycle"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/agile-sprint/scene.json"
     },
     {
@@ -2981,7 +2981,7 @@
         "Demonstrate the core value",
         "Encourage a useful return visit"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/user-onboarding/scene.json"
     },
     {
@@ -3002,7 +3002,7 @@
         "Service performs allowed operation",
         "Respond with result and status"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/api-request/scene.json"
     },
     {
@@ -3023,7 +3023,7 @@
         "Store isolated backup copies",
         "Regularly prove restoration succeeds"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/data-backup/scene.json"
     },
     {
@@ -3044,7 +3044,7 @@
         "Restore consistent data state",
         "Verify service before reopening"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/disaster-recovery/scene.json"
     },
     {
@@ -3065,7 +3065,7 @@
         "Use clearance interval for safety",
         "Allow conflicting traffic afterward"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/traffic-signals/scene.json"
     },
     {
@@ -3086,7 +3086,7 @@
         "Clean recovered feedstock",
         "Process it into reusable products"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/recycling-process/scene.json"
     },
     {
@@ -3107,7 +3107,7 @@
         "Inverter supplies compatible AC",
         "Loads consume or export electricity"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/solar-home/scene.json"
     },
     {
@@ -3128,7 +3128,7 @@
         "Battery system monitors temperature",
         "Cells accept energy within safe limits"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/ev-charging/scene.json"
     },
     {
@@ -3149,7 +3149,7 @@
         "Enable the lamp when appropriate",
         "Switch it off after inactivity"
       ],
-      "durationMs": 2700,
+      "durationMs": 3300,
       "file": "workflows/smart-home-automation/scene.json"
     }
   ]

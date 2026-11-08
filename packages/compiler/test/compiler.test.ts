@@ -537,12 +537,34 @@ describe("compiler", () => {
     );
 
     const drawTarget = compile(baseScene(
-      [{ id: "r", type: "rect" }],
-      [{ id: "draw", type: "draw", target: "r", start: 0, duration: 1, to: 0.5 }],
+      [{ id: "t", type: "text", text: "label" }],
+      [{ id: "draw", type: "draw", target: "t", start: 0, duration: 1, to: 0.5 }],
     ));
     expect(drawTarget.diagnostics).toContainEqual(
       expect.objectContaining({ code: "UNSUPPORTED_DRAW_TARGET", path: "timeline[0].target" }),
     );
+
+    // Shapes, lines and connectors draw on like strokes.
+    const shapes = compile(baseScene(
+      [
+        { id: "r", type: "rect", drawProgress: 0 },
+        { id: "c", type: "circle", radius: 20 },
+        { id: "e", type: "connector", from: { objectId: "r" }, to: { objectId: "c" }, arrowheads: "both", style: { strokeStyle: "dashed" } },
+      ],
+      [
+        { id: "draw-r", type: "draw", target: "r", start: 0, duration: 100, to: 1 },
+        { id: "draw-c", type: "draw", target: "c", start: 0, duration: 100, to: 1 },
+        { id: "draw-e", type: "draw", target: "e", start: 100, duration: 100, to: 1 },
+      ],
+    ));
+    expect(shapes.diagnostics).toEqual([]);
+    const edge = shapes.scene!.objects.find(object => object.id === "e");
+    expect(edge).toMatchObject({ arrowheads: "both", style: { strokeStyle: "dashed" } });
+
+    const badStyle = compile(baseScene([{ id: "r", type: "rect", style: { strokeStyle: "wavy" } }], []));
+    expect(badStyle.diagnostics).toContainEqual(expect.objectContaining({ code: "INVALID_STYLE_VALUE", path: "objects[0].style.strokeStyle" }));
+    const badHeads = compile(baseScene([{ id: "a", type: "rect" }, { id: "b", type: "rect" }, { id: "e", type: "connector", from: { objectId: "a" }, to: { objectId: "b" }, arrowheads: "middle" }], []));
+    expect(badHeads.diagnostics).toContainEqual(expect.objectContaining({ code: "INVALID_CONNECTOR_ARROWHEADS" }));
   });
 
   it("allows text bindings on ellipses", () => {

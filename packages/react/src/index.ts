@@ -2,16 +2,18 @@ import { describeScene, type DescribeSceneOptions } from "@anim8/a11y";
 import {
   createElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   type HTMLAttributes,
   type RefObject,
 } from "react";
 import {
   mountPlayer,
+  renderSceneMarkup,
   type PlayerController,
   type PlayerOptions,
+  type PlayerObjectEvent,
 } from "@anim8/player";
-import { renderSceneAt } from "@anim8/renderer-svg";
 
 export type Anim8Scene = Parameters<typeof mountPlayer>[1];
 
@@ -37,6 +39,8 @@ function normalizedInitialTime(value: number | undefined): number {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 0;
 }
 
+const useCommitEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 export function useAnim8Player(
   scene: Anim8Scene,
   options: UseAnim8PlayerOptions = {},
@@ -44,7 +48,12 @@ export function useAnim8Player(
   const containerRef = useRef<HTMLDivElement | null>(null);
   const controllerRef = useRef<PlayerController | null>(null);
   const onFrameRef = useRef(options.onFrame);
-  onFrameRef.current = options.onFrame;
+  const onObjectEventRef = useRef(options.onObjectEvent);
+  useCommitEffect(() => {
+    onFrameRef.current = options.onFrame;
+    onObjectEventRef.current = options.onObjectEvent;
+  });
+  const handlesObjectEvents = Boolean(options.onObjectEvent);
 
   const {
     autoplay = false,
@@ -64,6 +73,7 @@ export function useAnim8Player(
       ...(reducedMotion !== undefined ? { reducedMotion } : {}),
       ...(speed !== undefined ? { speed } : {}),
       onFrame: (frame) => onFrameRef.current?.(frame),
+      ...(handlesObjectEvents ? { onObjectEvent: (event: PlayerObjectEvent) => onObjectEventRef.current?.(event) } : {}),
     });
 
     controllerRef.current = controller;
@@ -76,6 +86,10 @@ export function useAnim8Player(
       controller.destroy();
     };
   }, [autoplay, initialTime, loop, reducedMotion, scene, speed]);
+
+  useEffect(() => {
+    controllerRef.current?.setObjectEventHandler(handlesObjectEvents ? event => onObjectEventRef.current?.(event) : undefined);
+  }, [handlesObjectEvents]);
 
   return { containerRef, controllerRef };
 }
@@ -92,7 +106,7 @@ export function Anim8Player({
     initialTime,
   });
   const time = normalizedInitialTime(initialTime);
-  const svg = renderSceneAt(scene, time);
+  const svg = renderSceneMarkup(scene, time);
   const summary = accessibility === false
     ? undefined
     : describeScene(scene, { time, ...(accessibility ?? {}) });

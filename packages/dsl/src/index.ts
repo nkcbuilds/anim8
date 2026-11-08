@@ -1,7 +1,9 @@
+import { compile as compileDocument, COMPILER_LIMITS } from "@anim8/compiler";
 import {
   defaultStyle,
   defaultTransform,
   evaluate,
+  VALIDATION_LIMITS,
   type Action,
   type DrawableObject,
   type Marker,
@@ -184,6 +186,7 @@ function parseNumber(
   token: Token | undefined,
   line: number,
   label: string,
+  limit: number = COMPILER_LIMITS.absoluteNumber,
 ): number | undefined {
   if (!token) return undefined;
   if (token.quoted || !NUMBER.test(token.value)) {
@@ -192,8 +195,8 @@ function parseNumber(
   }
 
   const value = Number(token.value);
-  if (!Number.isFinite(value)) {
-    diagnostic(state, "INVALID_NUMBER", `${label} must be a finite number.`, line, token.column);
+  if (!Number.isFinite(value) || Math.abs(value) > limit) {
+    diagnostic(state, "INVALID_NUMBER", `${label} must be finite with absolute value <= ${limit}.`, line, token.column);
     return undefined;
   }
   return value;
@@ -219,7 +222,7 @@ function parseDuration(
   token: Token | undefined,
   line: number,
 ): number | undefined {
-  const value = parseNumber(state, token, line, "duration");
+  const value = parseNumber(state, token, line, "duration", COMPILER_LIMITS.actionTime);
   if (value === undefined) return undefined;
   if (value < 0) {
     diagnostic(state, "INVALID_DURATION", "duration must be greater than or equal to 0.", line, token!.column);
@@ -375,7 +378,7 @@ function parseScene(state: ParseState, tokens: Token[], line: number): void {
 
     if (option.value === "seed") {
       const valueToken = requireToken(state, tokens, index + 1, line, "seed value");
-      const value = parseNumber(state, valueToken, line, "seed");
+      const value = parseNumber(state, valueToken, line, "seed", Number.MAX_SAFE_INTEGER);
       if (value === undefined) return;
       seed = value;
       index += 2;
@@ -817,6 +820,21 @@ function parseCommand(state: ParseState, tokens: Token[], line: number): void {
 }
 
 export function compile(source: string): DslCompileResult {
+  try { return parseWithinBudget(source); }
+  catch (error) {
+    if (!(error instanceof DslDiagnosticLimit)) throw error;
+    return { ok: false, diagnostics: error.diagnostics };
+  }
+}
+
+class DslDiagnosticLimit extends Error {
+  constructor(readonly diagnostics: DslDiagnostic[]) { super("DSL diagnostic limit reached."); }
+}
+
+function parseWithinBudget(source: string): DslCompileResult {
+  if (new TextEncoder().encode(source).length > COMPILER_LIMITS.sourceBytes) {
+    return { ok: false, diagnostics: [{ code: "LIMIT_SOURCE_BYTES", message: "DSL source exceeds the compiler source-size limit.", line: 1, column: 1 }] };
+  }
   const state: ParseState = {
     width: 800,
     height: 450,
@@ -834,6 +852,17 @@ export function compile(source: string): DslCompileResult {
     markerCounter: 0,
     diagnostics: [],
   };
+
+  const diagnostics = state.diagnostics;
+  Object.defineProperty(diagnostics, "push", { value: (...items: DslDiagnostic[]) => {
+    if (diagnostics.length + items.length >= VALIDATION_LIMITS.diagnostics) {
+      Array.prototype.push.apply(diagnostics, items.slice(0, VALIDATION_LIMITS.diagnostics - diagnostics.length - 1));
+      const location = items[0] ?? { line: 1, column: 1 };
+      Array.prototype.push.call(diagnostics, { code: "LIMIT_DIAGNOSTICS", message: "Parsing stopped after reaching the diagnostic limit.", line: location.line, column: location.column });
+      throw new DslDiagnosticLimit([...diagnostics]);
+    }
+    return Array.prototype.push.apply(diagnostics, items);
+  } });
 
   const lines = source.replace(/^\uFEFF/, "").split(/\r?\n/);
   for (let index = 0; index < lines.length; index += 1) {
@@ -860,14 +889,13 @@ export function compile(source: string): DslCompileResult {
   }
 
   if (state.diagnostics.length > 0) {
-    return { ok: false, diagnostics: state.diagnostics };
+    return { ok: false, diagnostics: [...state.diagnostics] };
   }
 
-  return {
-    ok: true,
-    scene: currentScene(state),
-    diagnostics: [],
-  };
+  const result = compileDocument(currentScene(state));
+  return result.ok
+    ? { ok: true, scene: result.scene!, diagnostics: [] }
+    : { ok: false, diagnostics: result.diagnostics.map(item => ({ code: item.code, message: `${item.path}: ${item.message}`, line: 1, column: 1 })) };
 }
 
 export const compileDsl = compile;

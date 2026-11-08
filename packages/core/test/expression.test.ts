@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { defaultStyle, defaultTransform, evaluate, evaluateExpression, type SceneDocument } from "../src/index.js";
 
 describe("declarative expressions", () => {
+  it("reads only own scalar input properties and rejects invalid runtime values", () => {
+    for (const path of ["inputs.toString", "state.constructor"]) {
+      expect(evaluateExpression({ kind: "get", path }, { time: 0, progress: 0, inputs: {}, state: {} })).toMatchObject({ ok: false, code: "EXPR_UNKNOWN_PATH" });
+    }
+    for (const value of [NaN, Infinity, "x".repeat(32769), {}]) {
+      expect(evaluateExpression({ kind: "get", path: "inputs.value" }, { time: 0, progress: 0, inputs: { value: value as number } })).toMatchObject({ ok: false });
+    }
+    expect(evaluateExpression({ kind: "get", path: "inputs.constructor" }, { time: 0, progress: 0, inputs: { constructor: "own" } })).toEqual({ ok: true, value: "own" });
+  });
   it("evaluates a bounded arithmetic AST without code execution", () => {
     const result = evaluateExpression(
       { kind: "op", op: "lerp", args: [

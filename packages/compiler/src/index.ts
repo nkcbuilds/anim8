@@ -34,7 +34,13 @@ import {
   type SceneDocument,
   type Style,
   type Transform,
+  DRAWABLE_TYPES,
+  isDrawableType,
   type TextRun,
+  createDiagnosticCollector,
+  consumeValidationWork,
+  ValidationBudgetExceeded,
+  VALIDATION_LIMITS,
 } from "@anim8/core";
 
 export interface CompileResult {
@@ -51,6 +57,8 @@ export interface CompileResult {
  */
 export const COMPILER_LIMITS = Object.freeze({
   sourceBytes: 2 * 1024 * 1024,
+  diagnostics: VALIDATION_LIMITS.diagnostics,
+  validationWork: VALIDATION_LIMITS.work,
   objects: 5_000,
   timelineActions: 10_000,
   markers: 10_000,
@@ -237,6 +245,11 @@ function parseStyle(value: unknown, path: string, diagnostics: Diagnostic[], par
       continue;
     }
     style[key] = candidate;
+  }
+
+  if (value.strokeStyle !== undefined) {
+    if (value.strokeStyle === "solid" || value.strokeStyle === "dashed" || value.strokeStyle === "dotted") style.strokeStyle = value.strokeStyle;
+    else diagnostic(diagnostics, "INVALID_STYLE_VALUE", `${path}.strokeStyle`, "strokeStyle must be solid, dashed, or dotted.");
   }
 
   const numberKeys = ["strokeWidth", "fontSize", "radius"] as const;
@@ -666,6 +679,10 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
     ...(parentId ? { parentId } : {}),
   };
 
+  const shapeDraw = () => {
+    const drawProgress = parseDrawProgress(value.drawProgress, `${path}.drawProgress`, diagnostics);
+    return drawProgress !== undefined ? { drawProgress } : {};
+  };
   let textRuns: TextRun[] | undefined;
   if (value.textRuns !== undefined) {
     if (!["rect", "circle", "ellipse", "text"].includes(type)) diagnostic(diagnostics, "INVALID_TEXT_RUNS", `${path}.textRuns`, "Only text and labeled shapes expose textRuns.");
@@ -685,6 +702,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         width: parsePositiveDimension(value.width, 100, `${path}.width`, diagnostics),
         height: parsePositiveDimension(value.height, 60, `${path}.height`, diagnostics),
         ...(text !== undefined ? { text } : {}),
+        ...shapeDraw(),
       };
     }
     case "circle": {
@@ -695,6 +713,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         ...labelRuns,
         radius: parsePositiveDimension(value.radius, 30, `${path}.radius`, diagnostics),
         ...(text !== undefined ? { text } : {}),
+        ...shapeDraw(),
       };
     }
     case "ellipse": {
@@ -709,6 +728,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         rx,
         ry,
         ...(text !== undefined ? { text } : {}),
+        ...shapeDraw(),
       };
     }
     case "polygon":
@@ -737,6 +757,7 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         type,
         x2: parseCoordinate(value.x2, 100, `${path}.x2`, diagnostics),
         y2: parseCoordinate(value.y2, 0, `${path}.y2`, diagnostics),
+        ...shapeDraw(),
       };
     case "path": {
       const d = parseBoundedText(value.d, "", `${path}.d`, diagnostics, COMPILER_LIMITS.pathLength);
@@ -813,6 +834,11 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
       }
 
       const label = parseOptionalText(value.label, `${path}.label`, diagnostics);
+      let arrowheads: "end" | "start" | "both" | "none" | undefined;
+      if (value.arrowheads !== undefined) {
+        if (value.arrowheads === "end" || value.arrowheads === "start" || value.arrowheads === "both" || value.arrowheads === "none") arrowheads = value.arrowheads;
+        else diagnostic(diagnostics, "INVALID_CONNECTOR_ARROWHEADS", `${path}.arrowheads`, "arrowheads must be end, start, both, or none.");
+      }
       return {
         ...base,
         type,
@@ -821,6 +847,8 @@ function parseObject(value: unknown, index: number, diagnostics: Diagnostic[]): 
         kind,
         ...(routing ? { routing } : {}),
         ...(label !== undefined ? { label } : {}),
+        ...(arrowheads !== undefined ? { arrowheads } : {}),
+        ...shapeDraw(),
       };
     }
     case "image": {
@@ -870,7 +898,7 @@ function parseState(value: unknown, diagnostics: Diagnostic[]): Record<string, S
     diagnostic(diagnostics, "LIMIT_STATE_ENTRIES", "state", `state exceeds ${COMPILER_LIMITS.stateEntries} entries.`);
     return undefined;
   }
-  const out: Record<string, ScalarValue> = {};
+  const out: Record<string, ScalarValue> = Object.create(null);
   for (const [key, candidate] of entries) {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key) || key.length > COMPILER_LIMITS.idLength) {
       diagnostic(diagnostics, "INVALID_STATE_KEY", `state.${key}`, "State keys must start with a letter or underscore and contain only letters, digits, or underscores.");
@@ -1313,6 +1341,7 @@ function parseExpression(
   budget: { nodes: number },
   depth = 0,
 ): Expression | null {
+  consumeValidationWork(diagnostics);
   budget.nodes += 1;
   if (budget.nodes > COMPILER_LIMITS.expressionNodes) {
     diagnostic(diagnostics, "LIMIT_EXPRESSION_NODES", path, `Expression exceeds ${COMPILER_LIMITS.expressionNodes} nodes.`);
@@ -1351,10 +1380,11 @@ function parseExpression(
       return null;
     }
     const args: Expression[] = [];
-    value.args.forEach((arg, index) => {
-      const parsed = parseExpression(arg, `${path}.args[${index}]`, diagnostics, budget, depth + 1);
-      if (parsed) args.push(parsed);
-    });
+    for (let index = 0; index < value.args.length; index++) {
+      const parsed = parseExpression(value.args[index], `${path}.args[${index}]`, diagnostics, budget, depth + 1);
+      if (!parsed) return null;
+      args.push(parsed);
+    }
     if (args.length !== value.args.length) return null;
     return { kind: "op", op: value.op as (typeof EXPRESSION_OPS)[number], args };
   }
@@ -1416,6 +1446,14 @@ function validateBindings(
   diagnostics: Diagnostic[],
 ): void {
   const ids = new Set<string>();
+  const actionsByTarget = new Map<string, Action[]>();
+  for (const action of timeline) {
+    consumeValidationWork(diagnostics);
+    if (action.type === "camera") continue;
+    const actions = actionsByTarget.get(action.target) ?? [];
+    actions.push(action);
+    actionsByTarget.set(action.target, actions);
+  }
   bindings.forEach((binding, index) => {
     if (ids.has(binding.id)) diagnostic(diagnostics, "DUPLICATE_BINDING_ID", `bindings[${index}].id`, `Binding '${binding.id}' is duplicated.`);
     ids.add(binding.id);
@@ -1427,7 +1465,8 @@ function validateBindings(
     if (binding.target.property === "text" && target.type !== "text" && target.type !== "rect" && target.type !== "circle" && target.type !== "ellipse") {
       diagnostic(diagnostics, "INVALID_BINDING_PROPERTY", `bindings[${index}].target.property`, `Object type '${target.type}' does not expose text.`);
     }
-    for (const action of timeline) {
+    for (const action of actionsByTarget.get(binding.target.objectId) ?? []) {
+      consumeValidationWork(diagnostics);
       if (action.type !== "camera" && action.target === binding.target.objectId && actionProperties(action).includes(binding.target.property)) {
         diagnostic(
           diagnostics,
@@ -1783,25 +1822,21 @@ function validateParentCycles(
   diagnostics: Diagnostic[],
 ): void {
   const state = new Map<string, 0 | 1 | 2>();
-  const stack: string[] = [];
-
-  const visit = (object: DrawableObject): void => {
-    const current = state.get(object.id) ?? 0;
-    if (current !== 0) return;
-
-    state.set(object.id, 1);
-    stack.push(object.id);
-
-    if (object.parentId) {
-      const parent = byId.get(object.parentId);
+  for (const object of objects) {
+    if (state.get(object.id) === 2) continue;
+    const stack: string[] = [];
+    let current: DrawableObject | undefined = object;
+    while (current) {
+      if (state.get(current.id) === 2) break;
+      state.set(current.id, 1);
+      stack.push(current.id);
+      const parent: DrawableObject | undefined = current.parentId ? byId.get(current.parentId) : undefined;
       if (parent) {
         const parentState = state.get(parent.id) ?? 0;
-        if (parentState === 0) {
-          visit(parent);
-        } else if (parentState === 1) {
+        if (parentState === 1) {
           const start = stack.indexOf(parent.id);
           const cycle = [...stack.slice(start), parent.id];
-          const objectIndex = indexById.get(object.id);
+          const objectIndex = indexById.get(current.id);
           diagnostic(
             diagnostics,
             "PARENT_CYCLE",
@@ -1809,15 +1844,13 @@ function validateParentCycles(
             `Parent cycle detected: ${cycle.join(" -> ")}.`,
             "Break the parentId cycle so every object has an acyclic path to the scene root.",
           );
+          break;
         }
       }
+      current = parent;
     }
-
-    stack.pop();
-    state.set(object.id, 2);
-  };
-
-  for (const object of objects) visit(object);
+    for (const id of stack) state.set(id, 2);
+  }
 }
 
 function validateObjectGraph(objects: DrawableObject[], diagnostics: Diagnostic[]): Map<string, DrawableObject> {
@@ -2011,13 +2044,13 @@ function validateTimelineReferences(
       }
     }
 
-    if (action.type === "draw" && target.type !== "path" && target.type !== "polygon" && target.type !== "polyline") {
+    if (action.type === "draw" && !isDrawableType(target.type)) {
       diagnostic(
         diagnostics,
         "UNSUPPORTED_DRAW_TARGET",
         `timeline[${index}].target`,
         `Object '${target.id}' of type '${target.type}' does not expose drawProgress.`,
-        "Use draw on path, polygon, or polyline objects.",
+        `Use draw on ${DRAWABLE_TYPES.join(", ")} objects.`,
       );
     }
 
@@ -2151,6 +2184,17 @@ function parseSceneMetadata(
     else diagnostic(diagnostics, "INVALID_THEME", "scene.theme", "theme must be clean or sketch.");
   }
 
+  let fontFamily: string | undefined;
+  if (input.scene.fontFamily !== undefined) {
+    const family = input.scene.fontFamily;
+    if (typeof family !== "string" || !family.trim()) {
+      diagnostic(diagnostics, "INVALID_FONT_FAMILY", "scene.fontFamily", "fontFamily must be a nonempty CSS font-family stack.");
+    } else if (family.length > COMPILER_LIMITS.styleStringLength) {
+      diagnostic(diagnostics, "LIMIT_STYLE_STRING", "scene.fontFamily", `fontFamily exceeds the ${COMPILER_LIMITS.styleStringLength}-character limit.`);
+    } else {
+      fontFamily = family;
+    }
+  }
   let background: string | undefined;
   if (input.scene.background !== undefined) {
     if (typeof input.scene.background !== "string") {
@@ -2181,6 +2225,7 @@ function parseSceneMetadata(
     width,
     height,
     ...(theme ? { theme } : {}),
+    ...(fontFamily !== undefined ? { fontFamily } : {}),
     ...(background !== undefined ? { background } : {}),
     ...(seed !== undefined ? { seed } : {}),
     ...(camera ? { camera } : {}),
@@ -2215,7 +2260,15 @@ function parseMarkers(value: unknown, diagnostics: Diagnostic[]): Marker[] {
 }
 
 export function compile(input: unknown): CompileResult {
-  const diagnostics: Diagnostic[] = [];
+  const diagnostics = createDiagnosticCollector();
+  try { return compileWithinBudget(input, diagnostics); }
+  catch (error) {
+    if (!(error instanceof ValidationBudgetExceeded)) throw error;
+    return { ok: false, diagnostics: sortedDiagnostics(diagnostics) };
+  }
+}
+
+function compileWithinBudget(input: unknown, diagnostics: Diagnostic[]): CompileResult {
   if (!isRecord(input)) {
     return {
       ok: false,
@@ -2343,7 +2396,7 @@ export function compile(input: unknown): CompileResult {
 
   // Compiler owns the stable duplicate/reference/time diagnostics above.
   // Keep core's cross-action conflict analysis without duplicating those errors.
-  diagnostics.push(...validateScene(doc).filter(item => item.code === "OVERLAPPING_PROPERTY_ACTIONS"));
+  diagnostics.push(...validateScene(doc).filter(item => ["OVERLAPPING_PROPERTY_ACTIONS", "LIMIT_DIAGNOSTICS", "LIMIT_VALIDATION_WORK", "INVALID_WORLD_TRANSFORM"].includes(item.code)));
 
   const resultDiagnostics = sortedDiagnostics(diagnostics);
   if (resultDiagnostics.length > 0) return { ok: false, diagnostics: resultDiagnostics };

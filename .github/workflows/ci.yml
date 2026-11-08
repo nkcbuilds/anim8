@@ -34,6 +34,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - run: pnpm docs:check
 
       - name: Run baseline benchmark
         run: pnpm benchmark
@@ -85,6 +86,9 @@ jobs:
       - name: Validate all 150 gallery scenes in Chromium
         run: pnpm catalog:browser
 
+      - name: Validate animated diagram families in Chromium
+        run: pnpm gallery:browser
+
       - name: Qualify desktop, mobile emulation, throttled CPU and dense scenes
         run: pnpm qualification:matrix
 
@@ -126,7 +130,4 @@ jobs:
           node packages/cli/dist/cli.js validate examples/binary-tree/scene.json
 
       - name: Measure baseline bundle
-        run: |
-          mkdir -p .bench
-          pnpm exec esbuild benchmarks/standard-runtime.ts --bundle --minify --format=esm --platform=browser --outfile=.bench/standard-runtime.js
-          node -e "const fs=require('fs'),z=require('zlib');const b=fs.readFileSync('.bench/standard-runtime.js');const g=z.gzipSync(b,{level:9});console.log('gzip bytes',g.length);if(g.length>35840)process.exit(1)"
+        run: pnpm bundle:check

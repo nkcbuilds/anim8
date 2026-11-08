@@ -1,0 +1,251 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 880,
+    "height": 360,
+    "theme": "sketch",
+    "seed": 11,
+    "camera": {
+      "x": 0,
+      "y": 0,
+      "zoom": 1
+    }
+  },
+  "objects": [
+    {
+      "id": "client",
+      "type": "rect",
+      "width": 144,
+      "height": 76,
+      "text": "Client",
+      "transform": {
+        "x": 140,
+        "y": 190,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 24
+      },
+      "visible": true,
+      "z": 0
+    },
+    {
+      "id": "api",
+      "type": "rect",
+      "width": 144,
+      "height": 76,
+      "text": "API",
+      "transform": {
+        "x": 440,
+        "y": 190,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 24
+      },
+      "visible": true,
+      "z": 1
+    },
+    {
+      "id": "store",
+      "type": "rect",
+      "width": 144,
+      "height": 76,
+      "text": "Store",
+      "transform": {
+        "x": 740,
+        "y": 190,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 24
+      },
+      "visible": true,
+      "z": 2
+    },
+    {
+      "id": "connector_1",
+      "type": "connector",
+      "from": {
+        "objectId": "client"
+      },
+      "to": {
+        "objectId": "api"
+      },
+      "kind": "straight",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16
+      },
+      "visible": true,
+      "z": 3
+    },
+    {
+      "id": "connector_2",
+      "type": "connector",
+      "from": {
+        "objectId": "api"
+      },
+      "to": {
+        "objectId": "store"
+      },
+      "kind": "straight",
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1f2937",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16
+      },
+      "visible": true,
+      "z": 4
+    },
+    {
+      "id": "packet",
+      "type": "circle",
+      "radius": 8,
+      "text": "",
+      "transform": {
+        "x": 244,
+        "y": 190,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "#1971c2",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#111827",
+        "fontSize": 16
+      },
+      "visible": true,
+      "z": 5
+    }
+  ],
+  "timeline": [
+    {
+      "type": "move",
+      "target": "packet",
+      "to": {
+        "x": 336,
+        "y": 190
+      },
+      "duration": 1000,
+      "easing": "linear",
+      "id": "move_4",
+      "start": 0
+    },
+    {
+      "type": "style",
+      "target": "api",
+      "to": {
+        "stroke": "#2f9e44",
+        "fill": "#b2f2bb"
+      },
+      "duration": 300,
+      "easing": "easeInOut",
+      "id": "style_6",
+      "start": 1000
+    },
+    {
+      "type": "move",
+      "target": "packet",
+      "to": {
+        "x": 544,
+        "y": 190
+      },
+      "duration": 0,
+      "easing": "easeInOut",
+      "id": "move_7",
+      "start": 1300
+    },
+    {
+      "type": "move",
+      "target": "packet",
+      "to": {
+        "x": 636,
+        "y": 190
+      },
+      "duration": 1000,
+      "easing": "linear",
+      "id": "move_9",
+      "start": 1300
+    },
+    {
+      "type": "style",
+      "target": "store",
+      "to": {
+        "stroke": "#2f9e44",
+        "fill": "#b2f2bb"
+      },
+      "duration": 300,
+      "easing": "easeInOut",
+      "id": "style_11",
+      "start": 2300
+    }
+  ],
+  "markers": [
+    {
+      "id": "step_3",
+      "label": "Send",
+      "time": 0
+    },
+    {
+      "id": "step_5",
+      "label": "Process",
+      "time": 1000
+    },
+    {
+      "id": "step_8",
+      "label": "Store",
+      "time": 1300
+    },
+    {
+      "id": "step_10",
+      "label": "Complete",
+      "time": 2300
+    }
+  ]
+}

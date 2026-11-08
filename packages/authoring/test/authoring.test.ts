@@ -93,7 +93,9 @@ describe("authoring", () => {
     const s = scene();
     const box = s.box();
     const path = s.path("M 0 0 L 10 10", { drawProgress: 0 });
-    expect(() => box.draw()).toThrow("does not expose drawProgress");
+    // Boxes draw on like strokes; plain text has no outline to trace.
+    expect(box.draw()).toMatchObject({ type: "draw", target: box.id, to: 1 });
+    expect(() => s.text("label").draw()).toThrow("does not expose drawProgress");
     expect(() => path.resize({ width: 20, height: 20 })).toThrow("cannot be resized geometrically");
     expect(() => s.path("M 0 0 L 10 10", { drawProgress: 2 })).toThrow("drawProgress must be a finite number");
   });

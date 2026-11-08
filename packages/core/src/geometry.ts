@@ -4,6 +4,52 @@ export type Point = PointValue;
 export interface Bounds { minX: number; minY: number; maxX: number; maxY: number }
 export interface Matrix { a: number; b: number; c: number; d: number; e: number; f: number }
 
+/** Leaves headroom for inverse determinants and geometry calculations. */
+export const WORLD_TRANSFORM_LIMIT = 1e100;
+function checkWorldMatrix(matrix: Matrix, id: string): Matrix {
+  if (!Number.isFinite(matrix.a) || !Number.isFinite(matrix.b) || !Number.isFinite(matrix.c) ||
+      !Number.isFinite(matrix.d) || !Number.isFinite(matrix.e) || !Number.isFinite(matrix.f) ||
+      Math.abs(matrix.a) > WORLD_TRANSFORM_LIMIT || Math.abs(matrix.b) > WORLD_TRANSFORM_LIMIT ||
+      Math.abs(matrix.c) > WORLD_TRANSFORM_LIMIT || Math.abs(matrix.d) > WORLD_TRANSFORM_LIMIT ||
+      Math.abs(matrix.e) > WORLD_TRANSFORM_LIMIT || Math.abs(matrix.f) > WORLD_TRANSFORM_LIMIT) {
+    throw new RangeError(`World transform for '${id}' exceeds supported finite bounds.`);
+  }
+  return matrix;
+}
+
+/** Validate the whole hierarchy in linear time, including runtime-bound transforms. */
+export function assertWorldTransforms(objects: ReadonlyMap<string, DrawableObject>): void {
+  let resolved: Map<string, Matrix> | undefined;
+  let opacities: Map<string, number> | undefined;
+  for (const object of objects.values()) {
+    if (!object.parentId) {
+      checkWorldMatrix(transformMatrix(object.transform), object.id);
+      const opacity = object.transform.opacity;
+      if (!Number.isFinite(opacity) || Math.abs(opacity) > WORLD_TRANSFORM_LIMIT) throw new RangeError(`World opacity for '${object.id}' exceeds supported finite bounds.`);
+      continue;
+    }
+    resolved ??= new Map();
+    opacities ??= new Map();
+    const chain: DrawableObject[] = [], seen = new Set<string>();
+    let current: DrawableObject | undefined = object;
+    while (current && !resolved.has(current.id)) {
+      if (seen.has(current.id)) throw new RangeError(`Parent cycle detected at '${current.id}'.`);
+      seen.add(current.id); chain.push(current);
+      current = current.parentId ? objects.get(current.parentId) : undefined;
+    }
+    let matrix = current ? resolved.get(current.id)! : identityMatrix();
+    let opacity = current ? opacities.get(current.id)! : 1;
+    for (let index = chain.length - 1; index >= 0; index--) {
+      const node = chain[index]!;
+      matrix = checkWorldMatrix(multiply(matrix, transformMatrix(node.transform)), node.id);
+      opacity *= node.transform.opacity;
+      if (!Number.isFinite(opacity) || Math.abs(opacity) > WORLD_TRANSFORM_LIMIT) throw new RangeError(`World opacity for '${node.id}' exceeds supported finite bounds.`);
+      resolved.set(node.id, matrix);
+      opacities.set(node.id, opacity);
+    }
+  }
+}
+
 export const identityMatrix = (): Matrix => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 });
 
 export function multiply(a: Matrix, b: Matrix): Matrix {
@@ -120,32 +166,39 @@ export function localAnchorPoint(object: DrawableObject, anchor: AnchorName = "c
   }
 }
 
-export function worldMatrix(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): Matrix {
+function ancestorChain(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): DrawableObject[] {
+  const chain: DrawableObject[] = [];
   const seen = new Set<string>();
-  let matrix = transformMatrix(object.transform);
   let current: DrawableObject | undefined = object;
-  while (current.parentId) {
-    if (seen.has(current.parentId)) throw new Error(`Parent cycle detected at '${current.parentId}'.`);
-    seen.add(current.parentId);
-    const parent = objects.get(current.parentId);
-    if (!parent) break;
-    matrix = multiply(transformMatrix(parent.transform), matrix);
-    current = parent;
+  while (current) {
+    if (seen.has(current.id)) throw new Error(`Parent cycle detected at '${current.id}'.`);
+    seen.add(current.id); chain.push(current);
+    current = current.parentId ? objects.get(current.parentId) : undefined;
+  }
+  return chain;
+}
+
+export function worldMatrix(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): Matrix {
+  if (!object.parentId) return checkWorldMatrix(transformMatrix(object.transform), object.id);
+  const chain = ancestorChain(object, objects);
+  let matrix = identityMatrix();
+  for (let index = chain.length - 1; index >= 0; index--) {
+    matrix = checkWorldMatrix(multiply(matrix, transformMatrix(chain[index]!.transform)), object.id);
   }
   return matrix;
 }
 
 export function worldOpacity(object: DrawableObject, objects: ReadonlyMap<string, DrawableObject>): number {
-  let opacity = object.transform.opacity;
-  const seen = new Set<string>();
-  let current: DrawableObject | undefined = object;
-  while (current.parentId) {
-    if (seen.has(current.parentId)) return opacity;
-    seen.add(current.parentId);
-    const parent = objects.get(current.parentId);
-    if (!parent) break;
-    opacity *= parent.transform.opacity;
-    current = parent;
+  if (!object.parentId) {
+    const opacity = object.transform.opacity;
+    if (!Number.isFinite(opacity) || Math.abs(opacity) > WORLD_TRANSFORM_LIMIT) throw new RangeError(`World opacity for '${object.id}' exceeds supported finite bounds.`);
+    return opacity;
+  }
+  const chain = ancestorChain(object, objects);
+  let opacity = 1;
+  for (let index = chain.length - 1; index >= 0; index--) {
+    opacity *= chain[index]!.transform.opacity;
+    if (!Number.isFinite(opacity) || Math.abs(opacity) > WORLD_TRANSFORM_LIMIT) throw new RangeError(`World opacity for '${object.id}' exceeds supported finite bounds.`);
   }
   return opacity;
 }

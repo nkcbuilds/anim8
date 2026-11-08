@@ -11,11 +11,21 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@anim8/compiler": ["../compiler/src/index.ts"],
+      "@anim8/renderer-sketch/live": [
+        "../renderer-sketch/src/live.ts"
+      ],
       "@anim8/core": [
         "../core/src/index.ts"
       ],
       "@anim8/renderer-svg": [
         "../renderer-svg/src/index.ts"
+      ],
+      "@anim8/renderer-sketch": [
+        "../renderer-sketch/src/index.ts"
+      ],
+      "@anim8/sketch": [
+        "../sketch/src/index.ts"
       ]
     }
   }

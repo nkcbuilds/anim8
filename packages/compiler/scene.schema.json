@@ -42,6 +42,13 @@
           "type": "string",
           "maxLength": 512
         },
+        "fontFamily": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "pattern": "\\S",
+          "description": "Default CSS font-family stack for labels. Object style.fontFamily overrides it; font files are supplied by the host."
+        },
         "seed": {
           "type": "integer"
         },
@@ -215,13 +222,20 @@
           "maxLength": 512
         },
         "strokeWidth": {
-          "$ref": "#/$defs/boundedNumber"
+          "type": "number", "minimum": 0, "maximum": 1000000
         },
         "fontSize": {
-          "$ref": "#/$defs/boundedNumber"
+          "type": "number", "minimum": 0, "maximum": 1000000
         },
         "radius": {
-          "$ref": "#/$defs/boundedNumber"
+          "type": "number", "minimum": 0, "maximum": 1000000
+        },
+        "strokeStyle": {
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
         }
       }
     },
@@ -309,6 +323,11 @@
                 "text": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -323,6 +342,11 @@
                 "text": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -344,6 +368,11 @@
                 "text": {
                   "type": "string",
                   "maxLength": 32768
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -417,6 +446,11 @@
                 },
                 "y2": {
                   "$ref": "#/$defs/boundedNumber"
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             },
@@ -496,6 +530,19 @@
                       "maximum": 10000
                     }
                   }
+                },
+                "drawProgress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "arrowheads": {
+                  "enum": [
+                    "end",
+                    "start",
+                    "both",
+                    "none"
+                  ]
                 }
               },
               "allOf": [

@@ -101,7 +101,7 @@ export function applyInteractions(
 
 /** Returns the explicit initial state for every declared state machine. */
 export function initializeStateMachines(scene: SceneDocument): StateMachineSnapshot {
-  const snapshot: StateMachineSnapshot = {};
+  const snapshot: StateMachineSnapshot = Object.create(null);
   for (const machine of scene.stateMachines ?? []) snapshot[machine.id] = machine.initial;
   return snapshot;
 }

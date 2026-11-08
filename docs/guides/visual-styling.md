@@ -48,6 +48,46 @@ Explicit run colors override the object's label color. A plain `textTo(...)` rep
 
 Dashed outlines apply to rectangles, circles, ellipses, polygons, polylines, lines, paths and connectors. Object groups organize their children; styles are per drawable and do not cascade through scene groups. Images retain their own pixel colors. Compose a rectangle behind an image when it needs a border.
 
+`strokeWidth`, `fontSize` and corner `radius` must be finite, nonnegative values
+within the compiler's numeric limit. These checks apply to object styles and
+timeline style patches. Large text fitting uses a bounded search after ordinary
+one-pixel steps; custom width measures should grow monotonically with font size.
+
+## Fonts
+
+Use any CSS font-family name or fallback stack. `scene({ fontFamily })` sets the default for standalone text, shape labels, rich text and connector labels in both themes. JSON uses `scene.fontFamily`. Per-object `fontFamily` (JSON: `style.fontFamily`) takes precedence; a timeline font change switches at its endpoint. Omitting the scene setting keeps the clean UI stack or sketch Virgil default.
+
+```css
+@font-face {
+  font-family: "My Brand Font";
+  src: url("/fonts/my-brand.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+```
+
+```ts
+import { scene } from "@anim8/authoring";
+import { mountPlayer } from "@anim8/player";
+
+const s = scene({ fontFamily: '"My Brand Font", sans-serif' });
+s.box("Brand label", { x: 180, y: 120 });
+s.text("Code label", { x: 180, y: 220, fontFamily: "monospace" });
+
+// Wait for the custom face when the first frame must use it immediately.
+await document.fonts.load('16px "My Brand Font"');
+const player = mountPlayer(document.querySelector("#diagram")!, s.toJSON());
+```
+
+Supply the font asset and its required weights/styles through your app's CSS or font loader. Font selection also works through the React, Vue and web-component players because it belongs to the scene. In a shadow root, make sure the font face is available to that rendering context.
+
+Anim8 stores font names, not arbitrary font URLs or font binaries. Custom fonts are not embedded in exported SVGs: a standalone viewer must have the font available, otherwise it uses the fallback stack. The default GIF/MP4 exporter blocks network requests and cannot see your app's CSS; install the font on the export machine or provide a trusted `rasterize` callback that loads your font and waits for it before capturing. The bundled sketch font continues to embed automatically when used.
+
+Text fitting is deterministic and uses estimated sans-serif widths for custom fonts; it does not measure their actual glyphs. Allow extra space and review labels when using unusually wide fonts or scripts. Bundled Virgil uses its supplied advance widths.
+
+## Gradients
+
 ```ts
 const gradient = {
   type: "linear" as const,

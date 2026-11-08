@@ -3,18 +3,40 @@
   "scene": {
     "width": 1000,
     "height": 560,
-    "theme": "clean",
-    "background": "#f8fafc",
+    "theme": "sketch",
+    "background": "#ffffff",
     "seed": 142
   },
   "objects": [
+    {
+      "id": "title_highlight",
+      "type": "path",
+      "d": "M 0 0 C 183.5 -3 428.2 3 627.7 -1",
+      "drawProgress": 0,
+      "transform": {
+        "x": 186.144,
+        "y": 61.44,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      },
+      "visible": true,
+      "z": 9,
+      "description": "Highlighter stroke under the title"
+    },
     {
       "id": "heading",
       "type": "text",
       "text": "Onboarding guides users to first value",
       "transform": {
         "x": 500,
-        "y": 43,
+        "y": 48,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -23,71 +45,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 27,
-        "radius": 12
-      },
-      "visible": true,
-      "z": 10
-    },
-    {
-      "id": "context",
-      "type": "text",
-      "text": "WORKFLOWS  /  LADDER EXPLANATION",
-      "transform": {
-        "x": 500,
-        "y": 79,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#475569",
-        "fontSize": 13,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 32
       },
       "visible": true,
       "z": 10
     },
     {
       "id": "concept_0",
+      "description": "Sign up",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 250,
-        "y": 375,
+        "x": 170,
+        "y": 370,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "Sign up",
+      "metadata": {
+        "tone": "blue"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "Sign up"
     },
     {
       "id": "stage_0",
       "type": "text",
-      "text": "STEP 1/4   Create the user account",
+      "text": "Step 1 · Create the user account",
       "description": "Create the user account",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -96,48 +96,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_1",
+      "description": "First action",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 415,
-        "y": 310,
+        "x": 390,
+        "y": 290,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "First action",
+      "metadata": {
+        "tone": "neutral"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "First action"
     },
     {
       "id": "stage_1",
       "type": "text",
-      "text": "STEP 2/4   Guide one meaningful action",
+      "text": "Step 2 · Guide one meaningful action",
       "description": "Guide one meaningful action",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -146,48 +147,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_2",
+      "description": "Aha moment",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 580,
-        "y": 245,
+        "x": 610,
+        "y": 210,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "Aha moment",
+      "metadata": {
+        "tone": "neutral"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "Aha moment"
     },
     {
       "id": "stage_2",
       "type": "text",
-      "text": "STEP 3/4   Demonstrate the core value",
+      "text": "Step 3 · Demonstrate the core value",
       "description": "Demonstrate the core value",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -196,48 +198,49 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_3",
+      "description": "Repeat usage",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 745,
-        "y": 180,
+        "x": 830,
+        "y": 130,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20
       },
-      "visible": true,
-      "z": 3,
-      "description": "Repeat usage",
+      "metadata": {
+        "tone": "green"
+      },
       "type": "rect",
-      "width": 174,
-      "height": 62,
+      "width": 168,
+      "height": 72,
       "text": "Repeat usage"
     },
     {
       "id": "stage_3",
       "type": "text",
-      "text": "STEP 4/4   Encourage a useful return visit",
+      "text": "Step 4 · Encourage a useful return visit",
       "description": "Encourage a useful return visit",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -246,10 +249,9 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
@@ -265,23 +267,23 @@
         "objectId": "concept_1",
         "anchor": "center"
       },
-      "kind": "straight",
+      "kind": "curve",
       "transform": {
         "x": 0,
         "y": 0,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.18
       },
       "style": {
         "fill": "none",
-        "stroke": "#64748b",
+        "stroke": "#1e1e1e",
         "strokeWidth": 2,
-        "color": "#475569"
+        "color": "#1e1e1e"
       },
       "visible": true,
-      "z": 0
+      "z": 1
     },
     {
       "id": "link_1",
@@ -294,23 +296,23 @@
         "objectId": "concept_2",
         "anchor": "center"
       },
-      "kind": "straight",
+      "kind": "curve",
       "transform": {
         "x": 0,
         "y": 0,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.18
       },
       "style": {
         "fill": "none",
-        "stroke": "#64748b",
+        "stroke": "#1e1e1e",
         "strokeWidth": 2,
-        "color": "#475569"
+        "color": "#1e1e1e"
       },
       "visible": true,
-      "z": 0
+      "z": 1
     },
     {
       "id": "link_2",
@@ -323,130 +325,106 @@
         "objectId": "concept_3",
         "anchor": "center"
       },
-      "kind": "straight",
+      "kind": "curve",
       "transform": {
         "x": 0,
         "y": 0,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.18
       },
       "style": {
         "fill": "none",
-        "stroke": "#64748b",
+        "stroke": "#1e1e1e",
         "strokeWidth": 2,
-        "color": "#475569"
+        "color": "#1e1e1e"
       },
       "visible": true,
-      "z": 0
+      "z": 1
     },
     {
-      "id": "footer",
-      "type": "text",
-      "text": "Seek to any time  •  Every frame is deterministic",
-      "transform": {
-        "x": 500,
-        "y": 526,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#475569",
-        "fontSize": 12,
-        "radius": 12
-      },
-      "visible": true,
-      "z": 10
-    },
-    {
-      "id": "timeline_rule",
-      "type": "path",
-      "d": "M 0 0 L 710 0",
-      "drawProgress": 0,
-      "transform": {
-        "x": 145,
-        "y": 496,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "#94a3b8",
-        "strokeWidth": 4
-      },
-      "visible": true,
-      "z": 1,
-      "description": "Drawn progress through the four explanation stages"
-    },
-    {
-      "id": "focus_dot",
+      "id": "token",
       "type": "circle",
-      "radius": 9,
+      "radius": 6,
       "transform": {
-        "x": 250,
-        "y": 318,
+        "x": 170,
+        "y": 370,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0
       },
       "style": {
-        "fill": "#2563eb",
-        "stroke": "#eff6ff",
-        "strokeWidth": 2
+        "fill": "#1971c2",
+        "stroke": "#1971c2",
+        "strokeWidth": 1.5
       },
       "visible": true,
-      "z": 9,
-      "description": "Current focus in the explanatory sequence"
+      "z": 2,
+      "description": "Token travelling along the active connection"
     }
   ],
   "timeline": [
     {
-      "id": "advance_progress",
+      "id": "draw_title_highlight",
       "type": "draw",
-      "target": "timeline_rule",
+      "target": "title_highlight",
       "start": 0,
-      "duration": 3200,
-      "easing": "linear",
+      "duration": 700,
+      "easing": "easeOut",
       "to": 1
     },
     {
-      "id": "highlight_0",
+      "id": "reveal_0",
+      "type": "opacity",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 0,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_0",
       "type": "fill",
       "target": "concept_0",
       "start": 0,
-      "duration": 380,
+      "duration": 0,
       "easing": "easeInOut",
-      "to": "#bfdbfe"
+      "to": "#a5d8ff"
     },
     {
-      "id": "expand_0",
+      "id": "stroke_0",
+      "type": "stroke",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 0,
+      "easing": "easeInOut",
+      "to": "#1971c2"
+    },
+    {
+      "id": "pop_0",
       "type": "scale",
       "target": "concept_0",
-      "start": 400,
-      "duration": 230,
+      "start": 120,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_0",
-      "type": "stroke",
+      "id": "settle_0",
+      "type": "scale",
       "target": "concept_0",
-      "start": 160,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 340,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_0",
@@ -457,34 +435,55 @@
       "visible": true
     },
     {
-      "id": "highlight_1",
+      "id": "reveal_1",
+      "type": "opacity",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_1",
       "type": "fill",
       "target": "concept_1",
       "start": 900,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#a7f3d0"
+      "to": "#f1f3f5"
     },
     {
-      "id": "expand_1",
+      "id": "stroke_1",
+      "type": "stroke",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#1e1e1e"
+    },
+    {
+      "id": "pop_1",
       "type": "scale",
       "target": "concept_1",
-      "start": 1300,
-      "duration": 230,
+      "start": 1020,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_1",
-      "type": "stroke",
+      "id": "settle_1",
+      "type": "scale",
       "target": "concept_1",
-      "start": 1060,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 1240,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_1",
@@ -503,46 +502,127 @@
       "visible": false
     },
     {
-      "id": "focus_move_1",
-      "type": "move",
-      "target": "focus_dot",
-      "start": 940,
-      "duration": 360,
-      "easing": "easeInOut",
-      "to": {
-        "x": 415,
-        "y": 253
-      }
+      "id": "reveal_link_0",
+      "type": "opacity",
+      "target": "link_0",
+      "start": 900,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
     },
     {
-      "id": "highlight_2",
+      "id": "token_show",
+      "type": "opacity",
+      "target": "token",
+      "start": 900,
+      "duration": 120,
+      "easing": "linear",
+      "to": 1
+    },
+    {
+      "id": "token_path_1",
+      "type": "followPath",
+      "target": "token",
+      "start": 940,
+      "duration": 420,
+      "easing": "easeInOut",
+      "points": [
+        {
+          "x": 170,
+          "y": 370
+        },
+        {
+          "x": 260,
+          "y": 370
+        },
+        {
+          "x": 266.6,
+          "y": 366.6
+        },
+        {
+          "x": 271.9,
+          "y": 357.5
+        },
+        {
+          "x": 276.2,
+          "y": 344.7
+        },
+        {
+          "x": 280,
+          "y": 330
+        },
+        {
+          "x": 283.8,
+          "y": 315.3
+        },
+        {
+          "x": 288.1,
+          "y": 302.5
+        },
+        {
+          "x": 293.4,
+          "y": 293.4
+        },
+        {
+          "x": 300,
+          "y": 290
+        },
+        {
+          "x": 390,
+          "y": 290
+        }
+      ]
+    },
+    {
+      "id": "reveal_2",
+      "type": "opacity",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_2",
       "type": "fill",
       "target": "concept_2",
       "start": 1800,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#fde68a"
+      "to": "#f1f3f5"
     },
     {
-      "id": "expand_2",
+      "id": "stroke_2",
+      "type": "stroke",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#1e1e1e"
+    },
+    {
+      "id": "pop_2",
       "type": "scale",
       "target": "concept_2",
-      "start": 2200,
-      "duration": 230,
+      "start": 1920,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_2",
-      "type": "stroke",
+      "id": "settle_2",
+      "type": "scale",
       "target": "concept_2",
-      "start": 1960,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 2140,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_2",
@@ -561,46 +641,118 @@
       "visible": false
     },
     {
-      "id": "focus_move_2",
-      "type": "move",
-      "target": "focus_dot",
-      "start": 1840,
-      "duration": 360,
-      "easing": "easeInOut",
-      "to": {
-        "x": 580,
-        "y": 188
-      }
+      "id": "reveal_link_1",
+      "type": "opacity",
+      "target": "link_1",
+      "start": 1800,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
     },
     {
-      "id": "highlight_3",
+      "id": "token_path_2",
+      "type": "followPath",
+      "target": "token",
+      "start": 1840,
+      "duration": 420,
+      "easing": "easeInOut",
+      "points": [
+        {
+          "x": 390,
+          "y": 290
+        },
+        {
+          "x": 480,
+          "y": 290
+        },
+        {
+          "x": 486.6,
+          "y": 286.6
+        },
+        {
+          "x": 491.9,
+          "y": 277.5
+        },
+        {
+          "x": 496.2,
+          "y": 264.7
+        },
+        {
+          "x": 500,
+          "y": 250
+        },
+        {
+          "x": 503.8,
+          "y": 235.3
+        },
+        {
+          "x": 508.1,
+          "y": 222.5
+        },
+        {
+          "x": 513.4,
+          "y": 213.4
+        },
+        {
+          "x": 520,
+          "y": 210
+        },
+        {
+          "x": 610,
+          "y": 210
+        }
+      ]
+    },
+    {
+      "id": "reveal_3",
+      "type": "opacity",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_3",
       "type": "fill",
       "target": "concept_3",
       "start": 2700,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#fecdd3"
+      "to": "#b2f2bb"
     },
     {
-      "id": "expand_3",
+      "id": "stroke_3",
+      "type": "stroke",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#2f9e44"
+    },
+    {
+      "id": "pop_3",
       "type": "scale",
       "target": "concept_3",
-      "start": 3100,
-      "duration": 230,
+      "start": 2820,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_3",
-      "type": "stroke",
+      "id": "settle_3",
+      "type": "scale",
       "target": "concept_3",
-      "start": 2860,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 3040,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
       "id": "show_stage_3",
@@ -619,16 +771,67 @@
       "visible": false
     },
     {
-      "id": "focus_move_3",
-      "type": "move",
-      "target": "focus_dot",
+      "id": "reveal_link_2",
+      "type": "opacity",
+      "target": "link_2",
+      "start": 2700,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "token_path_3",
+      "type": "followPath",
+      "target": "token",
       "start": 2740,
-      "duration": 360,
+      "duration": 420,
       "easing": "easeInOut",
-      "to": {
-        "x": 745,
-        "y": 123
-      }
+      "points": [
+        {
+          "x": 610,
+          "y": 210
+        },
+        {
+          "x": 700,
+          "y": 210
+        },
+        {
+          "x": 706.6,
+          "y": 206.6
+        },
+        {
+          "x": 711.9,
+          "y": 197.5
+        },
+        {
+          "x": 716.2,
+          "y": 184.7
+        },
+        {
+          "x": 720,
+          "y": 170
+        },
+        {
+          "x": 723.8,
+          "y": 155.3
+        },
+        {
+          "x": 728.1,
+          "y": 142.5
+        },
+        {
+          "x": 733.4,
+          "y": 133.4
+        },
+        {
+          "x": 740,
+          "y": 130
+        },
+        {
+          "x": 830,
+          "y": 130
+        }
+      ]
     }
   ],
   "markers": [

@@ -38,6 +38,9 @@ jobs:
       - name: Run release checks
         run: pnpm check
 
+      - name: Validate README examples and animation assets
+        run: pnpm docs:check
+
       - name: Configure reliable Ubuntu package downloads
         run: bash .github/scripts/prepare-apt.sh
 
@@ -84,6 +87,9 @@ jobs:
 
       - name: Validate all 150 gallery scenes in Chromium
         run: pnpm catalog:browser
+
+      - name: Validate animated diagram families in Chromium
+        run: pnpm gallery:browser
 
       - name: Qualify browser performance and lifecycle
         run: pnpm qualification:matrix

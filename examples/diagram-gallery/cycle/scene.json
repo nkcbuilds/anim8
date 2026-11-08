@@ -1,0 +1,457 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 26
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 279.4,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 127.6 -3 297.7 3 441.3 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "Build, measure, learn, repeat",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 140,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "s0",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Ideas",
+      "type": "rect",
+      "width": 140,
+      "height": 54,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 756.8,
+        "y": 271.3,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "s1",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Build",
+      "type": "rect",
+      "width": 140,
+      "height": 54,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 658.7,
+        "y": 483.7,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "s2",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Product",
+      "type": "rect",
+      "width": 140,
+      "height": 54,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 341.3,
+        "y": 483.7,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "s3",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Measure",
+      "type": "rect",
+      "width": 140,
+      "height": 54,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 243.2,
+        "y": 271.3,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "s4",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Learn",
+      "type": "rect",
+      "width": 140,
+      "height": 54,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "f0",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "s0"
+      },
+      "to": {
+        "objectId": "s1"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "f1",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "s1"
+      },
+      "to": {
+        "objectId": "s2"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "f2",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "s2"
+      },
+      "to": {
+        "objectId": "s3"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "f3",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "s3"
+      },
+      "to": {
+        "objectId": "s4"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "f4",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "s4"
+      },
+      "to": {
+        "objectId": "s0"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "hub",
+      "type": "text",
+      "text": "Validated\nlearning",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_s0",
+      "type": "draw",
+      "target": "s0",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "show_hub",
+      "type": "opacity",
+      "target": "hub",
+      "start": 558,
+      "duration": 312,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_f0",
+      "type": "draw",
+      "target": "f0",
+      "start": 1010,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_s1",
+      "type": "draw",
+      "target": "s1",
+      "start": 1010,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_f1",
+      "type": "draw",
+      "target": "f1",
+      "start": 1510,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_s2",
+      "type": "draw",
+      "target": "s2",
+      "start": 1510,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_f2",
+      "type": "draw",
+      "target": "f2",
+      "start": 2010,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_s3",
+      "type": "draw",
+      "target": "s3",
+      "start": 2010,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_f3",
+      "type": "draw",
+      "target": "f3",
+      "start": 2510,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_s4",
+      "type": "draw",
+      "target": "s4",
+      "start": 2510,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_f4",
+      "type": "draw",
+      "target": "f4",
+      "start": 3010,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}

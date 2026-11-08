@@ -33,7 +33,7 @@ installed; CI uses this mode.
 
 With an engine available, the runner:
 
-1. builds `@anim8/core`, `@anim8/renderer-svg`, and `@anim8/player`;
+1. builds the player, compiler, both renderers, framework integrations, and their workspace dependencies;
 2. starts a loopback-only static server for this repository;
 3. launches the requested Playwright browser;
 4. loads `fixture.html` against real package `dist/index.js` outputs;
@@ -52,6 +52,14 @@ Each available engine verifies:
 - `prefers-reduced-motion: reduce` through the real custom element;
 - multiple player instances with independent state/DOM;
 - mount/destroy/remount cleanup.
+- React/Vue object callback forwarding, callback replacement/removal, and keyboard activation.
+- React suspended transitions retain committed callbacks until a replacement commits.
+- Custom elements retry source replacements after reconnect and preserve explicit scene assignments.
+- callback updates without playback/state resets, Vue scene replacement while playing,
+  focus retention during seek/playback, and delayed source replacement/removal races.
+- host-loaded WOFF2 fonts on text, rich/shape/connector labels in both themes,
+  object overrides, font changes under seeking, SSR adoption and custom-font-only
+  sketch mounts without the bundled font rule.
 
 ## Visual determinism
 

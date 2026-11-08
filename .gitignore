@@ -9,3 +9,5 @@ coverage/
 *.log
 .DS_Store
 tests/browser/.tmp/
+docs/media/.generate.lock
+docs/media/.generate-*/

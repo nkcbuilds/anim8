@@ -11,6 +11,8 @@ import { fileURLToPath } from "node:url";
 import { compileJson } from "../../packages/compiler/dist/index.js";
 import { evaluate } from "../../packages/core/dist/index.js";
 import { renderSvg } from "../../packages/renderer-svg/dist/index.js";
+import { renderSketchSvg, measureSketchText } from "../../packages/renderer-sketch/dist/index.js";
+const renderFrame = frame => frame.scene.theme === "sketch" ? renderSketchSvg(frame) : renderSvg(frame);
 import { chromium } from "playwright";
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),"../..");
@@ -31,8 +33,10 @@ try {
     assert.ok(compiled.ok,entry.id+": compiler error");
     const times=[0,1350,3000];
     for(const time of times){
-      const svg=renderSvg(evaluate(compiled.scene,time));
+      const svg=renderFrame(evaluate(compiled.scene,time));
       await page.setContent(`<!doctype html><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{margin:0;padding:0}svg{display:block;width:1000px;height:560px}</style>${svg}`,{waitUntil:"domcontentloaded"});
+      // Measure with the embedded hand-drawn font, not a fallback.
+      await page.evaluate(()=>document.fonts.ready);
       const r=await page.evaluate(()=>{
         const svg=document.querySelector("svg");
         const box=svg.getBoundingClientRect();
@@ -54,7 +58,18 @@ try {
         for(const a of header)for(const b of concepts)if(intersects(a,b)) collisions++;
         const stages=[0,1,2,3].map(i=>get("stage_"+i)).filter(Boolean);
         for(const a of stages)for(const b of concepts)if(intersects(a,b)) collisions++;
-        return {outside,collisions,visibleTexts:textNodes.length,svgCount:document.querySelectorAll("svg").length};
+        // Labels rendered with the real font must stay inside their own shape.
+        const spills=[];
+        for(let i=0;i<4;i++){
+          const group=svg.querySelector(`[data-anim8-id="concept_${i}"]`);
+          const label=group?.querySelector("text");
+          const shape=group?.querySelector('[data-sketch-part="fill"],[data-sketch-part="outline"],rect,circle,ellipse');
+          if(!label||!shape) continue;
+          const t=label.getBoundingClientRect(), b=shape.getBoundingClientRect();
+          if(t.left<b.left-1||t.right>b.right+1||t.top<b.top-1||t.bottom>b.bottom+1) spills.push(label.textContent?.slice(0,40));
+        }
+        collisions+=spills.length;
+        return {outside,collisions,spills,visibleTexts:textNodes.length,svgCount:document.querySelectorAll("svg").length};
       });
       frames++;
       if(r.svgCount!==1||r.visibleTexts<5||r.outside.length||r.collisions){

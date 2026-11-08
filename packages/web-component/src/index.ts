@@ -1,6 +1,7 @@
 import { describeFrame, describeScene } from "@anim8/a11y";
 import type { ScalarValue, SceneDocument } from "@anim8/core";
 import { mountPlayer, type PlayerController } from "@anim8/player";
+import { readSceneResponse } from "../../../internal/scene-source.js";
 
 export type PlaybackShortcut =
   | "toggle"
@@ -161,6 +162,7 @@ export class Anim8WebComponent extends HTMLElementBase {
   #domBound = false;
   #loadSerial = 0;
   #loadAbort: AbortController | undefined;
+  #sourceToLoad: string | undefined;
 
   constructor() {
     super();
@@ -171,9 +173,17 @@ export class Anim8WebComponent extends HTMLElementBase {
   }
 
   set scene(value: SceneDocument | undefined) {
+    this.#sourceToLoad = undefined;
     this.#loadSerial += 1;
     this.#loadAbort?.abort();
     this.#scene = value;
+    if (!value) {
+      this.#controller?.destroy();
+      this.#controller = undefined;
+      if (this.#summary) this.#summary.textContent = "";
+      this.#syncControls();
+      return;
+    }
     this.#mount(false, false);
   }
 
@@ -224,7 +234,7 @@ export class Anim8WebComponent extends HTMLElementBase {
     if (!this.#bindDom()) return;
     this.#installReducedMotionListener();
 
-    if (this.#scene) {
+    if (this.#scene && !this.#sourceToLoad) {
       this.#mount(false, true);
       return;
     }
@@ -235,6 +245,7 @@ export class Anim8WebComponent extends HTMLElementBase {
   }
 
   disconnectedCallback(): void {
+    this.#loadSerial++;
     this.#controller?.destroy();
     this.#controller = undefined;
     this.#loadAbort?.abort();
@@ -243,13 +254,17 @@ export class Anim8WebComponent extends HTMLElementBase {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    if (oldValue === newValue || !this.isConnected) return;
+    if (oldValue === newValue) return;
 
     if (name === "src") {
-      if (newValue) void this.#loadScene(newValue);
+      this.#loadSerial++;
+      this.#loadAbort?.abort();
+      this.#sourceToLoad = newValue ?? undefined;
+      if (newValue && this.isConnected) void this.#loadScene(newValue);
       return;
     }
 
+    if (!this.isConnected) return;
     if (!this.#controller) return;
 
     if (name === "autoplay") {
@@ -445,6 +460,7 @@ export class Anim8WebComponent extends HTMLElementBase {
   };
 
   async #loadScene(src: string): Promise<void> {
+    this.#sourceToLoad = src;
     if (typeof fetch !== "function") return;
 
     const serial = ++this.#loadSerial;
@@ -453,15 +469,11 @@ export class Anim8WebComponent extends HTMLElementBase {
     this.#loadAbort = abort;
 
     try {
-      const response = await fetch(src, abort ? { signal: abort.signal } : undefined);
-      if (!response.ok) {
-        throw new Error(`Failed to load Anim8 scene: ${response.status}`);
-      }
-
-      const scene = await response.json() as SceneDocument;
-      if (serial !== this.#loadSerial) return;
+      const scene = await readSceneResponse(await fetch(src, abort ? { signal: abort.signal } : undefined));
+      if (serial !== this.#loadSerial || !this.isConnected || this.getAttribute("src") !== src) return;
 
       this.#scene = scene;
+      this.#sourceToLoad = undefined;
       this.#mount(false, true);
     } catch (error) {
       if (abort?.signal.aborted || serial !== this.#loadSerial) return;

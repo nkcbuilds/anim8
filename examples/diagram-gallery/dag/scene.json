@@ -1,0 +1,718 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1100,
+    "height": 560,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 11
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 246.8,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 177.1 -3 413.3 3 606.4 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 550,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "A CI pipeline is a directed acyclic graph",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 130,
+        "y": 320,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "commit",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Commit",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 340,
+        "y": 412,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "lint",
+      "z": 3,
+      "style": {
+        "fill": "#ffec99",
+        "stroke": "#e8590c",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Lint",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 340,
+        "y": 320,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "test",
+      "z": 3,
+      "style": {
+        "fill": "#ffec99",
+        "stroke": "#e8590c",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Unit tests",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 340,
+        "y": 228,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "types",
+      "z": 3,
+      "style": {
+        "fill": "#ffec99",
+        "stroke": "#e8590c",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Type check",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 550,
+        "y": 320,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "build",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Build",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 760,
+        "y": 274,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "image",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Container image",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 760,
+        "y": 366,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "docs",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Docs site",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 970,
+        "y": 320,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "release",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Release",
+      "type": "rect",
+      "width": 140,
+      "height": 58,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e0",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "commit"
+      },
+      "to": {
+        "objectId": "lint"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e1",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "commit"
+      },
+      "to": {
+        "objectId": "test"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e2",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "commit"
+      },
+      "to": {
+        "objectId": "types"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e3",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "lint"
+      },
+      "to": {
+        "objectId": "build"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e4",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "test"
+      },
+      "to": {
+        "objectId": "build"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e5",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "types"
+      },
+      "to": {
+        "objectId": "build"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e6",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "build"
+      },
+      "to": {
+        "objectId": "image"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e7",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "build"
+      },
+      "to": {
+        "objectId": "docs"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e8",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "image"
+      },
+      "to": {
+        "objectId": "release"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e9",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "docs"
+      },
+      "to": {
+        "objectId": "release"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_commit",
+      "type": "draw",
+      "target": "commit",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_lint",
+      "type": "draw",
+      "target": "lint",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_test",
+      "type": "draw",
+      "target": "test",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_types",
+      "type": "draw",
+      "target": "types",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e0",
+      "type": "draw",
+      "target": "e0",
+      "start": 1670,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e1",
+      "type": "draw",
+      "target": "e1",
+      "start": 1670,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e2",
+      "type": "draw",
+      "target": "e2",
+      "start": 1670,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_build",
+      "type": "draw",
+      "target": "build",
+      "start": 2230,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e3",
+      "type": "draw",
+      "target": "e3",
+      "start": 2890,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e4",
+      "type": "draw",
+      "target": "e4",
+      "start": 2890,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e5",
+      "type": "draw",
+      "target": "e5",
+      "start": 2890,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_image",
+      "type": "draw",
+      "target": "image",
+      "start": 3450,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_docs",
+      "type": "draw",
+      "target": "docs",
+      "start": 3450,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e6",
+      "type": "draw",
+      "target": "e6",
+      "start": 4110,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e7",
+      "type": "draw",
+      "target": "e7",
+      "start": 4110,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_release",
+      "type": "draw",
+      "target": "release",
+      "start": 4670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e8",
+      "type": "draw",
+      "target": "e8",
+      "start": 5330,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e9",
+      "type": "draw",
+      "target": "e9",
+      "start": 5330,
+      "duration": 420,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}

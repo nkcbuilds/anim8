@@ -1,0 +1,749 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 21
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 212.6,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 167.7 -3 391.2 3 574.9 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "Quarterly revenue grew every quarter",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 400,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "grid0",
+      "type": "line",
+      "z": 0,
+      "x2": 750,
+      "y2": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "#ced4da",
+        "strokeWidth": 2,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 110,
+        "y": 400,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "tick0",
+      "type": "text",
+      "text": "$100k",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#868e96",
+        "fontSize": 15
+      }
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 300,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "grid1",
+      "type": "line",
+      "z": 0,
+      "x2": 750,
+      "y2": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "#ced4da",
+        "strokeWidth": 2,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 110,
+        "y": 300,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "tick1",
+      "type": "text",
+      "text": "$200k",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#868e96",
+        "fontSize": 15
+      }
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 200,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "grid2",
+      "type": "line",
+      "z": 0,
+      "x2": 750,
+      "y2": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "#ced4da",
+        "strokeWidth": 2,
+        "strokeStyle": "dotted"
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 110,
+        "y": 200,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "tick2",
+      "type": "text",
+      "text": "$300k",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#868e96",
+        "fontSize": 15
+      }
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 500,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "x_axis",
+      "type": "line",
+      "z": 0,
+      "x2": 750,
+      "y2": 0,
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 150,
+        "y": 500,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "y_axis",
+      "type": "line",
+      "z": 0,
+      "x2": 0,
+      "y2": -360,
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 260,
+        "y": 499.5,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "bar0",
+      "type": "rect",
+      "width": 90,
+      "height": 1,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "radius": 4
+      }
+    },
+    {
+      "transform": {
+        "x": 260,
+        "y": 528,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "label0",
+      "type": "text",
+      "text": "Q1",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      }
+    },
+    {
+      "transform": {
+        "x": 260,
+        "y": 358,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "value0",
+      "type": "text",
+      "text": "$120k",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
+      }
+    },
+    {
+      "transform": {
+        "x": 440,
+        "y": 499.5,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "bar1",
+      "type": "rect",
+      "width": 90,
+      "height": 1,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "radius": 4
+      }
+    },
+    {
+      "transform": {
+        "x": 440,
+        "y": 528,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "label1",
+      "type": "text",
+      "text": "Q2",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      }
+    },
+    {
+      "transform": {
+        "x": 440,
+        "y": 298,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "value1",
+      "type": "text",
+      "text": "$180k",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
+      }
+    },
+    {
+      "transform": {
+        "x": 620,
+        "y": 499.5,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "bar2",
+      "type": "rect",
+      "width": 90,
+      "height": 1,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "radius": 4
+      }
+    },
+    {
+      "transform": {
+        "x": 620,
+        "y": 528,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "label2",
+      "type": "text",
+      "text": "Q3",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      }
+    },
+    {
+      "transform": {
+        "x": 620,
+        "y": 248,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "value2",
+      "type": "text",
+      "text": "$230k",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
+      }
+    },
+    {
+      "transform": {
+        "x": 800,
+        "y": 499.5,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "bar3",
+      "type": "rect",
+      "width": 90,
+      "height": 1,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "radius": 4
+      }
+    },
+    {
+      "transform": {
+        "x": 800,
+        "y": 528,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "label3",
+      "type": "text",
+      "text": "Q4",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      }
+    },
+    {
+      "transform": {
+        "x": 800,
+        "y": 168,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "value3",
+      "type": "text",
+      "text": "$310k",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_x_axis",
+      "type": "draw",
+      "target": "x_axis",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_y_axis",
+      "type": "draw",
+      "target": "y_axis",
+      "start": 350,
+      "duration": 500,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_grid0",
+      "type": "draw",
+      "target": "grid0",
+      "start": 990,
+      "duration": 400,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_grid1",
+      "type": "draw",
+      "target": "grid1",
+      "start": 990,
+      "duration": 400,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_grid2",
+      "type": "draw",
+      "target": "grid2",
+      "start": 990,
+      "duration": 400,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "show_tick0",
+      "type": "opacity",
+      "target": "tick0",
+      "start": 1150,
+      "duration": 240,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "show_tick1",
+      "type": "opacity",
+      "target": "tick1",
+      "start": 1150,
+      "duration": 240,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "show_tick2",
+      "type": "opacity",
+      "target": "tick2",
+      "start": 1150,
+      "duration": 240,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "easing": "easeOut",
+      "id": "grow0",
+      "type": "resize",
+      "target": "bar0",
+      "start": 1530,
+      "duration": 650,
+      "to": {
+        "width": 90,
+        "height": 120
+      }
+    },
+    {
+      "easing": "easeOut",
+      "id": "rise0",
+      "type": "move",
+      "target": "bar0",
+      "start": 1530,
+      "duration": 650,
+      "to": {
+        "x": 260,
+        "y": 440
+      }
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_label0",
+      "type": "opacity",
+      "target": "label0",
+      "start": 1530,
+      "duration": 300,
+      "to": 1
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_value0",
+      "type": "opacity",
+      "target": "value0",
+      "start": 1980,
+      "duration": 300,
+      "to": 1
+    },
+    {
+      "easing": "easeOut",
+      "id": "grow1",
+      "type": "resize",
+      "target": "bar1",
+      "start": 1690,
+      "duration": 650,
+      "to": {
+        "width": 90,
+        "height": 180
+      }
+    },
+    {
+      "easing": "easeOut",
+      "id": "rise1",
+      "type": "move",
+      "target": "bar1",
+      "start": 1690,
+      "duration": 650,
+      "to": {
+        "x": 440,
+        "y": 410
+      }
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_label1",
+      "type": "opacity",
+      "target": "label1",
+      "start": 1690,
+      "duration": 300,
+      "to": 1
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_value1",
+      "type": "opacity",
+      "target": "value1",
+      "start": 2140,
+      "duration": 300,
+      "to": 1
+    },
+    {
+      "easing": "easeOut",
+      "id": "grow2",
+      "type": "resize",
+      "target": "bar2",
+      "start": 1850,
+      "duration": 650,
+      "to": {
+        "width": 90,
+        "height": 230
+      }
+    },
+    {
+      "easing": "easeOut",
+      "id": "rise2",
+      "type": "move",
+      "target": "bar2",
+      "start": 1850,
+      "duration": 650,
+      "to": {
+        "x": 620,
+        "y": 385
+      }
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_label2",
+      "type": "opacity",
+      "target": "label2",
+      "start": 1850,
+      "duration": 300,
+      "to": 1
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_value2",
+      "type": "opacity",
+      "target": "value2",
+      "start": 2300,
+      "duration": 300,
+      "to": 1
+    },
+    {
+      "easing": "easeOut",
+      "id": "grow3",
+      "type": "resize",
+      "target": "bar3",
+      "start": 2010,
+      "duration": 650,
+      "to": {
+        "width": 90,
+        "height": 310
+      }
+    },
+    {
+      "easing": "easeOut",
+      "id": "rise3",
+      "type": "move",
+      "target": "bar3",
+      "start": 2010,
+      "duration": 650,
+      "to": {
+        "x": 800,
+        "y": 345
+      }
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_label3",
+      "type": "opacity",
+      "target": "label3",
+      "start": 2010,
+      "duration": 300,
+      "to": 1
+    },
+    {
+      "easing": "easeInOut",
+      "id": "show_value3",
+      "type": "opacity",
+      "target": "value3",
+      "start": 2460,
+      "duration": 300,
+      "to": 1
+    }
+  ]
+}

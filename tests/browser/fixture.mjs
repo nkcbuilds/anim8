@@ -4,7 +4,8 @@ import {
   evaluate,
 } from "@anim8/core";
 import { mountSvg, renderSceneAt } from "@anim8/renderer-svg";
-import { defineAnim8Player, mountPlayer } from "@anim8/player";
+import { defineAnim8Player, mountPlayer, renderSceneMarkup } from "@anim8/player";
+import { defineAnim8WebComponent } from "/packages/web-component/dist/index.js";
 
 const root = document.querySelector("#fixture-root");
 
@@ -458,7 +459,228 @@ async function setupScreenshotFixture() {
   };
 }
 
+function sketchScene() {
+  const scene = motionScene();
+  return {
+    ...scene,
+    scene: { ...scene.scene, theme: "sketch", seed: 7 },
+    objects: [
+      ...scene.objects,
+      { id: "trail", type: "path", d: "M 0 0 C 60 -40 120 40 180 0", drawProgress: 0,
+        transform: { ...defaultTransform(), x: 140, y: 220 },
+        style: { ...defaultStyle(), fill: "none", stroke: "#1971c2", strokeWidth: 2 }, visible: true, z: 2 },
+    ],
+    timeline: [
+      ...scene.timeline,
+      { id: "draw-trail", type: "draw", target: "trail", start: 0, duration: 1000, easing: "linear", to: 1 },
+      { id: "tint-a", type: "fill", target: "a", start: 0, duration: 1000, easing: "linear", to: "#a5d8ff" },
+    ],
+  };
+}
+
+async function sketchPlayer() {
+  reset();
+  const scene = sketchScene();
+  const container = host("sketch-player");
+  const controller = mountPlayer(container, scene, { autoplay: false });
+  controller.seek(0);
+  const svgBefore = container.querySelector("svg");
+  const node = container.querySelector('[data-anim8-id="a"]');
+  const marksBefore = node?.querySelector('[data-sketch-part="outline"]')?.getAttribute("d");
+  const transformBefore = node?.getAttribute("transform");
+  const trailBefore = container.querySelector('[data-anim8-id="trail"] path')?.getAttribute("stroke-dashoffset");
+  node?.setAttribute("tabindex", "0");
+  node?.focus();
+
+  controller.seek(500);
+  await waitAnimationFrames(2);
+  const nodeAfter = container.querySelector('[data-anim8-id="a"]');
+  const result = {
+    svgCount: container.querySelectorAll("svg").length,
+    sameSvg: container.querySelector("svg") === svgBefore,
+    sameNode: nodeAfter === node,
+    focusKept: document.activeElement === node,
+    transformBefore,
+    transformAfter: nodeAfter?.getAttribute("transform"),
+    marksStable: nodeAfter?.querySelector('[data-sketch-part="outline"]')?.getAttribute("d") === marksBefore,
+    roughOutline: Boolean(marksBefore && marksBefore.includes("C")),
+    trailBefore,
+    trailAfter: container.querySelector('[data-anim8-id="trail"] path')?.getAttribute("stroke-dashoffset"),
+    arrowheads: container.querySelectorAll('[data-sketch-part="arrowhead"]').length,
+    fontStyles: document.head.querySelectorAll("style[data-anim8-sketch-font]").length,
+  };
+  await document.fonts.load('20px "Virgil"');
+  result.fontReady = document.fonts.check('20px "Virgil"');
+
+  // A second player shares the single document font rule.
+  const other = mountPlayer(host("sketch-player-2"), scene, { autoplay: false });
+  result.fontStylesAfterSecond = document.head.querySelectorAll("style[data-anim8-sketch-font]").length;
+
+  // Server markup is adopted in place rather than replaced.
+  const ssrHost = host("sketch-ssr");
+  ssrHost.innerHTML = renderSceneMarkup(scene, 0);
+  const ssrNode = ssrHost.querySelector('[data-anim8-id="b"]');
+  const hydrated = mountPlayer(ssrHost, scene, { autoplay: false });
+  result.ssrAdopted = ssrHost.querySelector('[data-anim8-id="b"]') === ssrNode;
+  hydrated.seek(900);
+  result.ssrUpdates = ssrHost.querySelector('[data-anim8-id="a"]')?.getAttribute("transform") !== transformBefore;
+
+  controller.play();
+  await sleep(250);
+  result.playedTo = controller.getTime();
+  controller.destroy();
+  other.destroy();
+  hydrated.destroy();
+  result.childrenAfterDestroy = container.children.length;
+  return result;
+}
+
+async function customFonts() {
+  reset();
+  // Use a real local WOFF2 under a host-defined name, rather than relying on an installed font.
+  const face = new FontFace("Anim8TestFont", 'url("/packages/renderer-sketch/assets/Virgil.woff2")');
+  await face.load();
+  document.fonts.add(face);
+  const results = [];
+  try {
+    for (const theme of ["clean", "sketch"]) {
+      const scene = motionScene();
+      scene.scene.theme = theme;
+      scene.scene.fontFamily = '"Anim8TestFont", serif';
+      scene.objects[0].textRuns = [{ text: "A", fontWeight: 400 }];
+      scene.objects[1].style.fontFamily = "monospace";
+      scene.objects[2].label = "Link";
+      scene.objects.push(
+        { ...circle("circle", 100, 210), text: "Circle" },
+        { ...rect("ellipse", 300, 210), type: "ellipse", rx: 45, ry: 25, text: "Ellipse" },
+        { ...rect("label", 220, 40), type: "text", text: "Wide label" },
+      );
+      scene.timeline.push({ id: "font", type: "style", target: "label", start: 0, duration: 1000, to: { fontFamily: "monospace" } });
+      const container = host(`custom-font-${theme}`);
+      container.innerHTML = renderSceneMarkup(scene, 0);
+      const originalSvg = container.firstElementChild;
+      const original = container.querySelector('[data-anim8-id="label"]');
+      const controller = mountPlayer(container, scene);
+      try {
+        const label = () => {
+          const node = container.querySelector('[data-anim8-id="label"]');
+          return node.matches("text") ? node : node.querySelector("text");
+        };
+        await document.fonts.ready;
+        const families = [...container.querySelectorAll("text")].map(node => node.getAttribute("font-family"));
+        const computed = getComputedStyle(label()).fontFamily;
+        const canvas = document.createElement("canvas").getContext("2d");
+        canvas.font = `${label().getAttribute("font-size")}px "Anim8TestFont"`;
+        const widthDifference = Math.abs(label().getComputedTextLength() - canvas.measureText("Wide label").width);
+        controller.seek(1000);
+        const endFamily = label().getAttribute("font-family");
+        controller.seek(500);
+        const reverseFamily = label().getAttribute("font-family");
+        results.push({ theme, loaded: face.status, families, computed, widthDifference, endFamily, reverseFamily,
+          hydrated: container.firstElementChild === originalSvg && container.querySelector('[data-anim8-id="label"]') === original,
+          bundledStyles: document.head.querySelectorAll("style[data-anim8-sketch-font]").length });
+      } finally {
+        controller.destroy();
+      }
+    }
+    return results;
+  } finally {
+    document.fonts.delete(face);
+  }
+}
+
+async function remoteSceneLoads() {
+  reset();
+  defineAnim8Player("anim8-browser-test-player");
+  defineAnim8WebComponent("anim8-controls");
+  const valid = { version: "1.0", scene: { width: 320, height: 180, fontFamily: "serif" }, objects: [{ id: "remote", type: "rect", text: "Loaded" }], timeline: [] };
+  const invalid = { ...valid, objects: [{ id: "remote", type: "rect", style: { strokeWidth: -6.4, strokeStyle: "dashed" }, drawProgress: 0.5 }] };
+  const results = [];
+  for (const tag of ["anim8-browser-test-player", "anim8-controls"]) {
+    for (const [name, source] of [["valid", valid], ["invalid", invalid]]) {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(source)], { type: "application/json" }));
+      const element = document.createElement(tag);
+      let error;
+      element.addEventListener("anim8-error", event => { error = String(event.detail); });
+      element.setAttribute("src", url);
+      root.appendChild(element);
+      const stage = () => element.shadowRoot ?? element;
+      try {
+        for (let i = 0; i < 120 && !error && !stage().querySelector("svg"); i++) await waitAnimationFrames(1);
+        const rendered = Boolean(stage().querySelector("svg"));
+        const normalized = element.scene?.objects[0]?.transform?.scaleX;
+        element.scene = undefined;
+        results.push({ tag, name, rendered, error: error ?? null, normalized: normalized ?? null, cleared: !stage().querySelector("svg") });
+      } finally {
+        element.remove(); URL.revokeObjectURL(url);
+      }
+    }
+  }
+  return results;
+}
+
+async function focusAndSourceRaces() {
+  reset();
+  const focus = [];
+  for (const theme of ["clean", "sketch"]) {
+    const container = host(`focus-${theme}`), scene = motionScene(); scene.scene.theme = theme;
+    let blurs = 0;
+    const controller = mountPlayer(container, scene, { onObjectEvent: event => { if (event.type === "blur") blurs++; } });
+    const node = container.querySelector('[data-anim8-id="a"]'); node.focus();
+    controller.seek(500);
+    controller.play(); await waitAnimationFrames(4); controller.pause();
+    focus.push({ theme, focused: document.activeElement === node, blurs });
+    controller.destroy();
+  }
+  const originalFetch = window.fetch;
+  const races = [];
+  const source = text => ({ version: "1.0", scene: { width: 320, height: 180, fontFamily: "serif" }, objects: [{ id: "remote", type: "rect", text }], timeline: [] });
+  try {
+    for (const tag of ["anim8-browser-test-player", "anim8-controls"]) {
+      for (const action of ["remove", "replace"]) {
+        let resolveOld, signal;
+        window.fetch = (url, options) => {
+          if (url === "https://anim8.invalid/slow.json") { signal = options.signal; return new Promise(resolve => { resolveOld = resolve; }); }
+          if (url === "https://anim8.invalid/new.json") return Promise.resolve(new Response(JSON.stringify(source("new"))));
+          return originalFetch(url, options);
+        };
+        const element = document.createElement(tag); element.setAttribute("src", "https://anim8.invalid/slow.json"); root.append(element);
+        if (action === "remove") element.removeAttribute("src");
+        else element.setAttribute("src", "https://anim8.invalid/new.json");
+        resolveOld(new Response(JSON.stringify(source("old"))));
+        for (let i = 0; i < 6; i++) await waitAnimationFrames(2);
+        races.push({ tag, action, aborted: signal.aborted, label: element.scene?.objects[0]?.text ?? null });
+        element.remove();
+      }
+      for (const action of ["reconnect", "assigned"]) {
+        const pending = [], signals = [];
+        window.fetch = (_url, options) => {
+          signals.push(options.signal);
+          return new Promise(resolve => pending.push(resolve));
+        };
+        const assigned = text => ({ ...source(text), objects: source(text).objects.map(o => ({ ...o, width: 100, height: 50, style: defaultStyle(), transform: defaultTransform(), visible: true, z: 0 })) });
+        const element = document.createElement(tag);
+        element.scene = assigned("cached"); root.append(element);
+        element.setAttribute("src", "https://anim8.invalid/slow.json");
+        element.remove();
+        if (action === "assigned") element.scene = assigned("manual");
+        root.append(element);
+        const requests = pending.length;
+        for (const resolve of pending) resolve(new Response(JSON.stringify(source("new"))));
+        for (let i = 0; i < 6; i++) await waitAnimationFrames(2);
+        races.push({ tag, action, requests, aborted: signals[0].aborted, label: element.scene?.objects[0]?.text ?? null });
+        element.remove();
+      }
+    }
+  } finally { window.fetch = originalFetch; }
+  return { focus, races };
+}
+
 window.__anim8Browser = {
+  focusAndSourceRaces,
+  remoteSceneLoads,
+  customFonts,
+  sketchPlayer,
   svgIdentity,
   playerControls,
   dynamicConnector,
