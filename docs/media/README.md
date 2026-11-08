@@ -24,6 +24,15 @@ share. It uses one scene from `intro.mjs`, saved as `intro.scene.json`, and
 samples that scene at forward and backward timestamps to demonstrate direct
 seeking. Regenerate it with `node docs/media/generate.mjs --only intro`.
 
+Regeneration takes an exclusive `.generate.lock` in this directory. A second
+invocation exits without changing files; retry after the active invocation
+finishes. If a process is forcibly terminated, confirm it is no longer running
+before removing its leftover lock. The lock records the process ID.
+
+Scenes, GIFs, and the manifest stay staged until every selected preview has
+rendered and encoded successfully. Rendering failures preserve the previously
+published assets. Successful regeneration publishes the manifest last.
+
 `authoring.gif` is built from the marked TypeScript example in the root README.
 Its generated `quickstart.scene.json` is checked against that exact example.
 The walkthrough separates object creation and connection from playback, then

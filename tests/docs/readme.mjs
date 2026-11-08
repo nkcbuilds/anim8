@@ -4,11 +4,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { evaluate, lintDesign, validateScene } from "../../packages/core/dist/index.js";
 import { readQuickstart } from "../../docs/media/quickstart.mjs";
 import { createIntroScene } from "../../docs/media/intro.mjs";
+import { readmeAnchors } from "./anchors.mjs";
 
 const root = new URL("../../", import.meta.url);
 const readme = readFileSync(new URL("README.md", root), "utf8").replace(/\r/g, "");
-const anchors = new Set([...readme.matchAll(/^#{1,6} (.+)$/gm)].map(match => match[1].toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, "").replace(/\s/g, "-")));
-for (const match of readme.matchAll(/<a id="([^"]+)"/g)) anchors.add(match[1]);
+const anchors = readmeAnchors(readme);
 for (const match of readme.matchAll(/\]\(#([^)]+)\)/g)) assert.ok(anchors.has(match[1]), `Broken README section link: ${match[1]}`);
 for (const match of readme.matchAll(/href="#([^"]+)"/g)) assert.ok(anchors.has(match[1]), `Broken README navigation: ${match[1]}`);
 for (const match of readme.matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g)) {

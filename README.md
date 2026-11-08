@@ -110,6 +110,7 @@ import { scene } from "@anim8/authoring";
 import { DIAGRAM_TONES } from "@anim8/core";
 import { mountPlayer } from "@anim8/player";
 
+// quickstart:builder:start
 const s = scene({ width: 800, height: 360, theme: "sketch", seed: 7 });
 const input = s.box("Request", {
   id: "request", x: 160, y: 180, ...DIAGRAM_TONES.blue,
@@ -125,6 +126,7 @@ s.step("Send request", () => {
 s.step("Complete", () => {
   s.sequence(service.styleTo(DIAGRAM_TONES.green, { duration: 400 }));
 });
+// quickstart:builder:end
 
 const player = mountPlayer(document.querySelector("#diagram")!, s.toJSON());
 player.play();

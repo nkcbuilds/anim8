@@ -12,7 +12,7 @@
     "consumers": "node tests/consumers/run.mjs",
     "benchmark": "node benchmarks/run-baseline.mjs",
     "bundle:check": "node benchmarks/check-runtime-size.mjs",
-    "docs:check": "node tests/docs/readme.mjs",
+    "docs:check": "node --test tests/docs/media.test.mjs && node tests/docs/readme.mjs",
     "browser": "node tests/browser/run.mjs",
     "catalog:generate": "node examples/catalog/generate.mjs",
     "catalog:check": "node examples/catalog/generate.mjs --check",

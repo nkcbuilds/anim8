@@ -77,7 +77,7 @@
     "bytes": 192821,
     "sha256": "70102ee20fd4a2e09f74cdb8d57f5989fe8b6b38b6e283e641b52b84b9feddb0",
     "recipe": "docs/media/quickstart.mjs",
-    "recipeSha256": "ba77172312f97e763302f1c248bccf53305f2ab38918b962bf2b6576ab8989ec"
+    "recipeSha256": "6e587e2c3f71e07eb0d2a0cfd5b67eca71393af4f8b392e702212a2b3e9f0615"
   },
   {
     "file": "intro.gif",

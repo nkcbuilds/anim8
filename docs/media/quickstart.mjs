@@ -5,12 +5,13 @@ import { DIAGRAM_TONES, evaluate } from "../../packages/core/dist/index.js";
 import { renderSketchSvg } from "../../packages/renderer-sketch/dist/index.js";
 
 /** Execute only the trusted repository's marked authoring example, before its DOM mount. */
-export function readQuickstart() {
-  const readme = readFileSync(new URL("../../README.md", import.meta.url), "utf8").replace(/\r/g, "");
+export function readQuickstart(source = readFileSync(new URL("../../README.md", import.meta.url), "utf8")) {
+  const readme = source.replace(/\r/g, "");
   const snippet = readme.match(/<!-- quickstart:start -->\n```ts\n([\s\S]*?)\n```\n<!-- quickstart:end -->/);
   assert.ok(snippet, "README authoring example must have quickstart markers");
-  const builder = snippet[1].replace(/^import .*;\n/gm, "").split("const player =")[0];
-  const document = new Function("scene", "DIAGRAM_TONES", builder + "\nreturn s.toJSON();")(scene, DIAGRAM_TONES);
+  const builder = snippet[1].match(/^\/\/ quickstart:builder:start\n([\s\S]*?)^\/\/ quickstart:builder:end\s*$/m);
+  assert.ok(builder, "README scene builder must have explicit builder boundaries");
+  const document = new Function("scene", "DIAGRAM_TONES", builder[1] + "\nreturn s.toJSON();")(scene, DIAGRAM_TONES);
   assert.deepEqual(document.timeline.map(({ type, target, start, duration }) => ({ type, target, start, duration })), [
     { type: "move", target: "request", start: 0, duration: 900 },
     { type: "style", target: "service", start: 900, duration: 400 },
@@ -31,8 +32,7 @@ export function quickstartFrame(document, previewTime) {
   const frame = evaluate(document, sceneTime);
   if (phase === 0) frame.objects = frame.objects.filter(object => object.type !== "connector");
   const diagram = renderSketchSvg(frame)
-    .replace('viewBox="0 0 800 360"', 'viewBox="80 100 560 160"')
-    .replace('<svg xmlns=', '<svg x="40" y="76" width="800" height="230" xmlns=');
+    .replace(/<svg\b([^>]*)>/, (_root, attributes) => `<svg${attributes.replace(/\s(?:x|y|width|height|viewBox)="[^"]*"/g, "")} x="40" y="76" width="800" height="230" viewBox="80 100 560 160">`);
   const titles = ["Create two objects", "Connect them", "Move the request", "Mark it complete"];
   const code = [
     's.box("Request"); s.box("Service");',
