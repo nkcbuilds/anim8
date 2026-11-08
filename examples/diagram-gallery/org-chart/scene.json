@@ -1,0 +1,700 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 18
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 217.9,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 164.5 -3 383.7 3 564.2 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "A small company organised as a tree",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 130,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "ceo",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "CEO",
+      "type": "rect",
+      "width": 150,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 230,
+        "y": 280,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "cto",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "CTO",
+      "type": "rect",
+      "width": 150,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_cto",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "ceo",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "cto",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 280,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "cfo",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "CFO",
+      "type": "rect",
+      "width": 150,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_cfo",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "ceo",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "cfo",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 770,
+        "y": 280,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "coo",
+      "z": 3,
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "COO",
+      "type": "rect",
+      "width": 150,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_coo",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "ceo",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "coo",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 130,
+        "y": 440,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "eng",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Engineering",
+      "type": "rect",
+      "width": 140,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_eng",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "cto",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "eng",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 330,
+        "y": 440,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "data",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Data",
+      "type": "rect",
+      "width": 140,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_data",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "cto",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "data",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 440,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "finance",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Finance",
+      "type": "rect",
+      "width": 140,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_finance",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "cfo",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "finance",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 690,
+        "y": 440,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "ops",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Operations",
+      "type": "rect",
+      "width": 140,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_ops",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "coo",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ops",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 870,
+        "y": 440,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "people",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "People",
+      "type": "rect",
+      "width": 140,
+      "height": 60,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "e_people",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "coo",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "people",
+        "anchor": "top"
+      },
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_ceo",
+      "type": "draw",
+      "target": "ceo",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_cto",
+      "type": "draw",
+      "target": "cto",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_cto",
+      "type": "draw",
+      "target": "e_cto",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_cfo",
+      "type": "draw",
+      "target": "cfo",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_cfo",
+      "type": "draw",
+      "target": "e_cfo",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_coo",
+      "type": "draw",
+      "target": "coo",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_coo",
+      "type": "draw",
+      "target": "e_coo",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_eng",
+      "type": "draw",
+      "target": "eng",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_eng",
+      "type": "draw",
+      "target": "e_eng",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_data",
+      "type": "draw",
+      "target": "data",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_data",
+      "type": "draw",
+      "target": "e_data",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_finance",
+      "type": "draw",
+      "target": "finance",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_finance",
+      "type": "draw",
+      "target": "e_finance",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_ops",
+      "type": "draw",
+      "target": "ops",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_ops",
+      "type": "draw",
+      "target": "e_ops",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_people",
+      "type": "draw",
+      "target": "people",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_e_people",
+      "type": "draw",
+      "target": "e_people",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}

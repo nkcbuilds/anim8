@@ -47,6 +47,12 @@ function scene(objects: DrawableObject[]): SceneDocument {
 }
 
 describe("layoutElk", () => {
+  it("returns prototype-like ids as own position and route keys", async () => {
+    const result = await layoutElk([rect("__proto__"), rect("constructor"), edge("__proto__", "__proto__", "constructor")]);
+    expect(Object.keys(result.positions).sort()).toEqual(["__proto__", "constructor"]);
+    expect(Object.keys(result.routes)).toEqual(["__proto__"]);
+    expect(Number.isFinite(result.positions.__proto__!.x)).toBe(true);
+  });
   it("returns directed positions and routed connector sections without mutating input", async () => {
     const input = scene([
       rect("client"),

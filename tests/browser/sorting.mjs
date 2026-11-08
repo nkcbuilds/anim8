@@ -66,6 +66,7 @@ function compareSnapshot(actual, expected, context) {
 }
 try {
   for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
+    if (process.env.ANIM8_BROWSER_ENGINES && !process.env.ANIM8_BROWSER_ENGINES.split(",").includes(name)) continue;
     const browser = await engine.launch({ headless: true });
     const profile = { name, ok: false, browserVersion: browser.version() }; report.profiles.push(profile);
     try {
@@ -75,12 +76,12 @@ try {
       const errors = []; page.on("pageerror", error => errors.push(error.message));
       await page.goto("http://127.0.0.1:" + server.address().port); await page.waitForFunction(() => Boolean(window.SORT));
       await page.evaluate(() => document.fonts.ready);
-      let initialPixels;
+      let initialPixels, initialSvg;
       for (const snapshot of snapshots) {
         await page.evaluate(time => SORT.seek(time), snapshot.time);
         compareSnapshot(await page.evaluate(() => SORT.snapshot()), expectedSnapshot(snapshot.time), name + " " + snapshot.name);
         const before = await page.locator("#host").screenshot({ path: `artifacts/sorting/${name}-${snapshot.name}.png` });
-        if (snapshot.name === "input") initialPixels = before;
+        if (snapshot.name === "input") { initialPixels = before; initialSvg = await page.locator("#host").innerHTML(); }
         const svg = await page.evaluate(time => SORT.reference(time), snapshot.time);
         await referencePage.evaluate(svg => document.querySelector("#reference").innerHTML = svg, svg);
         await referencePage.evaluate(() => document.fonts.ready);
@@ -113,7 +114,14 @@ try {
       await page.waitForFunction(() => !SORT.stats().playing, {}, { timeout: trace.durationMs / 4 + 20_000 });
       assert.equal((await page.evaluate(() => SORT.stats())).time, 0);
       compareSnapshot(await page.evaluate(() => SORT.snapshot()), expectedSnapshot(0), name + " reverse playback finish");
-      assert.ok((await page.locator("#host").screenshot()).equals(initialPixels), "Reverse playback must restore initial pixels");
+      const reversed = await page.locator("#host").screenshot();
+      if (!reversed.equals(initialPixels)) {
+        await writeFile(`artifacts/sorting/${name}-reverse-before.png`, initialPixels);
+        await writeFile(`artifacts/sorting/${name}-reverse-after.png`, reversed);
+        await writeFile(`artifacts/sorting/${name}-reverse-before.svg`, initialSvg);
+        await writeFile(`artifacts/sorting/${name}-reverse-after.svg`, await page.locator("#host").innerHTML());
+      }
+      assert.ok(reversed.equals(initialPixels), name + " reverse playback must restore initial pixels");
       await page.evaluate(() => SORT.destroy());
       assert.equal(await page.locator("#host *").count(), 0);
       assert.deepEqual(errors, []);

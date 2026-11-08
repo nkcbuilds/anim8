@@ -1,7 +1,7 @@
 import { defaultCamera } from "./defaults.js";
 import { interpolateStyle, styleProperties } from "./style.js";
 import { ease, lerp, lerpColor } from "./easing.js";
-import { decomposeMatrix, identityMatrix, invertMatrix, multiply, quadraticPoint, worldMatrix, worldOpacity } from "./geometry.js";
+import { assertWorldTransforms, decomposeMatrix, identityMatrix, invertMatrix, multiply, quadraticPoint, worldMatrix, worldOpacity } from "./geometry.js";
 import { canonicalMorphPathToString, interpolateMorphPath, morphPathCompatibility, parseMorphPathData } from "./path-morph.js";
 import { evaluateExpression } from "./expression.js";
 import type { Action, Binding, CameraAction, CameraState, DrawableObject, EvaluatedScene, EvaluationContext, PointValue, SceneDocument, ScalarValue } from "./types.js";
@@ -237,8 +237,17 @@ function applyAction(state: Map<string, DrawableObject>, action: ObjectAction, t
       }
       break;
     case "draw":
-      if (target.type === "path" || target.type === "polygon" || target.type === "polyline") {
-        target.drawProgress = lerp(target.drawProgress ?? 1, action.to, progress);
+      switch (target.type) {
+        case "path":
+        case "polygon":
+        case "polyline":
+        case "rect":
+        case "circle":
+        case "ellipse":
+        case "line":
+        case "connector":
+          target.drawProgress = lerp(target.drawProgress ?? 1, action.to, progress);
+          break;
       }
       break;
     case "morph":
@@ -299,18 +308,23 @@ function applyBinding(state: Map<string, DrawableObject>, binding: Binding, time
 }
 
 export function evaluate(scene: SceneDocument, time: number, context: EvaluationContext = {}): EvaluatedScene {
+  if (!Number.isFinite(time)) throw new RangeError("Scene time must be a finite number.");
   const duration = sceneDuration(scene);
   const clamped = Math.max(0, Math.min(time, duration));
   const state = new Map(scene.objects.map(object => [object.id, clone(object)]));
+  if (scene.scene.fontFamily !== undefined) {
+    for (const object of state.values()) object.style.fontFamily ??= scene.scene.fontFamily;
+  }
   const camera = clone(scene.scene.camera ?? defaultCamera());
   const actions = scene.timeline
     .map((action, index) => ({ action, index }))
     .sort((a, b) => a.action.start - b.action.start || a.index - b.index)
     .map(entry => entry.action);
+  const interrupts = actions.filter(action => action.interrupt);
 
   for (const action of actions) {
     if (clamped < action.start) continue;
-    const interruptedAt = interruptionTime(action, actions);
+    const interruptedAt = interruptionTime(action, interrupts);
     const actionTime = Math.min(
       clamped,
       action.start + action.duration,
@@ -321,6 +335,7 @@ export function evaluate(scene: SceneDocument, time: number, context: Evaluation
   }
 
   for (const binding of scene.bindings ?? []) applyBinding(state, binding, clamped, duration, context, scene.state ?? {});
+  assertWorldTransforms(state);
 
   return {
     version: scene.version,

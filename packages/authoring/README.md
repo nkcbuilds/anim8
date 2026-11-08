@@ -6,6 +6,8 @@ This package is part of the [Anim8](https://github.com/nkcbuilds/anim8) monorepo
 
 > Status: pre-1.0. Public APIs may still evolve while the scene format and package boundaries are hardened.
 
+Set `scene({ fontFamily: '"My Font", sans-serif' })` to choose the default for every label in either theme. Override individual objects with `s.text("Code", { fontFamily: "monospace" })` or the same option on shapes/connectors. Load custom fonts in your host app; see [font loading and exports](../../docs/guides/visual-styling.md#fonts).
+
 ## Development
 
 From the repository root:

@@ -1,0 +1,280 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 20
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 171.5,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 192.3 -3 448.7 3 657.1 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "Great products sit where three skills meet",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 410,
+        "y": 270,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "design",
+      "type": "circle",
+      "radius": 135,
+      "style": {
+        "fill": "#a5d8ff88",
+        "stroke": "#1971c2",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 310,
+        "y": 170,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "design_label",
+      "type": "text",
+      "text": "Design",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 20
+      }
+    },
+    {
+      "transform": {
+        "x": 590,
+        "y": 270,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "eng",
+      "type": "circle",
+      "radius": 135,
+      "style": {
+        "fill": "#b2f2bb88",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 700,
+        "y": 170,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "eng_label",
+      "type": "text",
+      "text": "Engineering",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 20
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 420,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "biz",
+      "type": "circle",
+      "radius": 135,
+      "style": {
+        "fill": "#ffec9988",
+        "stroke": "#e8590c",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 560,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "biz_label",
+      "type": "text",
+      "text": "Business",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 20
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 330,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 0
+      },
+      "visible": true,
+      "id": "core",
+      "type": "text",
+      "text": "Great\nproduct",
+      "z": 6,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_design",
+      "type": "draw",
+      "target": "design",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "show_design_label",
+      "type": "opacity",
+      "target": "design_label",
+      "start": 558,
+      "duration": 312,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_eng",
+      "type": "draw",
+      "target": "eng",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "show_eng_label",
+      "type": "opacity",
+      "target": "eng_label",
+      "start": 1218,
+      "duration": 312,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_biz",
+      "type": "draw",
+      "target": "biz",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "show_biz_label",
+      "type": "opacity",
+      "target": "biz_label",
+      "start": 1878,
+      "duration": 312,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "show_core",
+      "type": "opacity",
+      "target": "core",
+      "start": 2538,
+      "duration": 312,
+      "easing": "easeOut",
+      "to": 1
+    }
+  ]
+}

@@ -334,7 +334,7 @@ export async function layoutElk(
   const outputNodes = new Map((laidOut.children ?? []).map(node => [node.id, node]));
   const outputEdges = new Map((laidOut.edges ?? []).map(edge => [edge.id, edge]));
 
-  const positions: Record<string, ElkNodePosition> = {};
+  const positions: Record<string, ElkNodePosition> = Object.create(null);
   for (const node of nodes) {
     const output = outputNodes.get(node.id);
     if (!output) throw new Error("ELK omitted layout node '" + node.id + "'.");
@@ -350,7 +350,7 @@ export async function layoutElk(
     };
   }
 
-  const routes: Record<string, ElkEdgeRoute> = {};
+  const routes: Record<string, ElkEdgeRoute> = Object.create(null);
   for (const edge of edges) {
     const output = outputEdges.get(edge.id);
     if (!output) throw new Error("ELK omitted connector '" + edge.id + "'.");

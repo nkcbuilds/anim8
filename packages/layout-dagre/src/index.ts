@@ -176,6 +176,9 @@ export function layoutDagre(
   const { nodes, edges } = graphInputs(target);
 
   const graph = new dagre.graphlib.Graph({ multigraph: true });
+  // Graphlib uses ordinary object dictionaries internally. Prefix external ids
+  // so valid scene names such as __proto__ and constructor cannot hit prototypes.
+  const nodeKey = (id: string) => `anim8-node:${id}`;
   graph.setDefaultEdgeLabel(() => ({}));
 
   const graphOptions: Record<string, string | number> = {
@@ -199,17 +202,17 @@ export function layoutDagre(
   graph.setGraph(graphOptions);
 
   for (const node of nodes) {
-    graph.setNode(node.id, { width: node.width, height: node.height });
+    graph.setNode(nodeKey(node.id), { width: node.width, height: node.height });
   }
   for (const edge of edges) {
-    graph.setEdge(edge.from, edge.to, {}, edge.id);
+    graph.setEdge(nodeKey(edge.from), nodeKey(edge.to), {}, edge.id);
   }
 
   dagre.layout(graph);
 
-  const positions: Record<string, DagreNodePosition> = {};
+  const positions: Record<string, DagreNodePosition> = Object.create(null);
   for (const node of nodes) {
-    const laidOut = graph.node(node.id) as { x: number; y: number; width: number; height: number };
+    const laidOut = graph.node(nodeKey(node.id)) as { x: number; y: number; width: number; height: number };
     positions[node.id] = {
       x: clean(laidOut.x),
       y: clean(laidOut.y),

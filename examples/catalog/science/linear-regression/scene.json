@@ -3,18 +3,40 @@
   "scene": {
     "width": 1000,
     "height": 560,
-    "theme": "clean",
-    "background": "#f8fafc",
+    "theme": "sketch",
+    "background": "#ffffff",
     "seed": 64
   },
   "objects": [
+    {
+      "id": "title_highlight",
+      "type": "path",
+      "d": "M 0 0 C 189.4 -3 441.9 3 647.3 -1",
+      "drawProgress": 0,
+      "transform": {
+        "x": 176.35199999999998,
+        "y": 61.44,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      },
+      "visible": true,
+      "z": 9,
+      "description": "Highlighter stroke under the title"
+    },
     {
       "id": "heading",
       "type": "text",
       "text": "Linear regression fits a trend to points",
       "transform": {
         "x": 500,
-        "y": 43,
+        "y": 48,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -23,60 +45,39 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 27,
-        "radius": 12
-      },
-      "visible": true,
-      "z": 10
-    },
-    {
-      "id": "context",
-      "type": "text",
-      "text": "SCIENCE  /  CHART EXPLANATION",
-      "transform": {
-        "x": 500,
-        "y": 79,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#475569",
-        "fontSize": 13,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 32
       },
       "visible": true,
       "z": 10
     },
     {
       "id": "concept_0",
+      "description": "Scatter points",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 185,
-        "y": 323,
+        "x": 200,
+        "y": 333,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20,
+        "radius": 6
       },
-      "visible": true,
-      "z": 3,
-      "description": "Scatter points",
+      "metadata": {
+        "tone": "blue"
+      },
       "type": "rect",
-      "width": 132,
+      "width": 120,
       "height": 94
     },
     {
@@ -84,20 +85,19 @@
       "type": "text",
       "text": "Scatter points",
       "transform": {
-        "x": 185,
-        "y": 394,
+        "x": 200,
+        "y": 408,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.3
       },
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 12,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
       },
       "visible": true,
       "z": 10
@@ -105,11 +105,11 @@
     {
       "id": "stage_0",
       "type": "text",
-      "text": "STEP 1/4   Plot observed pairs",
+      "text": "Step 1 · Plot observed pairs",
       "description": "Plot observed pairs",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -118,37 +118,39 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_1",
+      "description": "Candidate line",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 395,
-        "y": 300,
+        "x": 400,
+        "y": 310,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20,
+        "radius": 6
       },
-      "visible": true,
-      "z": 3,
-      "description": "Candidate line",
+      "metadata": {
+        "tone": "blue"
+      },
       "type": "rect",
-      "width": 132,
+      "width": 120,
       "height": 140
     },
     {
@@ -156,20 +158,19 @@
       "type": "text",
       "text": "Candidate line",
       "transform": {
-        "x": 395,
-        "y": 394,
+        "x": 400,
+        "y": 408,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.3
       },
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 12,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
       },
       "visible": true,
       "z": 10
@@ -177,11 +178,11 @@
     {
       "id": "stage_1",
       "type": "text",
-      "text": "STEP 2/4   Propose a straight-line model",
+      "text": "Step 2 · Propose a straight-line model",
       "description": "Propose a straight-line model",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -190,37 +191,39 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_2",
+      "description": "Residual errors",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 605,
-        "y": 277,
+        "x": 600,
+        "y": 287,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20,
+        "radius": 6
       },
-      "visible": true,
-      "z": 3,
-      "description": "Residual errors",
+      "metadata": {
+        "tone": "green"
+      },
       "type": "rect",
-      "width": 132,
+      "width": 120,
       "height": 186
     },
     {
@@ -228,20 +231,19 @@
       "type": "text",
       "text": "Residual errors",
       "transform": {
-        "x": 605,
-        "y": 394,
+        "x": 600,
+        "y": 408,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.3
       },
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 12,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
       },
       "visible": true,
       "z": 10
@@ -249,11 +251,11 @@
     {
       "id": "stage_2",
       "type": "text",
-      "text": "STEP 3/4   Measure vertical residuals",
+      "text": "Step 3 · Measure vertical residuals",
       "description": "Measure vertical residuals",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -262,37 +264,39 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
     },
     {
       "id": "concept_3",
+      "description": "Best fit",
+      "visible": true,
+      "z": 3,
       "transform": {
-        "x": 815,
-        "y": 306,
+        "x": 800,
+        "y": 316,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.22
       },
       "style": {
         "fill": "#ffffff",
-        "stroke": "#334155",
+        "stroke": "#ced4da",
         "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 14,
-        "radius": 12
+        "color": "#1e1e1e",
+        "fontSize": 20,
+        "radius": 6
       },
-      "visible": true,
-      "z": 3,
-      "description": "Best fit",
+      "metadata": {
+        "tone": "blue"
+      },
       "type": "rect",
-      "width": 132,
+      "width": 120,
       "height": 128
     },
     {
@@ -300,20 +304,19 @@
       "type": "text",
       "text": "Best fit",
       "transform": {
-        "x": 815,
-        "y": 394,
+        "x": 800,
+        "y": 408,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
-        "opacity": 1
+        "opacity": 0.3
       },
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 12,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 17
       },
       "visible": true,
       "z": 10
@@ -321,11 +324,11 @@
     {
       "id": "stage_3",
       "type": "text",
-      "text": "STEP 4/4   Minimize squared residuals",
+      "text": "Step 4 · Minimize squared residuals",
       "description": "Minimize squared residuals",
       "transform": {
         "x": 500,
-        "y": 467,
+        "y": 482,
         "rotation": 0,
         "scaleX": 1,
         "scaleY": 1,
@@ -334,110 +337,94 @@
       "style": {
         "fill": "none",
         "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#0f172a",
-        "fontSize": 16,
-        "radius": 12
+        "strokeWidth": 0,
+        "color": "#495057",
+        "fontSize": 20
       },
       "visible": false,
       "z": 10
-    },
-    {
-      "id": "footer",
-      "type": "text",
-      "text": "Seek to any time  •  Every frame is deterministic",
-      "transform": {
-        "x": 500,
-        "y": 526,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "none",
-        "strokeWidth": 2,
-        "color": "#475569",
-        "fontSize": 12,
-        "radius": 12
-      },
-      "visible": true,
-      "z": 10
-    },
-    {
-      "id": "timeline_rule",
-      "type": "path",
-      "d": "M 0 0 L 710 0",
-      "drawProgress": 0,
-      "transform": {
-        "x": 145,
-        "y": 496,
-        "rotation": 0,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1
-      },
-      "style": {
-        "fill": "none",
-        "stroke": "#94a3b8",
-        "strokeWidth": 4
-      },
-      "visible": true,
-      "z": 1,
-      "description": "Drawn progress through the four explanation stages"
     }
   ],
   "timeline": [
     {
-      "id": "advance_progress",
+      "id": "draw_title_highlight",
       "type": "draw",
-      "target": "timeline_rule",
+      "target": "title_highlight",
       "start": 0,
-      "duration": 3200,
-      "easing": "linear",
+      "duration": 700,
+      "easing": "easeOut",
       "to": 1
     },
     {
-      "id": "highlight_0",
+      "id": "reveal_0",
+      "type": "opacity",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 0,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_0",
       "type": "fill",
       "target": "concept_0",
       "start": 0,
-      "duration": 380,
+      "duration": 0,
       "easing": "easeInOut",
-      "to": "#bfdbfe"
+      "to": "#a5d8ff"
     },
     {
-      "id": "expand_0",
+      "id": "stroke_0",
+      "type": "stroke",
+      "target": "concept_0",
+      "start": 0,
+      "duration": 0,
+      "easing": "easeInOut",
+      "to": "#1971c2"
+    },
+    {
+      "id": "pop_0",
       "type": "scale",
       "target": "concept_0",
-      "start": 400,
-      "duration": 230,
+      "start": 120,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_0",
-      "type": "stroke",
+      "id": "settle_0",
+      "type": "scale",
       "target": "concept_0",
-      "start": 160,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 340,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
-      "id": "bar_growth_0",
+      "id": "reveal_bar_label_0",
+      "type": "opacity",
+      "target": "bar_label_0",
+      "start": 0,
+      "duration": 0,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "grow_0",
       "type": "resize",
       "target": "concept_0",
-      "start": 210,
-      "duration": 290,
+      "start": 120,
+      "duration": 420,
       "easing": "easeOut",
       "to": {
-        "width": 132,
-        "height": 122
+        "width": 120,
+        "height": 118
       }
     },
     {
@@ -449,45 +436,75 @@
       "visible": true
     },
     {
-      "id": "highlight_1",
+      "id": "reveal_1",
+      "type": "opacity",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_1",
       "type": "fill",
       "target": "concept_1",
       "start": 900,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#a7f3d0"
+      "to": "#a5d8ff"
     },
     {
-      "id": "expand_1",
+      "id": "stroke_1",
+      "type": "stroke",
+      "target": "concept_1",
+      "start": 900,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#1971c2"
+    },
+    {
+      "id": "pop_1",
       "type": "scale",
       "target": "concept_1",
-      "start": 1300,
-      "duration": 230,
+      "start": 1020,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_1",
-      "type": "stroke",
+      "id": "settle_1",
+      "type": "scale",
       "target": "concept_1",
-      "start": 1060,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 1240,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
-      "id": "bar_growth_1",
+      "id": "reveal_bar_label_1",
+      "type": "opacity",
+      "target": "bar_label_1",
+      "start": 900,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "grow_1",
       "type": "resize",
       "target": "concept_1",
-      "start": 1110,
-      "duration": 290,
+      "start": 1020,
+      "duration": 420,
       "easing": "easeOut",
       "to": {
-        "width": 132,
-        "height": 168
+        "width": 120,
+        "height": 164
       }
     },
     {
@@ -507,45 +524,75 @@
       "visible": false
     },
     {
-      "id": "highlight_2",
+      "id": "reveal_2",
+      "type": "opacity",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_2",
       "type": "fill",
       "target": "concept_2",
       "start": 1800,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#fde68a"
+      "to": "#b2f2bb"
     },
     {
-      "id": "expand_2",
+      "id": "stroke_2",
+      "type": "stroke",
+      "target": "concept_2",
+      "start": 1800,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#2f9e44"
+    },
+    {
+      "id": "pop_2",
       "type": "scale",
       "target": "concept_2",
-      "start": 2200,
-      "duration": 230,
+      "start": 1920,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_2",
-      "type": "stroke",
+      "id": "settle_2",
+      "type": "scale",
       "target": "concept_2",
-      "start": 1960,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 2140,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
-      "id": "bar_growth_2",
+      "id": "reveal_bar_label_2",
+      "type": "opacity",
+      "target": "bar_label_2",
+      "start": 1800,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "grow_2",
       "type": "resize",
       "target": "concept_2",
-      "start": 2010,
-      "duration": 290,
+      "start": 1920,
+      "duration": 420,
       "easing": "easeOut",
       "to": {
-        "width": 132,
-        "height": 214
+        "width": 120,
+        "height": 210
       }
     },
     {
@@ -565,45 +612,75 @@
       "visible": false
     },
     {
-      "id": "highlight_3",
+      "id": "reveal_3",
+      "type": "opacity",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "fill_3",
       "type": "fill",
       "target": "concept_3",
       "start": 2700,
       "duration": 380,
       "easing": "easeInOut",
-      "to": "#fecdd3"
+      "to": "#a5d8ff"
     },
     {
-      "id": "expand_3",
+      "id": "stroke_3",
+      "type": "stroke",
+      "target": "concept_3",
+      "start": 2700,
+      "duration": 380,
+      "easing": "easeInOut",
+      "to": "#1971c2"
+    },
+    {
+      "id": "pop_3",
       "type": "scale",
       "target": "concept_3",
-      "start": 3100,
-      "duration": 230,
+      "start": 2820,
+      "duration": 200,
       "easing": "easeOut",
       "to": {
-        "x": 1.07,
-        "y": 1.07
+        "x": 1.06,
+        "y": 1.06
       }
     },
     {
-      "id": "border_3",
-      "type": "stroke",
+      "id": "settle_3",
+      "type": "scale",
       "target": "concept_3",
-      "start": 2860,
-      "duration": 330,
-      "easing": "easeInOut",
-      "to": "#2563eb"
+      "start": 3040,
+      "duration": 260,
+      "easing": "spring",
+      "to": {
+        "x": 1,
+        "y": 1
+      }
     },
     {
-      "id": "bar_growth_3",
+      "id": "reveal_bar_label_3",
+      "type": "opacity",
+      "target": "bar_label_3",
+      "start": 2700,
+      "duration": 320,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "grow_3",
       "type": "resize",
       "target": "concept_3",
-      "start": 2910,
-      "duration": 290,
+      "start": 2820,
+      "duration": 420,
       "easing": "easeOut",
       "to": {
-        "width": 132,
-        "height": 156
+        "width": 120,
+        "height": 152
       }
     },
     {

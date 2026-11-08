@@ -14,6 +14,7 @@ import path from "node:path";
 import { gunzipSync } from "node:zlib";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { PACKAGE_FIXTURES } from "./fixtures.mjs";
+import { runtimeCoverage } from "./runtime-coverage.mjs";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const PACKAGES_DIR = path.join(ROOT, "packages");
@@ -523,6 +524,10 @@ function directDistOutput(relative) {
 
 function verifyPackedOutputCoverage(packageName, manifest, entryMap) {
   const { runtime, types } = manifestPublicTargets(manifest);
+  const { reachable, missing } = runtimeCoverage(entryMap, runtime);
+  for (const dependency of missing) {
+    problem(packageName, "SHIPPED_RUNTIME_DEPENDENCY_MISSING", `'${dependency.from}' imports missing packed file '${dependency.target}'.`);
+  }
 
   for (const relative of entryMap.keys()) {
     if (!directDistOutput(relative)) continue;
@@ -534,8 +539,8 @@ function verifyPackedOutputCoverage(packageName, manifest, entryMap) {
       continue;
     }
 
-    if (/\.(?:js|mjs|cjs)$/i.test(relative) && !runtime.has(relative)) {
-      problem(packageName, "SHIPPED_RUNTIME_UNREFERENCED", `shipped runtime entry '${relative}' is not referenced by exports/main/module/browser or bin.`);
+    if (/\.(?:js|mjs|cjs)$/i.test(relative) && !reachable.has(relative)) {
+      problem(packageName, "SHIPPED_RUNTIME_UNREFERENCED", `shipped runtime entry '${relative}' is not reachable from exports/main/module/browser or bin.`);
     }
   }
 }

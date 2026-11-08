@@ -11,6 +11,7 @@ interface SceneDocument {
     width: number;
     height: number;
     theme?: "clean" | "sketch";
+    fontFamily?: string;
     background?: string;
     seed?: number;
     camera?: { x: number; y: number; zoom: number };
@@ -26,6 +27,8 @@ interface SceneDocument {
 ```
 
 Every object has a stable `id`, transform, style, visibility and z-order. Parent relationships are represented with `parentId`.
+
+`scene.fontFamily` supplies a default CSS font-family stack for all text and labels in either theme. An object's `style.fontFamily` overrides it, including on connectors. Omit it to keep the theme's existing default. It must contain a non-whitespace character and be at most 512 characters long. The evaluator resolves it before timeline style actions without changing the source document. Font files are loaded by the host; see [fonts](../guides/visual-styling.md#fonts).
 
 ## Explanation markers
 
@@ -51,7 +54,7 @@ Higher-level technical shapes are composed from these generic primitives rather 
 
 ### Draw progress
 
-`path`, `polygon`, and `polyline` may carry normalized `drawProgress` in the inclusive range `0..1`.
+`path`, `polygon`, `polyline`, `rect`, `circle`, `ellipse`, `line`, and `connector` may carry normalized `drawProgress` in the inclusive range `0..1`.
 
 The SVG renderers map this semantic property to normalized stroke-dash attributes. They do not ask the DOM to measure path length, preserving headless/deterministic behavior.
 
@@ -76,6 +79,8 @@ A connector references two object IDs and optional named anchors:
 ```
 
 Supported connector kinds are `straight`, `curve`, `orthogonal`, and `routed`. Endpoints are recomputed from evaluated world-space anchors, so connectors remain attached during movement and parent/group transforms.
+
+Side anchors (`top`, `right`, `bottom`, `left`) are used exactly. A `center` anchor, or an omitted one, is a **binding**: the endpoint moves to where the connector leaves the shape's outline (rect, image, circle, ellipse or polygon, including rotation), plus a 6px gap, so the arrowhead stays visible. Overlapping shapes keep their centre point. `connectorGeometry(connector, objects)` in `@anim8/core` returns the resolved geometry both renderers draw.
 
 `routed` connectors perform deterministic obstacle-aware Manhattan routing from the current evaluated geometry. Optional `routing.clearance` and `routing.bendPenalty` tune the bounded router. The core considers at most 48 nearby visible obstacles per routed connector and never measures the DOM.
 

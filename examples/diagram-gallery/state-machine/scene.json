@@ -1,0 +1,424 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 14
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 210.4,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 169 -3 394.3 3 579.3 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "A request moves through four states",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 80,
+        "y": 300,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "initial",
+      "type": "circle",
+      "radius": 9,
+      "style": {
+        "fill": "#1e1e1e",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 220,
+        "y": 300,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "idle",
+      "z": 3,
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Idle",
+      "type": "circle",
+      "radius": 52,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 480,
+        "y": 300,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "loading",
+      "z": 3,
+      "style": {
+        "fill": "#ffec99",
+        "stroke": "#e8590c",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Loading",
+      "type": "circle",
+      "radius": 52,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 800,
+        "y": 180,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "success",
+      "z": 3,
+      "style": {
+        "fill": "#b2f2bb",
+        "stroke": "#2f9e44",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Success",
+      "type": "circle",
+      "radius": 52,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 800,
+        "y": 420,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "error",
+      "z": 3,
+      "style": {
+        "fill": "#ffc9c9",
+        "stroke": "#e03131",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18
+      },
+      "text": "Error",
+      "type": "circle",
+      "radius": 52,
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "t0",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "initial"
+      },
+      "to": {
+        "objectId": "idle"
+      },
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "t1",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "idle"
+      },
+      "to": {
+        "objectId": "loading"
+      },
+      "label": "fetch",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "t2",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "loading"
+      },
+      "to": {
+        "objectId": "success"
+      },
+      "label": "200 OK",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "t3",
+      "type": "connector",
+      "z": 1,
+      "kind": "curve",
+      "from": {
+        "objectId": "loading"
+      },
+      "to": {
+        "objectId": "error"
+      },
+      "label": "timeout",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "t4",
+      "type": "connector",
+      "z": 1,
+      "kind": "routed",
+      "from": {
+        "objectId": "error",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "idle",
+        "anchor": "bottom"
+      },
+      "label": "retry",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_initial",
+      "type": "draw",
+      "target": "initial",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_idle",
+      "type": "draw",
+      "target": "idle",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_t0",
+      "type": "draw",
+      "target": "t0",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_loading",
+      "type": "draw",
+      "target": "loading",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_t1",
+      "type": "draw",
+      "target": "t1",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_success",
+      "type": "draw",
+      "target": "success",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_t2",
+      "type": "draw",
+      "target": "t2",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_error",
+      "type": "draw",
+      "target": "error",
+      "start": 2330,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_t3",
+      "type": "draw",
+      "target": "t3",
+      "start": 2330,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_t4",
+      "type": "draw",
+      "target": "t4",
+      "start": 2990,
+      "duration": 700,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}
