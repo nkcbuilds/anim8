@@ -63,5 +63,35 @@
     "frames": 78,
     "bytes": 80789,
     "sha256": "01ebe92d454e26193e38ce05a5cdcf7afff27099bd19e2011d686a07b2a85e20"
+  },
+  {
+    "file": "authoring.gif",
+    "source": "docs/media/quickstart.scene.json",
+    "sourceSha256": "0f98c826359e503a41eeaa2953067cb1a79e592896f0137ec4b55830a2c9ecb8",
+    "width": 880,
+    "height": 410,
+    "fps": 10,
+    "durationMs": 10000,
+    "posterHoldMs": 0,
+    "frames": 101,
+    "bytes": 192821,
+    "sha256": "70102ee20fd4a2e09f74cdb8d57f5989fe8b6b38b6e283e641b52b84b9feddb0",
+    "recipe": "docs/media/quickstart.mjs",
+    "recipeSha256": "6e587e2c3f71e07eb0d2a0cfd5b67eca71393af4f8b392e702212a2b3e9f0615"
+  },
+  {
+    "file": "intro.gif",
+    "source": "docs/media/intro.scene.json",
+    "sourceSha256": "ab851e133c98db80f9a0928c06b6d744b01e70116ad3385da5f24019315b1254",
+    "width": 880,
+    "height": 430,
+    "fps": 10,
+    "durationMs": 14000,
+    "posterHoldMs": 0,
+    "frames": 141,
+    "bytes": 145621,
+    "sha256": "f2538ae104dacf7495246dd6fa86df43ea912253d71d0fad25681849c07a5e50",
+    "recipe": "docs/media/intro.mjs",
+    "recipeSha256": "f1224b68dfe300f8e5ec239621dc6d3c887fbd2aa2888353927d88a860bb2845"
   }
 ]
