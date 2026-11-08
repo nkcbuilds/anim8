@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "count": 17,
+  "diagrams": [
+    {
+      "id": "dag",
+      "title": "A CI pipeline is a directed acyclic graph",
+      "summary": "Directed acyclic graph laid out with the Dagre adapter.",
+      "durationMs": 6090,
+      "allowOverlap": [],
+      "file": "dag/scene.json"
+    },
+    {
+      "id": "flowchart",
+      "title": "Orders ship only when stock is available",
+      "summary": "Flowchart with terminators, a decision diamond and labelled branches.",
+      "durationMs": 5170,
+      "allowOverlap": [],
+      "file": "flowchart/scene.json"
+    },
+    {
+      "id": "sequence",
+      "title": "Signing in exchanges a password for a token",
+      "summary": "Sequence diagram with dashed lifelines, activation bars and dashed replies.",
+      "durationMs": 6010,
+      "allowOverlap": [
+        "api_act",
+        "auth_act",
+        "db_act"
+      ],
+      "file": "sequence/scene.json"
+    },
+    {
+      "id": "state-machine",
+      "title": "A request moves through four states",
+      "summary": "State machine with an initial state, labelled transitions and a routed loop back.",
+      "durationMs": 4030,
+      "allowOverlap": [],
+      "file": "state-machine/scene.json"
+    },
+    {
+      "id": "er-diagram",
+      "title": "Orders link users to the products they buy",
+      "summary": "Entity-relationship diagram with field lists and cardinality labels.",
+      "durationMs": 5170,
+      "allowOverlap": [
+        "user_head",
+        "order_head",
+        "item_head",
+        "product_head"
+      ],
+      "file": "er-diagram/scene.json"
+    },
+    {
+      "id": "architecture",
+      "title": "A web app scales behind a load balancer",
+      "summary": "Architecture diagram with an external user, a dashed network boundary, services, a cache and a database cylinder.",
+      "durationMs": 5350,
+      "allowOverlap": [
+        "db_top",
+        "db_bottom"
+      ],
+      "file": "architecture/scene.json"
+    },
+    {
+      "id": "mind-map",
+      "title": "Planning a product launch",
+      "summary": "Mind map with a central idea, branches and leaves joined by curved, arrowless links.",
+      "durationMs": 2530,
+      "allowOverlap": [],
+      "file": "mind-map/scene.json"
+    },
+    {
+      "id": "org-chart",
+      "title": "A small company organised as a tree",
+      "summary": "Tree with routed elbow connectors between levels.",
+      "durationMs": 2530,
+      "allowOverlap": [],
+      "file": "org-chart/scene.json"
+    },
+    {
+      "id": "timeline",
+      "title": "From idea to a thousand customers",
+      "summary": "Timeline with an arrowed axis, milestone dots and alternating cards.",
+      "durationMs": 3990,
+      "allowOverlap": [],
+      "file": "timeline/scene.json"
+    },
+    {
+      "id": "venn",
+      "title": "Great products sit where three skills meet",
+      "summary": "Three-set Venn diagram with translucent fills.",
+      "durationMs": 3190,
+      "allowOverlap": [
+        "design",
+        "eng",
+        "biz"
+      ],
+      "file": "venn/scene.json"
+    },
+    {
+      "id": "bar-chart",
+      "title": "Quarterly revenue grew every quarter",
+      "summary": "Bar chart whose bars grow from the axis, with gridlines and value labels.",
+      "durationMs": 3010,
+      "allowOverlap": [],
+      "file": "bar-chart/scene.json"
+    },
+    {
+      "id": "line-chart",
+      "title": "Weekly active users crossed the target",
+      "summary": "Line chart traced on by a draw action, with points and a dashed target line.",
+      "durationMs": 3850,
+      "allowOverlap": [],
+      "file": "line-chart/scene.json"
+    },
+    {
+      "id": "geometry",
+      "title": "Right triangles and circles",
+      "summary": "Geometry figure: a right triangle with a right-angle mark and angle arc, and a circle with its radius.",
+      "durationMs": 5170,
+      "allowOverlap": [
+        "center"
+      ],
+      "file": "geometry/scene.json"
+    },
+    {
+      "id": "data-structures",
+      "title": "An array is contiguous; a linked list follows pointers",
+      "summary": "Array with a moving index pointer, and a singly linked list with next pointers.",
+      "durationMs": 6090,
+      "allowOverlap": [
+        "cell0",
+        "cell1",
+        "cell2",
+        "cell3",
+        "cell4",
+        "cell5",
+        "val0",
+        "next0",
+        "val1",
+        "next1",
+        "val2",
+        "next2"
+      ],
+      "file": "data-structures/scene.json"
+    },
+    {
+      "id": "swimlanes",
+      "title": "Who does what when an order is placed",
+      "summary": "Cross-functional swimlane flow with lane headers and orthogonal hand-offs.",
+      "durationMs": 5250,
+      "allowOverlap": [
+        "lane_customer",
+        "lane_shop",
+        "lane_warehouse"
+      ],
+      "file": "swimlanes/scene.json"
+    },
+    {
+      "id": "cycle",
+      "title": "Build, measure, learn, repeat",
+      "summary": "Circular process with five stages around a central idea.",
+      "durationMs": 3710,
+      "allowOverlap": [],
+      "file": "cycle/scene.json"
+    },
+    {
+      "id": "network",
+      "title": "Friends of friends form a small world",
+      "summary": "Undirected graph: circular nodes joined by arrowless edges, with one highlighted path.",
+      "durationMs": 1930,
+      "allowOverlap": [],
+      "file": "network/scene.json"
+    }
+  ]
+}

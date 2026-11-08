@@ -5,7 +5,13 @@ import {
   evaluate,
   type SceneDocument,
 } from "@anim8/core";
-import { renderSketchSceneAt, renderSketchSvg } from "../src/index.js";
+import {
+  SKETCH_FONT_FAMILY,
+  measureSketchText,
+  renderSketchSceneAt,
+  renderSketchSvg,
+  sketchFontFaceCss,
+} from "../src/index.js";
 
 function allSketchPathData(svgFragment: string, part: string): string[] {
   const expression = new RegExp(
@@ -294,7 +300,8 @@ describe("@anim8/renderer-sketch", () => {
 
     expect(second).toBe(first);
     expect(first).toContain('data-anim8-id="oval"');
-    expect(first).toContain('<ellipse data-sketch-part="fill" cx="0" cy="0" rx="50" ry="24"');
+    // Ellipse fills follow the first rough outline pass rather than a perfect ellipse.
+    expect(objectGroup(first, "oval").body).toMatch(/<path data-sketch-part="fill" d="M [^"]+ Z" fill="#eef2ff"/);
     expect(first).toContain('data-anim8-id="tri"');
     expect(first).toContain('<polygon data-sketch-part="fill" points="-30,25 0,-30 30,25"');
     expect(first).toContain('data-anim8-id="wave"');
@@ -357,7 +364,18 @@ describe("@anim8/renderer-sketch", () => {
       expect(allSketchPathData(halfBody, part)).toEqual(allSketchPathData(startBody, part));
       expect(halfBody).toContain('pathLength="1"');
       expect(halfBody).toContain('stroke-dasharray="1"');
-      expect(halfBody).toContain('stroke-dashoffset="0.5"');
+    }
+    expect(objectGroup(half, "path").body).toContain('stroke-dashoffset="0.5"');
+
+    // Multi-segment outlines trace in order like a pen: earlier sides finish
+    // before later ones start, instead of every side drawing at once.
+    for (const id of ["polygon", "polyline"]) {
+      const offsets = [...objectGroup(half, id).body.matchAll(/data-sketch-part="outline" data-sketch-pass="(\d+)"[^>]*stroke-dashoffset="([\d.]+)"/g)]
+        .map(match => Number(match[2]));
+      expect(offsets.length).toBeGreaterThan(2);
+      for (let index = 1; index < offsets.length; index += 1) expect(offsets[index]!).toBeGreaterThanOrEqual(offsets[index - 1]! - 1e-9);
+      expect(offsets[0]).toBe(0);
+      expect(offsets.at(-1)!).toBeGreaterThan(0.5);
     }
 
     expect(objectGroup(half, "polygon").body).toContain('<polygon data-sketch-part="fill"');
@@ -559,4 +577,127 @@ describe("@anim8/renderer-sketch", () => {
     expect(first).toContain('data-sketch-part="connector-overdraw"');
   });
 
+
+  it("binds center-anchored connectors to shape outlines and draws a hand-drawn arrowhead", () => {
+    const scene: SceneDocument = {
+      version: "1.0",
+      scene: { width: 400, height: 200, seed: 5 },
+      objects: [
+        { id: "a", type: "rect", width: 80, height: 40, transform: { ...defaultTransform(), x: 80, y: 100 }, style: defaultStyle(), visible: true, z: 1 },
+        { id: "b", type: "circle", radius: 30, transform: { ...defaultTransform(), x: 300, y: 100 }, style: defaultStyle(), visible: true, z: 1 },
+        { id: "edge", type: "connector", from: { objectId: "a", anchor: "center" }, to: { objectId: "b" }, kind: "straight", transform: defaultTransform(), style: defaultStyle(), visible: true, z: 0 },
+      ],
+      timeline: [],
+    };
+    const svg = renderSketchSceneAt(scene, 0);
+    // Rect right edge 120 + 6px gap; circle left edge 270 - 6px gap.
+    expect(connectorBase(svg, "edge")).toBe("M 126 100 L 264 100");
+    expect(svg.match(/data-sketch-part="arrowhead"/g)?.length).toBe(4);
+    expect(svg).not.toContain("marker-end");
+  });
+
+  it("wraps shape labels into lines that fit the shape", () => {
+    const scene: SceneDocument = {
+      version: "1.0",
+      scene: { width: 400, height: 200 },
+      objects: [
+        { id: "box", type: "rect", width: 150, height: 72, text: "Payment gateway authorizes card", transform: { ...defaultTransform(), x: 200, y: 100 }, style: { ...defaultStyle(), fontSize: 20 }, visible: true, z: 1 },
+      ],
+      timeline: [],
+    };
+    const label = objectGroup(renderSketchSceneAt(scene, 0), "box").body;
+    const lines = [...label.matchAll(/<tspan [^>]*>([^<]+)<\/tspan>/g)].map(match => match[1]!);
+    const size = Number(label.match(/font-size="([\d.]+)"/)![1]);
+    expect(lines.length).toBeGreaterThan(1);
+    expect(size).toBeLessThanOrEqual(20);
+    expect(size).toBeGreaterThanOrEqual(14);
+    for (const line of lines) expect(measureSketchText(line, size)).toBeLessThanOrEqual(150 - 24);
+    expect(lines.length * size * 1.25).toBeLessThanOrEqual(72 - 12);
+  });
+
+  it("embeds the bundled font once, only when text uses it, and can reference it instead", () => {
+    const withText: SceneDocument = {
+      version: "1.0",
+      scene: { width: 200, height: 100 },
+      objects: [
+        { id: "t1", type: "text", text: "one", transform: { ...defaultTransform(), x: 50, y: 50 }, style: defaultStyle(), visible: true, z: 1 },
+        { id: "t2", type: "text", text: "two", transform: { ...defaultTransform(), x: 150, y: 50 }, style: defaultStyle(), visible: true, z: 1 },
+      ],
+      timeline: [],
+    };
+    const embedded = renderSketchSceneAt(withText, 0);
+    expect(embedded.match(/@font-face/g)?.length).toBe(1);
+    expect(embedded).toContain(`font-family="${SKETCH_FONT_FAMILY.replace(/"/g, "&quot;")}"`);
+    expect(renderSketchSceneAt(withText, 0, { font: "reference" })).not.toContain("@font-face");
+
+    const custom: SceneDocument = { ...withText, objects: withText.objects.map(o => ({ ...o, style: { ...o.style, fontFamily: "Georgia" } })) };
+    expect(renderSketchSceneAt(custom, 0)).not.toContain("@font-face");
+    for (const fontFamily of ["Virgil", '"virgil", serif', "Georgia, 'Virgil', cursive"]) {
+      const explicit = { ...withText, scene: { ...withText.scene, fontFamily } };
+      expect(renderSketchSceneAt(explicit, 0)).toContain("@font-face");
+    }
+    custom.scene.fontFamily = "NotVirgil";
+    expect(renderSketchSceneAt(custom, 0)).not.toContain("@font-face");
+    expect(sketchFontFaceCss()).toContain('font-family:"Virgil"');
+  });
+
+  const drawScene = (progress: number | undefined, extra: Record<string, unknown> = {}): SceneDocument => ({
+  version: "1.0",
+  scene: { width: 400, height: 200, seed: 3 },
+  objects: [
+    { id: "a", type: "rect", width: 100, height: 50, text: "Start", transform: { ...defaultTransform(), x: 80, y: 100 }, style: { ...defaultStyle(), fill: "#a5d8ff" }, visible: true, z: 1, ...(progress === undefined ? {} : { drawProgress: progress }) },
+    { id: "b", type: "circle", radius: 30, transform: { ...defaultTransform(), x: 300, y: 100 }, style: defaultStyle(), visible: true, z: 1 },
+    { id: "edge", type: "connector", from: { objectId: "a" }, to: { objectId: "b" }, kind: "straight", transform: defaultTransform(), style: { ...defaultStyle(), fill: "none" }, visible: true, z: 0, ...(progress === undefined ? {} : { drawProgress: progress }), ...extra },
+  ],
+  timeline: [],
+} as SceneDocument);
+
+  it("draws shapes on: outline first, then fill and label fade in", () => {
+    const at = (progress: number) => objectGroup(renderSketchSceneAt(drawScene(progress), 0), "a").body;
+    expect(at(0)).not.toContain('data-sketch-part="fill"');
+    expect(at(0)).not.toContain("Start");
+    expect(at(0)).toContain('stroke-dashoffset="1"');
+    expect(at(0)).toContain('stroke-opacity="0"');
+    expect(at(0.25)).not.toContain('stroke-opacity="0"');
+    expect(at(0.25)).toContain('stroke-dashoffset="0.75"');
+    expect(at(0.25)).not.toContain("Start");
+    expect(at(0.75)).toContain('fill-opacity="0.5"');
+    expect(at(0.75)).toMatch(/data-sketch-part="label-fade" opacity="0.5"/);
+    expect(at(1).match(/<path data-sketch-part="fill"[^>]*>/)![0]).not.toContain("fill-opacity");
+    expect(at(1)).not.toContain("label-fade");
+  });
+
+  it("draws connectors on: line first, arrowheads last", () => {
+    const edge = (progress: number) => {
+      const svg = renderSketchSceneAt(drawScene(progress), 0);
+      return svg.slice(svg.indexOf('data-anim8-id="edge"'));
+    };
+    expect(edge(0.4)).toContain('stroke-dashoffset="0.5"');
+    expect(edge(0.4)).not.toContain('data-sketch-part="arrowhead"');
+    expect(edge(0.9)).toContain('data-sketch-part="arrowhead"');
+    expect(edge(0.9)).toContain('stroke-dashoffset="0.5"');
+  });
+
+  it("supports arrowheads at either end, both, or none", () => {
+    const heads = (arrowheads: string) => (renderSketchSceneAt(drawScene(undefined, { arrowheads }), 0).match(/data-sketch-part="arrowhead"/g) ?? []).length;
+    expect(heads("none")).toBe(0);
+    expect(heads("end")).toBe(4);
+    expect(heads("start")).toBe(4);
+    expect(heads("both")).toBe(8);
+  });
+
+  it("renders dashed and dotted strokes as a single pen line, including while drawing", () => {
+    const dashed = drawScene(undefined);
+    dashed.objects[0]!.style = { ...dashed.objects[0]!.style, strokeStyle: "dashed" };
+    const body = objectGroup(renderSketchSceneAt(dashed, 0), "a").body;
+    expect(body.match(/data-sketch-part="outline"/g)?.length).toBe(1);
+    expect(body).toContain('stroke-dasharray="10 11"');
+
+    const drawing = drawScene(0.5);
+    drawing.objects[0]!.style = { ...drawing.objects[0]!.style, strokeStyle: "dotted" };
+    const partial = objectGroup(renderSketchSceneAt(drawing, 0), "a").body;
+    const list = partial.match(/data-sketch-part="outline"[^>]*stroke-dasharray="([^"]+)"/)![1]!.split(" ").map(Number);
+    expect(list.length).toBeGreaterThan(8);
+    expect(partial).not.toContain("pathLength");
+  });
 });

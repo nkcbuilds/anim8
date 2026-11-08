@@ -37,6 +37,18 @@ The default compiler policy rejects unsafe schemes such as `javascript:` and tre
 
 Compiler policy places limits on scene size, node count, timeline actions, duration, text/path lengths and nesting. Optional graph-layout adapters must have their own limits/cancellation.
 
+Compiler/core validation stops at 256 diagnostics or 1,000,000 budgeted expression
+node/conflict-comparison operations per validation phase. Conflict checks group
+actions by target and time so long sequential timelines avoid pairwise enumeration.
+An exhausted budget rejects the scene with `LIMIT_DIAGNOSTICS` or
+`LIMIT_VALIDATION_WORK`; expression node/depth limits stop traversal immediately.
+
+Composed world-matrix entries and world opacity must be finite and at most `1e100` in magnitude,
+leaving headroom for geometry and inverse calculations. Static hierarchies are
+validated during compilation. Evaluation checks transforms after actions and
+bindings and throws `RangeError` for unsafe runtime composition rather than
+returning an invalid frame. Hosts supplying runtime inputs should handle that error.
+
 ## Extensions
 
 Trusted JavaScript plugins may add capabilities, but they are outside the guarantee made for portable untrusted scene files.

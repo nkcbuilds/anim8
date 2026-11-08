@@ -44,6 +44,11 @@ function scene(objects: DrawableObject[]): SceneDocument {
 }
 
 describe("layoutDagre", () => {
+  it("returns prototype-like node ids as own position keys", () => {
+    const result = layoutDagre([rect("__proto__"), rect("constructor"), edge("e", "__proto__", "constructor")]);
+    expect(Object.keys(result.positions).sort()).toEqual(["__proto__", "constructor"]);
+    expect(Number.isFinite(result.positions.__proto__!.x)).toBe(true);
+  });
   it("returns directed top-bottom positions without mutating Anim8 objects", () => {
     const input = scene([
       rect("a"),

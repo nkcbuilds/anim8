@@ -87,7 +87,7 @@ Unsupported resize targets are rejected.
 
 ## Stroke reveal
 
-`draw` animates normalized `drawProgress` for paths, polygons, and polylines. Its target value is constrained to `0..1`.
+`draw` animates normalized `drawProgress` for paths, polygons, polylines, rectangles, circles, ellipses, lines, and connectors. Its target value is constrained to `0..1`.
 
 ## Authoring-only helpers
 

@@ -7,6 +7,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@anim8/compiler": [
+        "../compiler/src/index.ts"
+      ],
       "@anim8/core": [
         "../core/src/index.ts"
       ]

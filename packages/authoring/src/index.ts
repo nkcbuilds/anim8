@@ -1,9 +1,11 @@
-import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, STYLE_KEYS, styleIssues, styleProperties, textRunIssues, type Style, type TextRun, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
+import { applyMatrix, canonicalMorphPathToString, defaultCamera, defaultStyle, defaultTransform, evaluate, morphPathCompatibility, objectBounds, parseMorphPathData, transformMatrix, isDrawableType, STYLE_KEYS, styleIssues, styleProperties, textRunIssues, type Style, type TextRun, type Action, type AnchorName, type Binding, type BindingProperty, type CameraState, type CameraTarget, type ConnectorObject, type DrawableObject, type Easing, type Expression, type Interaction, type InteractionTrigger, type Marker, type PointValue, type ScalarValue, type SceneDocument, type StateAction, type StateMachine, type ThemeName } from "@anim8/core";
 
 export interface SceneOptions {
   width?: number;
   height?: number;
   theme?: ThemeName;
+  /** Default CSS font-family stack; per-object fontFamily overrides it. Load custom fonts in the host app. */
+  fontFamily?: string;
   background?: string;
   seed?: number;
   camera?: Partial<CameraState>;
@@ -216,14 +218,19 @@ export class SceneBuilder {
   private objects: DrawableObject[] = [];
   private timeline: Action[] = [];
   private markers: Marker[] = [];
-  private stateValues: Record<string, ScalarValue> = {};
+  private stateValues: Record<string, ScalarValue> = Object.create(null);
   private bindings: Binding[] = [];
   private interactions: Interaction[] = [];
   private stateMachines: StateMachine[] = [];
   private cursor = 0;
   private idCounter = 0;
 
-  constructor(private readonly options: SceneOptions = {}) {}
+  constructor(private readonly options: SceneOptions = {}) {
+    const family = options.fontFamily;
+    if (family !== undefined && (typeof family !== "string" || !family.trim() || family.length > 512)) {
+      throw new Error("fontFamily must be a nonempty CSS font-family stack of at most 512 characters.");
+    }
+  }
 
   private next(prefix: string): string { return `${prefix}_${++this.idCounter}`; }
 
@@ -260,7 +267,11 @@ export class SceneBuilder {
     if (this.timeline.length === 0 || this.cursor === 0) return this.objectById(id);
     const frame = evaluate({
       version: "1.0",
-      scene: { width: this.options.width ?? 800, height: this.options.height ?? 450 },
+      scene: {
+        width: this.options.width ?? 800,
+        height: this.options.height ?? 450,
+        ...(this.options.fontFamily !== undefined ? { fontFamily: this.options.fontFamily } : {}),
+      },
       objects: this.objects,
       timeline: this.timeline,
     }, this.cursor);
@@ -310,7 +321,7 @@ export class SceneBuilder {
 
   assertDrawableStroke(id: string, to: number): void {
     const object = this.objectById(id);
-    if (object.type !== "path" && object.type !== "polygon" && object.type !== "polyline") {
+    if (!isDrawableType(object.type)) {
       throw new Error(`Object '${id}' of type '${object.type}' does not expose drawProgress.`);
     }
     if (!Number.isFinite(to) || to < 0 || to > 1) {
@@ -518,11 +529,12 @@ export class SceneBuilder {
     return new NodeHandle(id, this);
   }
 
-  connect(from: NodeHandle, to: NodeHandle, options: ShapeOptions & { from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string } = {}): NodeHandle {
+  connect(from: NodeHandle, to: NodeHandle, options: ShapeOptions & { arrowheads?: ConnectorObject["arrowheads"]; from?: AnchorName; to?: AnchorName; kind?: ConnectorObject["kind"]; routing?: ConnectorObject["routing"]; label?: string } = {}): NodeHandle {
     const id = options.id ?? this.next("connector");
     this.objects.push({
       id, type: "connector", from: { objectId: from.id, ...(options.from ? { anchor: options.from } : {}) }, to: { objectId: to.id, ...(options.to ? { anchor: options.to } : {}) },
       kind: options.kind ?? "straight", ...(options.routing ? { routing: structuredClone(options.routing) } : {}), ...(options.label ? { label: options.label } : {}),
+      ...(options.arrowheads ? { arrowheads: options.arrowheads } : {}),
       transform: defaultTransform(), style: { ...this.styleFor(options), fill: "none" }, visible: true, z: this.objects.length,
     });
     return new NodeHandle(id, this);
@@ -620,6 +632,18 @@ export class SceneBuilder {
    * offset 0 is allowed to intentionally establish an immediate value.
    */
   keyframes(target: NodeHandle, frames: readonly Keyframe[], options: KeyframeOptions): string[] {
+    const length = this.timeline.length, cursor = this.cursor, counter = this.idCounter;
+    try {
+      return this.buildKeyframes(target, frames, options);
+    } catch (error) {
+      this.timeline.length = length;
+      this.cursor = cursor;
+      this.idCounter = counter;
+      throw error;
+    }
+  }
+
+  private buildKeyframes(target: NodeHandle, frames: readonly Keyframe[], options: KeyframeOptions): string[] {
     if (!Number.isFinite(options.duration) || options.duration <= 0) {
       throw new Error("Keyframe duration must be a finite number > 0.");
     }
@@ -755,6 +779,7 @@ export class SceneBuilder {
         width: this.options.width ?? 800,
         height: this.options.height ?? 450,
         camera: this.baseCamera(),
+        ...(this.options.fontFamily !== undefined ? { fontFamily: this.options.fontFamily } : {}),
       },
       objects: this.objects,
       timeline: this.timeline,
@@ -812,8 +837,8 @@ export class SceneBuilder {
           break;
         }
         case "draw":
-          if (object.type === "path" || object.type === "polygon" || object.type === "polyline") {
-            hold = { type: "draw", target: original.target, to: object.drawProgress ?? 1, duration: 0, easing: "linear", interrupt: true };
+          if (isDrawableType(object.type)) {
+            hold = { type: "draw", target: original.target, to: ("drawProgress" in object ? object.drawProgress : undefined) ?? 1, duration: 0, easing: "linear", interrupt: true };
           }
           break;
         case "morph":
@@ -966,6 +991,7 @@ export class SceneBuilder {
         width: this.options.width ?? 800,
         height: this.options.height ?? 450,
         theme: this.options.theme ?? "clean",
+        ...(this.options.fontFamily !== undefined ? { fontFamily: this.options.fontFamily } : {}),
         ...(this.options.background ? { background: this.options.background } : {}),
         ...(this.options.seed !== undefined ? { seed: this.options.seed } : {}),
         camera: this.baseCamera(),

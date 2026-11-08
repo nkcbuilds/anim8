@@ -67,6 +67,9 @@ importers:
       '@anim8/core':
         specifier: workspace:*
         version: link:../core
+      '@anim8/renderer-sketch':
+        specifier: workspace:*
+        version: link:../renderer-sketch
       '@anim8/renderer-svg':
         specifier: workspace:*
         version: link:../renderer-svg
@@ -81,6 +84,9 @@ importers:
 
   packages/dsl:
     dependencies:
+      '@anim8/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@anim8/core':
         specifier: workspace:*
         version: link:../core
@@ -93,6 +99,9 @@ importers:
       '@anim8/core':
         specifier: workspace:*
         version: link:../core
+      '@anim8/renderer-sketch':
+        specifier: workspace:*
+        version: link:../renderer-sketch
       '@anim8/renderer-svg':
         specifier: workspace:*
         version: link:../renderer-svg
@@ -126,9 +135,15 @@ importers:
 
   packages/player:
     dependencies:
+      '@anim8/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@anim8/core':
         specifier: workspace:*
         version: link:../core
+      '@anim8/renderer-sketch':
+        specifier: workspace:*
+        version: link:../renderer-sketch
       '@anim8/renderer-svg':
         specifier: workspace:*
         version: link:../renderer-svg
@@ -150,9 +165,6 @@ importers:
       '@anim8/player':
         specifier: workspace:*
         version: link:../player
-      '@anim8/renderer-svg':
-        specifier: workspace:*
-        version: link:../renderer-svg
     devDependencies:
       '@types/react':
         specifier: ^19.2.0
@@ -192,9 +204,6 @@ importers:
       '@anim8/player':
         specifier: workspace:*
         version: link:../player
-      '@anim8/renderer-svg':
-        specifier: workspace:*
-        version: link:../renderer-svg
     devDependencies:
       '@vue/server-renderer':
         specifier: ^3.5.22
@@ -208,6 +217,9 @@ importers:
       '@anim8/a11y':
         specifier: workspace:*
         version: link:../a11y
+      '@anim8/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@anim8/core':
         specifier: workspace:*
         version: link:../core

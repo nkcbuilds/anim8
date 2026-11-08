@@ -1,6 +1,7 @@
 import { compileJson, type CompileResult } from "@anim8/compiler";
-import { evaluate } from "@anim8/core";
+import { evaluate, type EvaluatedScene } from "@anim8/core";
 import { renderSvg } from "@anim8/renderer-svg";
+import { renderSketchSvg } from "@anim8/renderer-sketch";
 
 export interface RenderResult extends CompileResult {
   svg?: string;
@@ -15,6 +16,11 @@ export function renderSource(source: string, timeMs = 0): RenderResult {
   if (!compiled.ok || !compiled.scene) return compiled;
   return {
     ...compiled,
-    svg: renderSvg(evaluate(compiled.scene, timeMs)),
+    svg: renderFrameForTheme(evaluate(compiled.scene, timeMs)),
   };
+}
+
+/** Render a frame with the renderer its scene theme asks for ("sketch" or "clean"). */
+export function renderFrameForTheme(frame: EvaluatedScene): string {
+  return frame.scene.theme === "sketch" ? renderSketchSvg(frame) : renderSvg(frame);
 }

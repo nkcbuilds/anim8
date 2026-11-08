@@ -7,6 +7,7 @@ import { build } from "esbuild";
 import { compileJson } from "../../packages/compiler/dist/index.js";
 import { evaluate, sceneDuration } from "../../packages/core/dist/index.js";
 import { renderSvg } from "../../packages/renderer-svg/dist/index.js";
+import { renderSketchSvg } from "../../packages/renderer-sketch/dist/index.js";
 const here=dirname(fileURLToPath(import.meta.url)), catalog=resolve(here,"../catalog");
 const manifest=JSON.parse(readFileSync(join(catalog,"index.json"),"utf8"));
 const entries=new Map(manifest.examples.map(e=>[e.id,e]));
@@ -58,7 +59,8 @@ const server=createServer(async(req,res)=>{
    if(url.pathname==="/api/compile"){
      response(res,200,{ok:true,scene:compiled.scene,durationMs:sceneDuration(compiled.scene),diagnostics:compiled.diagnostics});return;
    }
-   const svg=renderSvg(evaluate(compiled.scene,time));
+   const frame=evaluate(compiled.scene,time);
+   const svg=frame.scene.theme==="sketch"?renderSketchSvg(frame):renderSvg(frame);
    response(res,200,{ok:true,svg,durationMs:sceneDuration(compiled.scene),diagnostics:compiled.diagnostics});return;
   }
   response(res,405,{error:"Method not allowed"});

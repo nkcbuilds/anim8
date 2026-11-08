@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COMPILER_LIMITS, compile } from "../src/index.js";
+import { applySceneEvent, initializeStateMachines } from "@anim8/core";
 
 const baseScene = () => ({
   version: "1.0",
@@ -10,6 +11,20 @@ const baseScene = () => ({
 });
 
 describe("state-machine compiler", () => {
+  it("preserves prototype-like state keys and machine identifiers as own data", () => {
+    const result = compile({ ...baseScene(), state: JSON.parse('{"__proto__":0}'), stateMachines: [{ id: "__proto__", initial: "idle", states: [
+      { id: "idle", transitions: [{ id: "go", event: { type: "custom", name: "advance" }, target: "done", actions: [{ type: "increment", key: "__proto__", by: 1 }] }] },
+      { id: "done", transitions: [] },
+    ] }] });
+    expect(result.ok).toBe(true);
+    const document = result.scene!;
+    expect(Object.keys(document.state!)).toContain("__proto__");
+    const machines = initializeStateMachines(document);
+    expect(Object.keys(machines)).toEqual(["__proto__"]);
+    const next = applySceneEvent(document, document.state!, machines, { type: "custom", name: "advance" });
+    expect(next.state.__proto__).toBe(1);
+    expect(next.machines.__proto__).toBe("done");
+  });
   it("compiles bounded serializable state machines", () => {
     const result = compile({
       ...baseScene(),

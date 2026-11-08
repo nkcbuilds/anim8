@@ -10,8 +10,10 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compileJson } from "../../packages/compiler/dist/index.js";
-import { evaluate } from "../../packages/core/dist/index.js";
+import { evaluate, lintDesign } from "../../packages/core/dist/index.js";
 import { renderSvg } from "../../packages/renderer-svg/dist/index.js";
+import { renderSketchSvg, measureSketchText } from "../../packages/renderer-sketch/dist/index.js";
+const renderFrame = frame => frame.scene.theme === "sketch" ? renderSketchSvg(frame) : renderSvg(frame);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const catalog = join(root, "examples", "catalog");
@@ -98,7 +100,7 @@ function visit(entry) {
       assert.equal(frame.objects.length,scene.objects.length);
       assert.ok(frame.objects.every(o => o.transform && Object.values(o.transform).every(Number.isFinite)),
         "Non-finite object transform");
-      const svg=renderSvg(frame);
+      const svg=renderFrame(frame);
       renderedFrames++;
       assert.match(svg, /^<svg\b[^>]*>/, "Output must begin with SVG element");
       assert.ok(svg.includes("</svg>"),"Output must close SVG");
@@ -118,6 +120,10 @@ function visit(entry) {
       const focused=evaluate(scene,time+600).objects.find(o=>o.id===`concept_${i}`);
       assert.notEqual(focused.style.fill,"#ffffff","Animated focus should have a visible effect");
     }
+    // Design quality: the fully revealed diagram must pass the design lint.
+    assert.equal(scene.scene.theme, "sketch", "Catalog scenes use the hand-drawn theme");
+    const lint = lintDesign(evaluate(scene, 3300), { measure: measureSketchText, minGap: 12 });
+    assert.deepEqual(lint.map(issue => issue.message), [], "Design lint issues");
     const last = baseline.get(3200).svg;
     const first=baseline.get(0).svg;
     assert.notEqual(first,last, "Scene never visually changes over time");
@@ -126,14 +132,14 @@ function visit(entry) {
       const actual=evaluate(scene,t);
       evaluatedFrames++;
       assert.deepEqual(actual, baseline.get(t).frame, `Seek nondeterministic at t=${t}`);
-      assert.equal(renderSvg(actual),baseline.get(t).svg, `SVG unstable at t=${t}`);
+      assert.equal(renderFrame(actual),baseline.get(t).svg, `SVG unstable at t=${t}`);
       renderedFrames++;
     }
     const recompiled=compileJson(JSON.stringify(scene));
     assert.ok(recompiled.ok, "Canonical scene fails compiler round-trip");
     for(const t of [0,1260,3200]){
-      const a=renderSvg(evaluate(recompiled.scene,t));
-      const b=renderSvg(evaluate(scene,t));
+      const a=renderFrame(evaluate(recompiled.scene,t));
+      const b=renderFrame(evaluate(scene,t));
       renderedFrames+=2;
       evaluatedFrames+=2;
       assert.equal(a,b, `Recompiled scene changed rendering at t=${t}`);

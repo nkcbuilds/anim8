@@ -1,0 +1,466 @@
+{
+  "version": "1.0",
+  "scene": {
+    "width": 1000,
+    "height": 600,
+    "theme": "sketch",
+    "background": "#ffffff",
+    "seed": 15
+  },
+  "objects": [
+    {
+      "transform": {
+        "x": 171.3,
+        "y": 58.6,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title_highlight",
+      "type": "path",
+      "z": 9,
+      "drawProgress": 0,
+      "d": "M 0 0 C 192.4 -3 449 3 657.4 -1",
+      "style": {
+        "fill": "none",
+        "stroke": "#ffec99",
+        "strokeWidth": 10
+      }
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 46,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "title",
+      "type": "text",
+      "text": "Orders link users to the products they buy",
+      "z": 10,
+      "style": {
+        "fill": "none",
+        "stroke": "none",
+        "strokeWidth": 0,
+        "color": "#1e1e1e",
+        "fontSize": 30
+      }
+    },
+    {
+      "transform": {
+        "x": 180,
+        "y": 149,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "user_head",
+      "type": "rect",
+      "width": 180,
+      "height": 42,
+      "text": "User",
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 180,
+        "y": 213,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "user",
+      "type": "rect",
+      "width": 180,
+      "height": 86,
+      "text": "id\nemail\nname",
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#495057",
+        "fontSize": 16,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 149,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "order_head",
+      "type": "rect",
+      "width": 180,
+      "height": 42,
+      "text": "Order",
+      "style": {
+        "fill": "#d0bfff",
+        "stroke": "#6741d9",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 224,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "order",
+      "type": "rect",
+      "width": 180,
+      "height": 108,
+      "text": "id\nuser_id\nplaced_at\ntotal",
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#6741d9",
+        "strokeWidth": 2,
+        "color": "#495057",
+        "fontSize": 16,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 389,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "item_head",
+      "type": "rect",
+      "width": 180,
+      "height": 42,
+      "text": "OrderItem",
+      "style": {
+        "fill": "#f1f3f5",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 500,
+        "y": 453,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "item",
+      "type": "rect",
+      "width": 180,
+      "height": 86,
+      "text": "order_id\nproduct_id\nquantity",
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#495057",
+        "fontSize": 16,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 820,
+        "y": 389,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "product_head",
+      "type": "rect",
+      "width": 180,
+      "height": 42,
+      "text": "Product",
+      "style": {
+        "fill": "#a5d8ff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 18,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 820,
+        "y": 453,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "z": 3,
+      "id": "product",
+      "type": "rect",
+      "width": 180,
+      "height": 86,
+      "text": "id\ntitle\nprice",
+      "style": {
+        "fill": "#ffffff",
+        "stroke": "#1971c2",
+        "strokeWidth": 2,
+        "color": "#495057",
+        "fontSize": 16,
+        "radius": 6
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "r1",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "user"
+      },
+      "to": {
+        "objectId": "order"
+      },
+      "label": "1 : N",
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "r2",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "order"
+      },
+      "to": {
+        "objectId": "item"
+      },
+      "label": "1 : N",
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    },
+    {
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1
+      },
+      "visible": true,
+      "id": "r3",
+      "type": "connector",
+      "z": 1,
+      "kind": "straight",
+      "from": {
+        "objectId": "product"
+      },
+      "to": {
+        "objectId": "item"
+      },
+      "label": "1 : N",
+      "arrowheads": "none",
+      "style": {
+        "fill": "none",
+        "stroke": "#1e1e1e",
+        "strokeWidth": 2,
+        "color": "#1e1e1e",
+        "fontSize": 16
+      },
+      "drawProgress": 0
+    }
+  ],
+  "timeline": [
+    {
+      "id": "draw_title_highlight",
+      "type": "draw",
+      "target": "title_highlight",
+      "start": 0,
+      "duration": 600,
+      "easing": "easeOut",
+      "to": 1
+    },
+    {
+      "id": "draw_user_head",
+      "type": "draw",
+      "target": "user_head",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_user",
+      "type": "draw",
+      "target": "user",
+      "start": 350,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_order_head",
+      "type": "draw",
+      "target": "order_head",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_order",
+      "type": "draw",
+      "target": "order",
+      "start": 1010,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_r1",
+      "type": "draw",
+      "target": "r1",
+      "start": 1670,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_item_head",
+      "type": "draw",
+      "target": "item_head",
+      "start": 2330,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_item",
+      "type": "draw",
+      "target": "item",
+      "start": 2330,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_r2",
+      "type": "draw",
+      "target": "r2",
+      "start": 2990,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_product_head",
+      "type": "draw",
+      "target": "product_head",
+      "start": 3650,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_product",
+      "type": "draw",
+      "target": "product",
+      "start": 3650,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    },
+    {
+      "id": "draw_r3",
+      "type": "draw",
+      "target": "r3",
+      "start": 4310,
+      "duration": 520,
+      "easing": "easeInOut",
+      "to": 1
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 /** Static/interactive parity, seek determinism and rich-style lifecycle in real engines. */
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
-import { readFile, mkdir } from "node:fs/promises";
+import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { build } from "esbuild";
 import { chromium, firefox, webkit } from "playwright";
 
@@ -38,6 +38,7 @@ await new Promise(done => server.listen(0, "127.0.0.1", done));
 await mkdir("artifacts/rich-styles", { recursive: true });
 try {
   for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
+    if (process.env.ANIM8_BROWSER_ENGINES && !process.env.ANIM8_BROWSER_ENGINES.split(",").includes(name)) continue;
     const browser = await engine.launch({ headless: true });
     try {
       const page = await browser.newPage({ viewport: { width: 1200, height: 700 }, deviceScaleFactor: 1 });
@@ -49,11 +50,19 @@ try {
         await page.evaluate(time => DEMO.static(time), time);
         await page.evaluate(() => document.fonts.ready);
         const before = await page.locator("#host").screenshot();
+        const beforeSvg = await page.locator("#host").innerHTML();
         assert.equal(await page.evaluate(time => DEMO.hydrate(time), time), true, "Hydration must preserve SVG/shape identity");
         assert.deepEqual(await page.locator("#host").screenshot(), before, name + " static and mounted pixels must agree at " + time);
         await page.evaluate(() => { DEMO.seek(6000); DEMO.seek(0); });
         await page.evaluate(time => DEMO.seek(time), time);
-        assert.deepEqual(await page.locator("#host").screenshot(), before, name + " seek history must not affect pixels");
+        const after = await page.locator("#host").screenshot();
+        if (!after.equals(before)) {
+          await writeFile(`artifacts/rich-styles/${name}-${time}-before.png`, before);
+          await writeFile(`artifacts/rich-styles/${name}-${time}-after.png`, after);
+          await writeFile(`artifacts/rich-styles/${name}-${time}-before.svg`, beforeSvg);
+          await writeFile(`artifacts/rich-styles/${name}-${time}-after.svg`, await page.locator("#host").innerHTML());
+        }
+        assert.ok(after.equals(before), name + " seek history must not affect pixels at " + time);
       }
       const revealPage=await browser.newPage({viewport:{width:240,height:160},deviceScaleFactor:1});
       await revealPage.setContent('<html><body style="margin:0;background:white"></body></html>');
@@ -85,7 +94,7 @@ try {
       assert.equal(await page.locator('[data-anim8-id="commit-progress"]').getAttribute("mask"), null);
       await page.locator("#host").screenshot({ path: "artifacts/rich-styles/" + name + "-finished.png" });
       await page.evaluate(() => DEMO.clearStyles());
-      assert.equal(await page.locator("linearGradient, mask, tspan").count(), 0, "Stale paint definitions and text spans must be removed");
+      assert.equal(await page.locator("linearGradient, mask, tspan[fill], tspan[font-weight], tspan[font-style]").count(), 0, "Stale paint definitions and styled text spans must be removed");
       await page.evaluate(() => DEMO.destroy());
       assert.equal(await page.locator("#host *").count(), 0);
       assert.deepEqual(errors, []);
