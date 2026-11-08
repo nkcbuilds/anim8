@@ -161,8 +161,7 @@ function runFrameworkBuild(label, cliPath, cwd) {
   );
 }
 
-function runTypeScriptConsumers(rootRequire) {
-  const cwd = join(fixtureRuntime, "typescript");
+function runTypeScriptConsumers(rootRequire, cwd) {
   for (const [packageName, bin] of [["@typescript/native", "tsc"], ["typescript", "tsc6"]]) {
     const cli = packageBinPath(rootRequire, packageName, bin);
     const result = spawnSync(process.execPath, [cli, "-p", "tsconfig.json"], {
@@ -177,11 +176,13 @@ function runTypeScriptConsumers(rootRequire) {
 }
 
 /** Exercise ELK's installed runtime dependencies outside the workspace tree. */
-async function runElkConsumer() {
+async function runElkConsumer(rootRequire) {
   const isolated = await mkdtemp(join(tmpdir(), "anim8-elk-consumer-"));
   try {
     await cp(runtimeNodeModules, join(isolated, "node_modules"), { recursive: true });
     await cp(join(fixtureRuntime, "layout-elk"), join(isolated, "fixture"), { recursive: true });
+    await cp(join(fixtureRuntime, "typescript"), join(isolated, "typescript"), { recursive: true });
+    runTypeScriptConsumers(rootRequire, join(isolated, "typescript"));
     const result = spawnSync(process.execPath, [join(isolated, "fixture", "index.mjs")], {
       cwd: isolated, encoding: "utf8", timeout: 30_000, windowsHide: true,
     });
@@ -306,8 +307,7 @@ async function main() {
 
     const rootRequire = createRequire(join(repoRoot, "package.json"));
     runDesktopWebviewBuild(rootRequire);
-    runTypeScriptConsumers(rootRequire);
-    await runElkConsumer();
+    await runElkConsumer(rootRequire);
 
     const frameworkCount = await runOptionalFrameworks();
     console.log(`PASS consumer package-boundary suite (${8 + frameworkCount} executed fixtures)`);

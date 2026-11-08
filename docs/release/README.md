@@ -8,7 +8,7 @@ Pull requests, pushes to main, manual runs, and version tags use the same [quali
 
 The `release-qualification` Actions artifact retains the complete command log and generated browser evidence for 14 days, including qualification failures. The CI check keeps its existing `check` job name. Both workflows allow 30 minutes for dependency installation and full qualification.
 
-Manual runs qualify without publishing and use a separate concurrency group so they cannot displace a pending pushed-tag release. Publishing still requires a matching `vX.Y.Z` tag and successful credential/tag preflight; publishing runs for the same tag are serialized. Qualification does not establish npm ownership or replace the remaining product release gates below.
+Manual runs qualify without publishing and each use an independent concurrency group, so they cannot displace one another or a pending pushed-tag release. Publishing still requires a matching `vX.Y.Z` tag and successful credential/tag preflight; publishing runs for the same tag are serialized. Qualification does not establish npm ownership or replace the remaining product release gates below.
 
 ## Completed technical qualification
 

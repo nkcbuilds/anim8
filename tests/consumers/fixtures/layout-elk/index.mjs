@@ -16,6 +16,7 @@ const document = builder.toJSON();
 const before = structuredClone(document);
 const result = await layoutElk(document, { direction: "left-right" });
 assert.ok(result.positions.first.x < result.positions.second.x);
+assert.ok(Number.isFinite(result.positions.first.y) && Number.isFinite(result.positions.second.y));
 assert.ok(result.width > 0 && result.height > 0);
 const route = result.routes[connection.id];
 assert.equal(route.from, first.id);

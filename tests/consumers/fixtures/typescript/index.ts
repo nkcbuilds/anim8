@@ -39,7 +39,9 @@ const routeSection: ElkRouteSection = { id: "route", points: [{ x: 1, y: 2 }] };
 const layout = await layoutElk(document);
 const layoutWidth: number = layout.width;
 const returnedSection: ElkRouteSection = layout.routes[connection.id]!.sections[0]!;
-void [routeSection, returnedSection, layoutWidth];
+// @ts-expect-error returned point x must remain numeric
+const returnedXAsString: string = layout.routes[connection.id]!.sections[0]!.points[0]!.x;
+void [routeSection, returnedSection, layoutWidth, returnedXAsString];
 void [svg, sketch];
 
 // Keep a negative assertion so a loss of public typing cannot silently pass.

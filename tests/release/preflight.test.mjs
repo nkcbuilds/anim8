@@ -68,7 +68,7 @@ test("publishing rejects a matching version tag on another commit", async () => 
     }
     const git = (...args) => {
       const result = spawnSync("git", ["-c", `core.hooksPath=${join(fixture, "no-hooks")}`,
-        "-c", "commit.gpgsign=false", "-c", "user.name=Anim8 test",
+        "-c", "commit.gpgsign=false", "-c", "tag.gpgsign=false", "-c", "user.name=Anim8 test",
         "-c", "user.email=anim8@example.invalid", ...args], {
         cwd: fixture, encoding: "utf8", timeout: 30_000, windowsHide: true,
       });
@@ -86,6 +86,12 @@ test("publishing rejects a matching version tag on another commit", async () => 
     const accepted = run("tests/release/preflight.mjs", ["--publish"], `v${version}`, options);
     assert.equal(accepted.status, 0, accepted.stdout + accepted.stderr);
     assert.match(accepted.stdout, /Publishing environment OK/);
+    git("tag", "--force", "--annotate", `v${version}`, "--message", "Qualified release");
+    const annotated = run("tests/release/preflight.mjs", ["--publish"], `v${version}`, options);
+    assert.equal(annotated.status, 0, annotated.stdout + annotated.stderr);
+    git("tag", "--delete", `v${version}`);
+    const missing = run("tests/release/preflight.mjs", ["--publish"], `v${version}`, options);
+    assert.notEqual(missing.status, 0, "A missing release tag must not pass publication preflight");
   } finally {
     const target = resolve(fixture);
     assert.equal(dirname(target), resolve(tmpdir()));
