@@ -142,6 +142,15 @@ function sortedDiagnostics(diagnostics: Diagnostic[]): Diagnostic[] {
     .map(({ value }) => value);
 }
 
+/** Restore source timeline locations after malformed actions are filtered out. */
+function sourceTimelineDiagnostic(item: Diagnostic, sourceIndices: readonly number[]): Diagnostic {
+  const path = item.path.replace(/^timeline\[(\d+)\]/, (original, index: string) => {
+    const sourceIndex = sourceIndices[Number(index)];
+    return sourceIndex === undefined ? original : `timeline[${sourceIndex}]`;
+  });
+  return path === item.path ? item : { ...item, path };
+}
+
 function utf8ByteLength(value: string): number {
   return new TextEncoder().encode(value).byteLength;
 }
@@ -616,19 +625,20 @@ function parseImageHref(value: unknown, path: string, diagnostics: Diagnostic[])
     return "";
   }
 
+  let url: URL;
   try {
-    const url = new URL(value);
-    if (!url.hostname || url.username || url.password || isUnsafeNetworkHost(url.hostname)) {
-      diagnostic(
-        diagnostics,
-        "UNSAFE_IMAGE_URL",
-        path,
-        "HTTPS image URL must use a public hostname and must not contain credentials.",
-      );
-      return "";
-    }
+    url = new URL(value);
   } catch {
     diagnostic(diagnostics, "INVALID_IMAGE_URL", path, "image.href is not a valid HTTPS URL.");
+    return "";
+  }
+  if (!url.hostname || url.username || url.password || isUnsafeNetworkHost(url.hostname)) {
+    diagnostic(
+      diagnostics,
+      "UNSAFE_IMAGE_URL",
+      path,
+      "HTTPS image URL must use a public hostname and must not contain credentials.",
+    );
     return "";
   }
 
@@ -1959,11 +1969,13 @@ function validateTimelineReferences(
   timeline: Action[],
   objects: ReadonlyMap<string, DrawableObject>,
   diagnostics: Diagnostic[],
+  sourceIndices: readonly number[],
 ): void {
   const actionIds = new Set<string>();
   const objectIds = [...objects.keys()].sort();
 
-  timeline.forEach((action, index) => {
+  timeline.forEach((action, normalizedIndex) => {
+    const index = sourceIndices[normalizedIndex]!;
     if (actionIds.has(action.id)) {
       diagnostic(
         diagnostics,
@@ -2355,9 +2367,15 @@ function compileWithinBudget(input: unknown, diagnostics: Diagnostic[]): Compile
     .map((value, index) => parseObject(value, index, diagnostics))
     .filter((value): value is DrawableObject => value !== null);
 
-  const timeline = input.timeline
-    .map((value, index) => parseAction(value, index, diagnostics))
-    .filter((value): value is Action => value !== null);
+  const timeline: Action[] = [];
+  const timelineSourceIndices: number[] = [];
+  input.timeline.forEach((value, index) => {
+    const action = parseAction(value, index, diagnostics);
+    if (action !== null) {
+      timeline.push(action);
+      timelineSourceIndices.push(index);
+    }
+  });
 
   const state = parseState(input.state, diagnostics);
   const markers = parseMarkers(input.markers, diagnostics);
@@ -2377,7 +2395,7 @@ function compileWithinBudget(input: unknown, diagnostics: Diagnostic[]): Compile
         .filter((value): value is StateMachine => value !== null)
     : [];
 
-  validateTimelineReferences(timeline, objectIndex, diagnostics);
+  validateTimelineReferences(timeline, objectIndex, diagnostics, timelineSourceIndices);
   validateBindings(bindings, timeline, objectIndex, diagnostics);
   validateInteractionIds(interactions, diagnostics);
   validateStateMachineIds(stateMachines, diagnostics);
@@ -2396,7 +2414,9 @@ function compileWithinBudget(input: unknown, diagnostics: Diagnostic[]): Compile
 
   // Compiler owns the stable duplicate/reference/time diagnostics above.
   // Keep core's cross-action conflict analysis without duplicating those errors.
-  diagnostics.push(...validateScene(doc).filter(item => ["OVERLAPPING_PROPERTY_ACTIONS", "LIMIT_DIAGNOSTICS", "LIMIT_VALIDATION_WORK", "INVALID_WORLD_TRANSFORM"].includes(item.code)));
+  diagnostics.push(...validateScene(doc)
+    .filter(item => ["OVERLAPPING_PROPERTY_ACTIONS", "LIMIT_DIAGNOSTICS", "LIMIT_VALIDATION_WORK", "INVALID_WORLD_TRANSFORM"].includes(item.code))
+    .map(item => sourceTimelineDiagnostic(item, timelineSourceIndices)));
 
   const resultDiagnostics = sortedDiagnostics(diagnostics);
   if (resultDiagnostics.length > 0) return { ok: false, diagnostics: resultDiagnostics };

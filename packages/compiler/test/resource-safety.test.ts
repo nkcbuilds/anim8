@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { evaluate, validateScene, worldMatrix, worldOpacity } from "@anim8/core";
-import { compile, COMPILER_LIMITS } from "../src/index.js";
+import { compile, compileJson, COMPILER_LIMITS } from "../src/index.js";
 
 const base = () => ({ version: "1.0", scene: { width: 400, height: 200 }, objects: [{ id: "a", type: "rect" }], timeline: [] as unknown[] });
 const move = (index: number, start = 0, duration = 1000) => ({ id: "m" + index, type: "move", target: "a", start, duration, to: { x: 100, y: 0 } });
@@ -12,6 +12,33 @@ const hierarchy = (scale: number) => ({
 });
 
 describe("resource safety across compiler and evaluator", () => {
+  for (const [name, compileInput] of Object.entries({ compile, compileJson: (input: unknown) => compileJson(JSON.stringify(input)) })) {
+    it(`${name} preserves source timeline indices after filtering malformed actions`, () => {
+      const input = {
+        ...base(), objects: [{ id: "a", type: "rect" }, { id: "b", type: "rect" }],
+        timeline: [null, move(0, 0, 10), { id: "rotation", type: "rotate", target: "b", start: 0, duration: 10, to: 45 }, move(1, 5, 10)],
+      };
+      const result = compileInput(input);
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "INVALID_ACTION", path: "timeline[0]" }));
+      expect(result.diagnostics.filter(item => item.code === "OVERLAPPING_PROPERTY_ACTIONS").map(item => item.path)).toEqual(["timeline[3]"]);
+    });
+    it(`${name} preserves source indices for timeline reference and duplicate diagnostics`, () => {
+      const result = compileInput({ ...base(), timeline: [null, { ...move(0), target: "missing" }, move(0)] });
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "UNKNOWN_OBJECT", path: "timeline[1].target" }));
+      expect(result.diagnostics).toContainEqual(expect.objectContaining({ code: "DUPLICATE_ACTION_ID", path: "timeline[2].id" }));
+    });
+    it.each(["https://localhost/a.png", "https://127.0.0.1/a.png", "https://user:password@example.com/a.png", "https://["])(`${name} caps image URL diagnostics at the shared ceiling: %s`, href => {
+      const input = { ...base(), objects: [
+        ...Array.from({ length: COMPILER_LIMITS.diagnostics - 1 }, (_, index) => ({ id: "bad" + index, type: "unsupported" })),
+        { id: "image", type: "image", href, width: 10, height: 10 },
+      ] };
+      const result = compileInput(input);
+      expect(result.ok).toBe(false);
+      expect(result.diagnostics).toHaveLength(COMPILER_LIMITS.diagnostics);
+      expect(result.diagnostics.filter(item => item.code === "LIMIT_DIAGNOSTICS")).toHaveLength(1);
+      expect(Object.hasOwn(result.diagnostics, "push")).toBe(false);
+    });
+  }
   it("indexes disjoint binding/action targets and budgets dense same-target scans", () => {
     const timeline = Array.from({ length: 1500 }, (_, i) => move(i, i, 1));
     const bindings = Array.from({ length: 1500 }, (_, i) => ({ id: "b" + i, target: { objectId: "b", property: "rotation" }, expression: { kind: "literal", value: 0 } }));
@@ -69,6 +96,16 @@ describe("resource safety across compiler and evaluator", () => {
       }
       const result = compile({ ...base(), timeline: actions });
       expect(result.diagnostics.filter(d => d.code === "OVERLAPPING_PROPERTY_ACTIONS").map(d => d.path).sort(), `sample ${sample}`).toEqual(referencePaths.sort());
+      const sourceTimeline: unknown[] = [];
+      const sourceIndices: number[] = [];
+      for (const action of actions) {
+        if (next(3) === 0) sourceTimeline.push(null);
+        sourceIndices.push(sourceTimeline.length);
+        sourceTimeline.push(action);
+      }
+      const withMalformedActions = compile({ ...base(), timeline: sourceTimeline });
+      const sourcePaths = referencePaths.map(path => `timeline[${sourceIndices[Number(path.match(/\d+/)![0])]}]`);
+      expect(withMalformedActions.diagnostics.filter(d => d.code === "OVERLAPPING_PROPERTY_ACTIONS").map(d => d.path).sort(), `source sample ${sample}`).toEqual(sourcePaths.sort());
     }
   });
   it("rejects static world overflow and guards scale bindings and actions at runtime", () => {
