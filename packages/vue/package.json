@@ -21,7 +21,7 @@
     "vue": ">=3.3"
   },
   "devDependencies": {
-    "@vue/server-renderer": "^3.5.22",
+    "@vue/server-renderer": "^3.5.45",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vue": "^3.5.22"
   },
