@@ -47,7 +47,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "astro": "^7.4.4",
     "esbuild": "^0.28.2",
-    "next": "^16.4.3",
+    "next": "^16.4.5",
     "playwright": "^1.64.1",
     "publint": "^0.3.25",
     "react": "^19.3.1",
